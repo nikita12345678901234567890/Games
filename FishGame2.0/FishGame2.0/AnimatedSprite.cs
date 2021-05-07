@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace AnimationIntro
+namespace FishGame2._0
 {
     public class AnimatedSprite : Sprite
     {
@@ -36,6 +36,8 @@ namespace AnimationIntro
             }
 
             Source = Frames[current];
+
+            base.Update(gameTime);
         }
     }
 }

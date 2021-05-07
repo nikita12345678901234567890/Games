@@ -5,15 +5,18 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 
-namespace AnimationIntro
+namespace FishGame2._0
 {
     public class Game1 : Game
     {
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
-        AnimatedSprite fish;
 
+        Fish Bob;
+        KeyboardState lastkb;
+
+        public static string Text;
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -25,13 +28,16 @@ namespace AnimationIntro
         {
             // TODO: Add your initialization logic here
 
+            graphics.PreferredBackBufferWidth = 1000;
+            graphics.PreferredBackBufferHeight = 1000;
+            graphics.ApplyChanges();
+
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
 
             List<Rectangle> rectangles = new List<Rectangle>();
 
@@ -40,8 +46,8 @@ namespace AnimationIntro
             rectangles.Add(new Rectangle(265, 98, 15, 25));
             rectangles.Add(new Rectangle(233, 99, 14, 27));
 
-            
-            fish = new AnimatedSprite(rectangles.ToArray(), TimeSpan.FromMilliseconds(100), Content.Load<Texture2D>("FishSheet1"), new Vector2(50, 50), Vector2.Zero, Vector2.One, Color.White);
+
+            Bob = new Fish(rectangles.ToArray(), TimeSpan.FromMilliseconds(100), Content.Load<Texture2D>("FishSheet1"), new Vector2(50, 50), Vector2.Zero, Vector2.One, Color.White);
         }
 
         protected override void Update(GameTime gameTime)
@@ -49,10 +55,11 @@ namespace AnimationIntro
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            
+            Bob.Update(Keyboard.GetState(), lastkb, gameTime);
 
-            fish.Update(gameTime);
+            lastkb = Keyboard.GetState();
 
+            Window.Title = Text;
 
             base.Update(gameTime);
         }
@@ -63,10 +70,8 @@ namespace AnimationIntro
 
             spriteBatch.Begin();
 
+            Bob.Draw(spriteBatch);
 
-            fish.Draw(spriteBatch);
-            
-            
             spriteBatch.End();
 
             base.Draw(gameTime);
