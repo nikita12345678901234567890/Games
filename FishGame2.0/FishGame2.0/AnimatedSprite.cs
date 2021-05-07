@@ -15,10 +15,14 @@ namespace FishGame2._0
         public TimeSpan Delay;
         public TimeSpan Elapsed;
 
+        public bool Wiggle;
+
         public AnimatedSprite(Rectangle[] frames, TimeSpan delay, Texture2D image, Vector2 position, Vector2 origin, Vector2 scale, Color color) : base(image, position, origin, scale, color)
         {
             Frames = frames;
             Delay = delay;
+
+            Wiggle = false;
         }
 
         public override void Update(GameTime gameTime)
@@ -26,7 +30,14 @@ namespace FishGame2._0
             Elapsed += gameTime.ElapsedGameTime;
             if (Elapsed > Delay)
             {
-                current++;
+                if (Wiggle)
+                {
+                    current++;
+                }
+                else
+                {
+                    current = 1;
+                }
                 if (current >= Frames.Length)
                 {
                     current = 0;
