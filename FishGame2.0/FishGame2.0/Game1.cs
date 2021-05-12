@@ -7,18 +7,20 @@ using System.Collections.Generic;
 
 namespace FishGame2._0
 {
+
     public class Game1 : Game
     {
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
 
+        public static int LaserSpeedCoefficient = 10;
         public static int LaserSpeed = 10;
 
 
-        Fish Bob;
-        Fish Steve;
-        List<Fish> Fishies;
+        PlayerFish Bob;
+        PlayerFish Steve;
+        List<AiFish> Fishies;
         KeyboardState lastkb;
 
         TimeSpan FishSpawnTime = TimeSpan.FromMilliseconds(500);
@@ -76,14 +78,14 @@ namespace FishGame2._0
             AiRectangles.Add(new Rectangle(73, 226, 15, 25));
             AiRectangles.Add(new Rectangle(41, 227, 14, 27));
 
-            Bob = new Fish(BobRectangles.ToArray(), TimeSpan.FromMilliseconds(100), Content.Load<Texture2D>("FishSheet1"), Content.Load<Texture2D>("Laser"), new Vector2(50, 50), new Vector2(7.5f, 13), Vector2.One, Color.White, 0);
-            Steve = new Fish(SteveRectangles.ToArray(), TimeSpan.FromMilliseconds(100), Content.Load<Texture2D>("FishSheet1"), Content.Load<Texture2D>("Laser"), new Vector2(500, 500), new Vector2(7.5f, 13), Vector2.One, Color.White, 1);
+            Bob = new PlayerFish(BobRectangles.ToArray(), TimeSpan.FromMilliseconds(100), Content.Load<Texture2D>("FishSheet1"), Content.Load<Texture2D>("Laser"), new Vector2(50, 50), new Vector2(7.5f, 13), Vector2.One, Color.White, PlayerKeyboardLayout.ArrowKeys);
+            Steve = new PlayerFish(SteveRectangles.ToArray(), TimeSpan.FromMilliseconds(100), Content.Load<Texture2D>("FishSheet1"), Content.Load<Texture2D>("Laser"), new Vector2(500, 500), new Vector2(7.5f, 13), Vector2.One, Color.White, PlayerKeyboardLayout.WASD);
 
 
-            Fishies = new List<Fish>();
+            Fishies = new List<AiFish>();
             for (int i = 0; i < 10; i++)
             {
-                Fishies.Add(new Fish(AiRectangles.ToArray(), TimeSpan.FromMilliseconds(100), Content.Load<Texture2D>("FishSheet1"), Content.Load<Texture2D>("Laser"), new Vector2(random.Next(50, graphics.PreferredBackBufferWidth - 50), random.Next(50, graphics.PreferredBackBufferHeight - 50)), new Vector2(7.5f, 13), Vector2.One, Color.White, 5));
+                Fishies.Add(new AiFish(AiRectangles.ToArray(), TimeSpan.FromMilliseconds(100), Content.Load<Texture2D>("FishSheet1"), Content.Load<Texture2D>("Laser"), new Vector2(random.Next(50, graphics.PreferredBackBufferWidth - 50), random.Next(50, graphics.PreferredBackBufferHeight - 50)), new Vector2(7.5f, 13), Vector2.One, Color.White, PlayerKeyboardLayout.AI));
             }
         }
 
@@ -92,16 +94,16 @@ namespace FishGame2._0
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            if (Keyboard.GetState().IsKeyDown(Keys.NumPad0)) LaserSpeed = 10;
-            if (Keyboard.GetState().IsKeyDown(Keys.NumPad1)) LaserSpeed = 1;
-            if (Keyboard.GetState().IsKeyDown(Keys.NumPad2)) LaserSpeed = 2;
-            if (Keyboard.GetState().IsKeyDown(Keys.NumPad3)) LaserSpeed = 3;
-            if (Keyboard.GetState().IsKeyDown(Keys.NumPad4)) LaserSpeed = 4;
-            if (Keyboard.GetState().IsKeyDown(Keys.NumPad5)) LaserSpeed = 5;
-            if (Keyboard.GetState().IsKeyDown(Keys.NumPad6)) LaserSpeed = 6;
-            if (Keyboard.GetState().IsKeyDown(Keys.NumPad7)) LaserSpeed = 7;
-            if (Keyboard.GetState().IsKeyDown(Keys.NumPad8)) LaserSpeed = 8;
-            if (Keyboard.GetState().IsKeyDown(Keys.NumPad9)) LaserSpeed = 9;
+            if (Keyboard.GetState().IsKeyDown(Keys.NumPad0)) LaserSpeed = LaserSpeedCoefficient * 10;
+            if (Keyboard.GetState().IsKeyDown(Keys.NumPad1)) LaserSpeed = LaserSpeedCoefficient * 1;
+            if (Keyboard.GetState().IsKeyDown(Keys.NumPad2)) LaserSpeed = LaserSpeedCoefficient * 2;
+            if (Keyboard.GetState().IsKeyDown(Keys.NumPad3)) LaserSpeed = LaserSpeedCoefficient * 3;
+            if (Keyboard.GetState().IsKeyDown(Keys.NumPad4)) LaserSpeed = LaserSpeedCoefficient * 4;
+            if (Keyboard.GetState().IsKeyDown(Keys.NumPad5)) LaserSpeed = LaserSpeedCoefficient * 5;
+            if (Keyboard.GetState().IsKeyDown(Keys.NumPad6)) LaserSpeed = LaserSpeedCoefficient * 6;
+            if (Keyboard.GetState().IsKeyDown(Keys.NumPad7)) LaserSpeed = LaserSpeedCoefficient * 7;
+            if (Keyboard.GetState().IsKeyDown(Keys.NumPad8)) LaserSpeed = LaserSpeedCoefficient * 8;
+            if (Keyboard.GetState().IsKeyDown(Keys.NumPad9)) LaserSpeed = LaserSpeedCoefficient * 9;
 
             Bob.Update(Keyboard.GetState(), lastkb, gameTime, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
 
@@ -112,13 +114,13 @@ namespace FishGame2._0
             {
                 ElapsedFishTime = TimeSpan.Zero;
 
-                Fishies.Add(new Fish(AiRectangles.ToArray(), TimeSpan.FromMilliseconds(100), Content.Load<Texture2D>("FishSheet1"), Content.Load<Texture2D>("Laser"), new Vector2(random.Next(50, graphics.PreferredBackBufferWidth - 50), random.Next(50, graphics.PreferredBackBufferHeight - 50)), new Vector2(7.5f, 13), Vector2.One, Color.White, 5));
+                Fishies.Add(new AiFish(AiRectangles.ToArray(), TimeSpan.FromMilliseconds(100), Content.Load<Texture2D>("FishSheet1"), Content.Load<Texture2D>("Laser"), new Vector2(random.Next(50, graphics.PreferredBackBufferWidth - 50), random.Next(50, graphics.PreferredBackBufferHeight - 50)), new Vector2(7.5f, 13), Vector2.One, Color.White, PlayerKeyboardLayout.AI));
             }
 
 
             for (int i = 0; i < Fishies.Count; i++)
             {
-                int value = Fishies[i].Update(Keyboard.GetState(), lastkb, gameTime, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
+                int value = Fishies[i].Update(gameTime, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
                 if (value == 1)
                 {
                     Fishies.RemoveAt(i);
