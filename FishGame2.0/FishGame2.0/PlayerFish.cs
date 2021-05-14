@@ -16,7 +16,7 @@ namespace FishGame2._0
         TimeSpan FullAutoDelay = TimeSpan.FromMilliseconds(50);
         TimeSpan FullAutoElapsedTime = TimeSpan.Zero;
 
-        public PlayerFish(Rectangle[] frames, TimeSpan delay, Texture2D image, Texture2D laser, Vector2 position, Vector2 origin, Vector2 scale, Color color, PlayerKeyboardLayout layout)
+        public PlayerFish(AnimationFrame[] frames, TimeSpan delay, Texture2D image, Texture2D laser, Vector2 position, Vector2 origin, Vector2 scale, Color color, PlayerKeyboardLayout layout)
             : base(frames, delay, image, laser, position, origin, scale, color)
         {
             KeysLayout = layout;

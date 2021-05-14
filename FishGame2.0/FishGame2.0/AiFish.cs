@@ -10,8 +10,8 @@ namespace FishGame2._0
 {
     public class AiFish : Fish
     {
-        public AiFish(Rectangle[] frames, TimeSpan delay, Texture2D image, Texture2D laser, Vector2 position, Vector2 origin, Vector2 scale, Color color, PlayerKeyboardLayout layout)
-            : base(frames, delay, image, laser, position, origin, scale, color)
+        public AiFish(AnimationFrame[] frames, TimeSpan delay, Texture2D image, Texture2D laser, Vector2 position, Vector2 origin, Vector2 scale, Color color, PlayerKeyboardLayout layout, int startHealth = 1)
+            : base(frames, delay, image, laser, position, origin, scale, color, startHealth)
         {
 
         }
@@ -81,13 +81,19 @@ namespace FishGame2._0
                 Position.Y = 0;
             }
 
-            //dying:
+
+            //taking damage and dying:
             for (int i = 0; i < Game1.Lasers.Count; i++)
             {
                 if (Game1.Lasers[i].HitBox.Intersects(HitBox))
                 {
+                    Health--;
                     Game1.Lasers.RemoveAt(i);
-                    return 1;
+
+                    if (Health <= 0)
+                    {
+                        return 1;
+                    }
                 }
             }
 

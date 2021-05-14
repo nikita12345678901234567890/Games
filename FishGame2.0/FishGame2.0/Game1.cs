@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-
+using System.Linq;
 using System;
 using System.Collections.Generic;
 
@@ -17,6 +17,7 @@ namespace FishGame2._0
         public static int LaserSpeedCoefficient = 10;
         public static int LaserSpeed = 10;
 
+        public static Texture2D Pixel;
 
         PlayerFish Bob;
         PlayerFish Steve;
@@ -27,6 +28,7 @@ namespace FishGame2._0
         TimeSpan ElapsedFishTime;
 
         public List<Rectangle> AiRectangles;
+        public List<Rectangle> TankRectangles;
 
         public static List<Laser> Lasers;
 
@@ -55,6 +57,9 @@ namespace FishGame2._0
         {
             Lasers = new List<Laser>();
 
+            Pixel = new Texture2D(GraphicsDevice, 1, 1);
+            Pixel.SetData(new[] { Color.White });
+
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             List<Rectangle> BobRectangles = new List<Rectangle>();
@@ -78,14 +83,31 @@ namespace FishGame2._0
             AiRectangles.Add(new Rectangle(73, 226, 15, 25));
             AiRectangles.Add(new Rectangle(41, 227, 14, 27));
 
-            Bob = new PlayerFish(BobRectangles.ToArray(), TimeSpan.FromMilliseconds(100), Content.Load<Texture2D>("FishSheet1"), Content.Load<Texture2D>("Laser"), new Vector2(50, 50), new Vector2(7.5f, 13), Vector2.One, Color.White, PlayerKeyboardLayout.ArrowKeys);
-            Steve = new PlayerFish(SteveRectangles.ToArray(), TimeSpan.FromMilliseconds(100), Content.Load<Texture2D>("FishSheet1"), Content.Load<Texture2D>("Laser"), new Vector2(500, 500), new Vector2(7.5f, 13), Vector2.One, Color.White, PlayerKeyboardLayout.WASD);
+            TankRectangles = new List<Rectangle>();
+
+            TankRectangles.Add(new Rectangle(1, 224, 30, 32));
+            TankRectangles.Add(new Rectangle(35, 224, 26, 32));
+            TankRectangles.Add(new Rectangle(65, 224, 30, 32));
+            TankRectangles.Add(new Rectangle(35, 224, 26, 32));
+
+            Bob = new PlayerFish(BobRectangles.Select((currentAiRectangle) => new AnimationFrame(currentAiRectangle)).ToArray(), TimeSpan.FromMilliseconds(100), Content.Load<Texture2D>("FishSheet1"), Content.Load<Texture2D>("Laser"), new Vector2(50, 50), new Vector2(7.5f, 13), Vector2.One, Color.White, PlayerKeyboardLayout.ArrowKeys);
+            Steve = new PlayerFish(SteveRectangles.Select((currentAiRectangle) => new AnimationFrame(currentAiRectangle)).ToArray(), TimeSpan.FromMilliseconds(100), Content.Load<Texture2D>("FishSheet1"), Content.Load<Texture2D>("Laser"), new Vector2(0, 0), new Vector2(7.5f, 13), Vector2.One, Color.White, PlayerKeyboardLayout.WASD);
 
 
             Fishies = new List<AiFish>();
             for (int i = 0; i < 10; i++)
             {
-                Fishies.Add(new AiFish(AiRectangles.ToArray(), TimeSpan.FromMilliseconds(100), Content.Load<Texture2D>("FishSheet1"), Content.Load<Texture2D>("Laser"), new Vector2(random.Next(50, graphics.PreferredBackBufferWidth - 50), random.Next(50, graphics.PreferredBackBufferHeight - 50)), new Vector2(7.5f, 13), Vector2.One, Color.White, PlayerKeyboardLayout.AI));
+                //Generating a tank every 1 in 10 fish:
+                if (random.Next(0, 10) < 9)
+                {
+                    //Add normal AiFish:
+                    Fishies.Add(new AiFish(AiRectangles.Select((currentAiRectangle) => new AnimationFrame(currentAiRectangle)).ToArray(), TimeSpan.FromMilliseconds(100), Content.Load<Texture2D>("FishSheet1"), Content.Load<Texture2D>("Laser"), new Vector2(random.Next(50, graphics.PreferredBackBufferWidth - 50), random.Next(50, graphics.PreferredBackBufferHeight - 50)), new Vector2(7.5f, 13), Vector2.One, Color.White, PlayerKeyboardLayout.AI));
+                }
+                else
+                {
+                    //Add tankFish;
+                    Fishies.Add(new AiFish(TankRectangles.Select((currentAiRectangle) => new AnimationFrame(currentAiRectangle)).ToArray(), TimeSpan.FromMilliseconds(100), Content.Load<Texture2D>("FishSheet2"), Content.Load<Texture2D>("Laser"), new Vector2(random.Next(50, graphics.PreferredBackBufferWidth - 50), random.Next(50, graphics.PreferredBackBufferHeight - 50)), new Vector2(7.5f, 13), Vector2.One, Color.White, PlayerKeyboardLayout.AI, 3));
+                }
             }
         }
 
@@ -105,7 +127,7 @@ namespace FishGame2._0
             if (Keyboard.GetState().IsKeyDown(Keys.NumPad8)) LaserSpeed = LaserSpeedCoefficient * 8;
             if (Keyboard.GetState().IsKeyDown(Keys.NumPad9)) LaserSpeed = LaserSpeedCoefficient * 9;
 
-            Bob.Update(Keyboard.GetState(), lastkb, gameTime, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
+       //     Bob.Update(Keyboard.GetState(), lastkb, gameTime, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
 
             Steve.Update(Keyboard.GetState(), lastkb, gameTime, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
 
@@ -114,7 +136,18 @@ namespace FishGame2._0
             {
                 ElapsedFishTime = TimeSpan.Zero;
 
-                Fishies.Add(new AiFish(AiRectangles.ToArray(), TimeSpan.FromMilliseconds(100), Content.Load<Texture2D>("FishSheet1"), Content.Load<Texture2D>("Laser"), new Vector2(random.Next(50, graphics.PreferredBackBufferWidth - 50), random.Next(50, graphics.PreferredBackBufferHeight - 50)), new Vector2(7.5f, 13), Vector2.One, Color.White, PlayerKeyboardLayout.AI));
+                //Generating a tank every 1 in 10 fish:
+                if (random.Next(0, 10) < 9)
+                {
+                    //Add normal AiFish:
+
+                    Fishies.Add(new AiFish(AiRectangles.Select((currentAiRectangle) => new AnimationFrame(currentAiRectangle)).ToArray(), TimeSpan.FromMilliseconds(100), Content.Load<Texture2D>("FishSheet1"), Content.Load<Texture2D>("Laser"), new Vector2(random.Next(50, graphics.PreferredBackBufferWidth - 50), random.Next(50, graphics.PreferredBackBufferHeight - 50)), new Vector2(7.5f, 13), Vector2.One, Color.White, PlayerKeyboardLayout.AI));
+                }
+                else
+                {
+                    //Add tankFish;
+                    Fishies.Add(new AiFish(TankRectangles.Select((currentAiRectangle) => new AnimationFrame(currentAiRectangle)).ToArray(), TimeSpan.FromMilliseconds(100), Content.Load<Texture2D>("FishSheet2"), Content.Load<Texture2D>("Laser"), new Vector2(random.Next(50, graphics.PreferredBackBufferWidth - 50), random.Next(50, graphics.PreferredBackBufferHeight - 50)), new Vector2(7.5f, 13), Vector2.One, Color.White, PlayerKeyboardLayout.AI, 3));
+                }
             }
 
 
@@ -144,14 +177,15 @@ namespace FishGame2._0
 
             spriteBatch.Begin();
 
-            Bob.Draw(spriteBatch);
+            //Bob.Draw(spriteBatch);
 
             Steve.Draw(spriteBatch);
 
+            Fishies.Clear();
 
             foreach (Fish fish in Fishies)
             {
-                fish.Draw(spriteBatch);
+          //      fish.Draw(spriteBatch);
             }
 
 

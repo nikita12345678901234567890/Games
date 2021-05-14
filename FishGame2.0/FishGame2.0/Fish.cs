@@ -14,21 +14,24 @@ namespace FishGame2._0
         public Vector2 Velocity;
         public Vector2 Acceleration;
         public Directions Direction = Directions.None;
+        public int Health;
 
         public Texture2D LaserTexture;
 
 
         public bool IsAi = false;
 
-        public Fish(Rectangle[] frames, TimeSpan delay, Texture2D image, Texture2D laser, Vector2 position, Vector2 origin, Vector2 scale, Color color)
+        public Fish(AnimationFrame[] frames, TimeSpan delay, Texture2D image, Texture2D laser, Vector2 position, Vector2 origin, Vector2 scale, Color color, int startHealth = 1)
             : base(frames, delay, image, position, origin, scale, color)
         {
             LaserTexture = laser;
 
             random = new Random();
+
+            Health = startHealth;
         }
         
-        public virtual int Update(GameTime gameTime)
+        public new virtual int Update(GameTime gameTime)
         {
             Velocity += Acceleration;
             Position += Velocity;
@@ -43,8 +46,6 @@ namespace FishGame2._0
             {
                 laser.Draw(spriteBatch);
             }
-
-
 
             base.Draw(spriteBatch);
         }
