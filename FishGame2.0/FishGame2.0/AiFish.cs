@@ -16,7 +16,7 @@ namespace FishGame2._0
 
         }
 
-        public int Update(GameTime gameTime, Vector2 screen)
+        public virtual int Update(GameTime gameTime, Vector2 screen)
         {
             int choice = choice = random.Next(1, 5);
 
