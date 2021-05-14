@@ -16,7 +16,7 @@ namespace FishGame2._0
             this.Frame = Frame;
             if (!Origin.HasValue)
             {
-                this.Origin = Frame.Center.ToVector2();
+                this.Origin = new Vector2(Frame.Width / 2, Frame.Height / 2);
             }
             else
             {
