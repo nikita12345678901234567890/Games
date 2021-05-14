@@ -44,8 +44,6 @@ namespace FishGame2._0
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-
             graphics.PreferredBackBufferWidth = 1000;
             graphics.PreferredBackBufferHeight = 1000;
             graphics.ApplyChanges();
@@ -127,7 +125,7 @@ namespace FishGame2._0
             if (Keyboard.GetState().IsKeyDown(Keys.NumPad8)) LaserSpeed = LaserSpeedCoefficient * 8;
             if (Keyboard.GetState().IsKeyDown(Keys.NumPad9)) LaserSpeed = LaserSpeedCoefficient * 9;
 
-       //     Bob.Update(Keyboard.GetState(), lastkb, gameTime, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
+            Bob.Update(Keyboard.GetState(), lastkb, gameTime, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
 
             Steve.Update(Keyboard.GetState(), lastkb, gameTime, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
 
@@ -140,7 +138,6 @@ namespace FishGame2._0
                 if (random.Next(0, 10) < 9)
                 {
                     //Add normal AiFish:
-
                     Fishies.Add(new AiFish(AiRectangles.Select((currentAiRectangle) => new AnimationFrame(currentAiRectangle)).ToArray(), TimeSpan.FromMilliseconds(100), Content.Load<Texture2D>("FishSheet1"), Content.Load<Texture2D>("Laser"), new Vector2(random.Next(50, graphics.PreferredBackBufferWidth - 50), random.Next(50, graphics.PreferredBackBufferHeight - 50)), new Vector2(7.5f, 13), Vector2.One, Color.White, PlayerKeyboardLayout.AI));
                 }
                 else
@@ -177,15 +174,14 @@ namespace FishGame2._0
 
             spriteBatch.Begin();
 
-            //Bob.Draw(spriteBatch);
+            Bob.Draw(spriteBatch);
 
             Steve.Draw(spriteBatch);
 
-            Fishies.Clear();
 
             foreach (Fish fish in Fishies)
             {
-          //      fish.Draw(spriteBatch);
+                fish.Draw(spriteBatch);
             }
 
 

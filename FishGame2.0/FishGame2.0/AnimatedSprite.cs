@@ -55,9 +55,6 @@ namespace FishGame2._0
         public override void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(Image, Position, Frames[current].Frame, Color, Rotation, Frames[current].Origin, Scale, SpriteEffects.None, 0);
-
-
-            spriteBatch.Draw(Game1.Pixel, HitBox, Color.Red);
         }
     }
 }
