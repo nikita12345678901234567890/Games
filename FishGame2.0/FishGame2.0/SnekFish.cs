@@ -19,12 +19,36 @@ namespace FishGame2._0
         {
             //Moving
             Wiggle = true;
+            double angle = 0;
 
-            //if player = 0, chase Bob
-            //if ()
-            //{
-                //Acceleration += new Vector2(Game1.Bob);
-            //}
+            Vector2 delta = Position - Game1.Bob.Position;
+            Vector2 delta2 = Position - Game1.Steve.Position;
+
+            if (!Game1.Bob.Alive)
+            {
+                angle = Math.Atan2(delta2.Y, delta2.X);
+            }
+            else if (!Game1.Steve.Alive)
+            {
+                angle = Math.Atan2(delta.Y, delta.X);
+            }
+            else if (delta.Length() < delta2.Length())
+            {
+                angle = Math.Atan2(delta.Y, delta.X);
+            }
+            else
+            {
+                angle = Math.Atan2(delta2.Y, delta2.X);
+            }
+
+
+            Rotation = (float)(angle - 90 * Math.PI / 180);
+
+            Acceleration += new Vector2((float)Math.Cos(Rotation - Math.PI / 2), (float)Math.Sin(Rotation - Math.PI / 2));
+            Acceleration.Normalize();
+            Acceleration *= 0.05f;
+
+            Wiggle = true;
 
             //stop at walls:
             if (Position.X > screen.X)
@@ -61,6 +85,16 @@ namespace FishGame2._0
                         return 1;
                     }
                 }
+            }
+
+            //Killing:
+            if (HitBox.Intersects(Game1.Bob.HitBox))
+            {
+                Game1.Bob.Alive = false;
+            }
+            if (HitBox.Intersects(Game1.Steve.HitBox))
+            {
+                Game1.Steve.Alive = false;
             }
 
 

@@ -15,7 +15,7 @@ namespace FishGame2._0
 
 
         public static int LaserSpeedCoefficient = 10;
-        public static int LaserSpeed = 10;
+        public static int LaserSpeed = 100;
 
         public static Texture2D Pixel;
 
@@ -138,6 +138,11 @@ namespace FishGame2._0
                     playing = false;
                     MessageBox.Show("You won!", "Good job", new string[]{"Ok"});
                 }
+                if (!Bob.Alive && !Steve.Alive)
+                {
+                    playing = false;
+                    MessageBox.Show("You lost!", "Good job", new string[] { "Ok" });
+                }    
 
                 if (Keyboard.GetState().IsKeyDown(Keys.NumPad0)) LaserSpeed = LaserSpeedCoefficient * 10;
                 if (Keyboard.GetState().IsKeyDown(Keys.NumPad1)) LaserSpeed = LaserSpeedCoefficient * 1;
@@ -150,10 +155,14 @@ namespace FishGame2._0
                 if (Keyboard.GetState().IsKeyDown(Keys.NumPad8)) LaserSpeed = LaserSpeedCoefficient * 8;
                 if (Keyboard.GetState().IsKeyDown(Keys.NumPad9)) LaserSpeed = LaserSpeedCoefficient * 9;
 
-                Bob.Update(Keyboard.GetState(), lastkb, gameTime, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
-
-                Steve.Update(Keyboard.GetState(), lastkb, gameTime, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
-
+                if (Bob.Alive)
+                {
+                    Bob.Update(Keyboard.GetState(), lastkb, gameTime, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
+                }
+                if (Steve.Alive)
+                {
+                    Steve.Update(Keyboard.GetState(), lastkb, gameTime, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
+                }
 
                 if (ElapsedFishTime >= FishSpawnTime)
                 {
@@ -166,7 +175,7 @@ namespace FishGame2._0
                         //Add tankFish;
                         Fishies.Add(new AiFish(TankRectangles.Select((currentAiRectangle) => new AnimationFrame(currentAiRectangle)).ToArray(), TimeSpan.FromMilliseconds(100), Content.Load<Texture2D>("FishSheet2"), Content.Load<Texture2D>("Laser"), new Vector2(random.Next(50, graphics.PreferredBackBufferWidth - 50), random.Next(50, graphics.PreferredBackBufferHeight - 50)), new Vector2(7.5f, 13), Vector2.One, Color.White, PlayerKeyboardLayout.AI, 3));
                     }
-                    else if (thing == 8)
+                    else if (thing <= 8 && thing >= 7)
                     {
                         //Add Snekfish:
                         Fishies.Add(new SnekFish(SnekRectangles.Select((currentAiRectangle) => new AnimationFrame(currentAiRectangle)).ToArray(), TimeSpan.FromMilliseconds(100), Content.Load<Texture2D>("FishSheet2"), Content.Load<Texture2D>("Laser"), new Vector2(random.Next(50, graphics.PreferredBackBufferWidth - 50), random.Next(50, graphics.PreferredBackBufferHeight - 50)), new Vector2(7.5f, 13), Vector2.One, Color.White, PlayerKeyboardLayout.AI));
@@ -207,9 +216,14 @@ namespace FishGame2._0
 
             spriteBatch.Begin();
 
-            Bob.Draw(spriteBatch);
-
-            Steve.Draw(spriteBatch);
+            if (Bob.Alive)
+            {
+                Bob.Draw(spriteBatch);
+            }
+            if (Steve.Alive)
+            {
+                Steve.Draw(spriteBatch);
+            }
 
 
             foreach (Fish fish in Fishies)
