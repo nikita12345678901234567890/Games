@@ -50,6 +50,16 @@ namespace Chess
             Textures = new Dictionary<(PieceTypes, bool), Texture2D>();
             Textures.Add((PieceTypes.Pawn, true), Content.Load<Texture2D>("whitepawn"));
             Textures.Add((PieceTypes.Pawn, false), Content.Load<Texture2D>("blackpawn"));
+            Textures.Add((PieceTypes.Rook, true), Content.Load<Texture2D>("whiterook"));
+            Textures.Add((PieceTypes.Rook, false), Content.Load<Texture2D>("blackrook"));
+            Textures.Add((PieceTypes.Knight, true), Content.Load<Texture2D>("whiteknight"));
+            Textures.Add((PieceTypes.Knight, false), Content.Load<Texture2D>("blackknight"));
+            Textures.Add((PieceTypes.Bishop, true), Content.Load<Texture2D>("whitebishop"));
+            Textures.Add((PieceTypes.Bishop, false), Content.Load<Texture2D>("blackbishop"));
+            Textures.Add((PieceTypes.King, true), Content.Load<Texture2D>("whiteking"));
+            Textures.Add((PieceTypes.King, false), Content.Load<Texture2D>("blackking"));
+            Textures.Add((PieceTypes.Queen, true), Content.Load<Texture2D>("whitequeen"));
+            Textures.Add((PieceTypes.Queen, false), Content.Load<Texture2D>("blackqueen"));
 
             //Setting up grid:
             for (int x = 0; x < 8; x++)
@@ -60,6 +70,37 @@ namespace Chess
                 //White pawns:
                 PieceGrid[6, x] = new Pawn(true);
             }
+            //Rooks:
+            //Black:
+            PieceGrid[0, 0] = new Rook(false);
+            PieceGrid[0, 7] = new Rook(false);
+            //White:
+            PieceGrid[7, 0] = new Rook(true);
+            PieceGrid[7, 7] = new Rook(true);
+            //Knights:
+            //Black:
+            PieceGrid[0, 1] = new Knight(false);
+            PieceGrid[0, 6] = new Knight(false);
+            //white:
+            PieceGrid[7, 1] = new Knight(true);
+            PieceGrid[7, 6] = new Knight(true);
+            //Bishops:
+            //Black:
+            PieceGrid[0, 2] = new Bishop(false);
+            PieceGrid[0, 5] = new Bishop(false);
+            //White:
+            PieceGrid[7, 2] = new Bishop(true);
+            PieceGrid[7, 5] = new Bishop(true);
+            //Kings:
+            //Black:
+            PieceGrid[0, 4] = new King(false);
+            //White:
+            PieceGrid[7, 4] = new King(true);
+            //Queens:
+            //Black:
+            PieceGrid[0, 3] = new Queen(false);
+            //White:
+            PieceGrid[7, 3] = new Queen(true);
         }
 
         protected override void Update(GameTime gameTime)
@@ -84,9 +125,7 @@ namespace Chess
             spriteBatch.Begin();
 
             //Drawing grid:
-
             Color cellColor = Color.White;
-
             for (int x = 0; x < 8; x++)
             {
                 for (int y = 0; y < 8; y++)
@@ -99,14 +138,23 @@ namespace Chess
             }
 
             //Drawing pieces:
+            float scale;
             for (int y = 0; y < PieceGrid.GetLength(0); y++)
             {
                 for (int x = 0; x < PieceGrid.GetLength(1); x++)
                 {
                     if (PieceGrid[y, x] != null)
                     {
+                        if (PieceGrid[y, x].PieceType == PieceTypes.Pawn)
+                        {
+                            scale = 1;
+                        }
+                        else
+                        {
+                            scale = 0.5f;
+                        }
                         var texture = Textures[(PieceGrid[y, x].PieceType, PieceGrid[y, x].IsWhite)];
-                        spriteBatch.Draw(texture, CellCenter(new Point(x, y)), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 1, SpriteEffects.None, 0);
+                        spriteBatch.Draw(texture, CellCenter(new Point(x, y)), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), scale, SpriteEffects.None, 0);
                     }
                 }
             }
