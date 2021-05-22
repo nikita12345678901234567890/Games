@@ -21,6 +21,12 @@ namespace Chess
 
         public int squaresize;
 
+        public List<Point> HighlightedSquares;
+
+        public MouseState Lastms;
+
+        public bool Whiteturn = true;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -35,6 +41,8 @@ namespace Chess
             graphics.ApplyChanges();
 
             squaresize = graphics.PreferredBackBufferWidth / 8;
+
+            HighlightedSquares = new List<Point>();
 
             base.Initialize();
         }
@@ -108,10 +116,47 @@ namespace Chess
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            MouseState ms = Mouse.GetState();
 
+            //Checking if mouse clicked:
+            if (ms.LeftButton == ButtonState.Pressed && Lastms.LeftButton == ButtonState.Released)
+            {
+                //Moving:
+                if (HighlightedSquares.Contains(PositionToCell(ms.Position)))
+                {
+                    PieceGrid[PositionToCell(ms.Position).Y, PositionToCell(ms.Position).X] = PieceGrid[HighlightedSquares[0].Y, HighlightedSquares[0].X];
+                    PieceGrid[HighlightedSquares[0].Y, HighlightedSquares[0].X] = null;
+                    HighlightedSquares.Clear();
+                    Whiteturn = !Whiteturn;
+                }
+                //Fix piece deleting when double clicking!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                //Highlighting potential moves:
+                if (PieceGrid[PositionToCell(ms.Position).Y, PositionToCell(ms.Position).X] != null)
+                {
+                    //Checking if the piece selected is of the same color as the turn:
+                    if (PieceGrid[PositionToCell(ms.Position).Y, PositionToCell(ms.Position).X].IsWhite == Whiteturn)
+                    {
+                        HighlightedSquares.Clear();
+                        HighlightedSquares.Add(PositionToCell(ms.Position));
+                        var moves = PieceGrid[HighlightedSquares[0].Y, HighlightedSquares[0].X].GetMoves(PieceGrid, new Point(HighlightedSquares[0].X, HighlightedSquares[0].Y));
+                        foreach (Point move in moves)
+                        {
+                            HighlightedSquares.Add(move);
+                        }
+                    }
+                }
+
+            }
+
+
+            Lastms = ms;
             base.Update(gameTime);
         }
 
+        public Point PositionToCell(Point position)
+        {
+            return new Point((position.X / squaresize), (position.Y / squaresize));
+        }
 
         public Vector2 CellCenter(Point GridPosition)
         {
@@ -126,11 +171,20 @@ namespace Chess
 
             //Drawing grid:
             Color cellColor = Color.White;
+            Color color = cellColor;
             for (int x = 0; x < 8; x++)
             {
                 for (int y = 0; y < 8; y++)
                 {
-                    spriteBatch.Draw(Pixel, new Vector2(x * squaresize, y * squaresize), null, cellColor, 0, new Vector2(0, 0), Vector2.One * squaresize, SpriteEffects.None, 0);
+                    if (HighlightedSquares.Contains(new Point(x, y)))
+                    {
+                        color = Color.Yellow;
+                    }
+                    else
+                    {
+                        color = cellColor;
+                    }
+                    spriteBatch.Draw(Pixel, new Vector2(x * squaresize, y * squaresize), null, color, 0, new Vector2(0, 0), Vector2.One * squaresize, SpriteEffects.None, 0);
                     cellColor = cellColor == Color.White ? Color.Gray : Color.White;
                 }
 
