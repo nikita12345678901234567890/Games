@@ -129,7 +129,7 @@ namespace Chess
                     HighlightedSquares.Clear();
                     Whiteturn = !Whiteturn;
                 }
-                //Fix piece deleting when double clicking!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
                 //Highlighting potential moves:
                 if (PieceGrid[PositionToCell(ms.Position).Y, PositionToCell(ms.Position).X] != null)
                 {
