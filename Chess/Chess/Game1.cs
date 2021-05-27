@@ -17,15 +17,19 @@ namespace Chess
 
         public static Dictionary<(PieceTypes, bool), Texture2D> Textures;
 
-        public Piece[,] PieceGrid = new Piece[8, 8];
-
         public int squaresize;
-
-        public List<Point> HighlightedSquares;
 
         public MouseState Lastms;
 
+
+        //Specifically chess related stuff:
+        public Piece[,] PieceGrid = new Piece[8, 8];
+
+        public List<(Point location, MoveType)> HighlightedSquares;
+
         public bool Whiteturn = true;
+
+        public static Point LastMove;
 
         public Game1()
         {
@@ -42,7 +46,7 @@ namespace Chess
 
             squaresize = graphics.PreferredBackBufferWidth / 8;
 
-            HighlightedSquares = new List<Point>();
+            HighlightedSquares = new List<(Point, MoveType)>();
 
             base.Initialize();
         }
@@ -111,6 +115,30 @@ namespace Chess
             PieceGrid[7, 3] = new Queen(true);
         }
 
+        public bool Contains(Point pos)
+        {
+            foreach (var square in HighlightedSquares)
+            {
+                if (square.location == pos)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public int IndexOf(Point pos)
+        {
+            for (int i = 0; i < HighlightedSquares.Count; i++)
+            {
+                if (HighlightedSquares[i].location == pos)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -119,15 +147,35 @@ namespace Chess
             MouseState ms = Mouse.GetState();
 
             //Checking if mouse clicked:
-            if (ms.LeftButton == ButtonState.Pressed && Lastms.LeftButton == ButtonState.Released)
+            if (ms.LeftButton == ButtonState.Pressed && Lastms.LeftButton == ButtonState.Released && GraphicsDevice.Viewport.Bounds.Contains(ms.Position))
             {
+                var mouseCell = PositionToCell(ms.Position);
                 //Moving:
-                if (HighlightedSquares.Contains(PositionToCell(ms.Position)))
+                if (Contains(mouseCell) && HighlightedSquares[0].location != mouseCell)
                 {
-                    PieceGrid[PositionToCell(ms.Position).Y, PositionToCell(ms.Position).X] = PieceGrid[HighlightedSquares[0].Y, HighlightedSquares[0].X];
-                    PieceGrid[HighlightedSquares[0].Y, HighlightedSquares[0].X] = null;
+                    if (HighlightedSquares.Count >= 3 && mouseCell == HighlightedSquares[2].location && PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X] != null && PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X].PieceType == PieceTypes.Pawn)
+                    {
+                        Pawn pawn = (Pawn)PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X];
+                        pawn.DidMoveTwice = true;
+                    }
+
+                    //switch on the piece type, if it was normal you do this code:
+                    PieceGrid[mouseCell.Y, mouseCell.X] = PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X];
+                    PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X] = null;
+                    switch (HighlightedSquares[IndexOf(mouseCell)].Item2)
+                    {
+                        case MoveType.EnPassant:
+
+                            PieceGrid[mouseCell.Y + 1, mouseCell.X] = null;
+
+                            break;
+                    }
+
+                    LastMove = mouseCell;
                     HighlightedSquares.Clear();
                     Whiteturn = !Whiteturn;
+
+                    //if it was an empassant
                 }
 
                 //Highlighting potential moves:
@@ -137,12 +185,9 @@ namespace Chess
                     if (PieceGrid[PositionToCell(ms.Position).Y, PositionToCell(ms.Position).X].IsWhite == Whiteturn)
                     {
                         HighlightedSquares.Clear();
-                        HighlightedSquares.Add(PositionToCell(ms.Position));
-                        var moves = PieceGrid[HighlightedSquares[0].Y, HighlightedSquares[0].X].GetMoves(PieceGrid, new Point(HighlightedSquares[0].X, HighlightedSquares[0].Y));
-                        foreach (Point move in moves)
-                        {
-                            HighlightedSquares.Add(move);
-                        }
+                        HighlightedSquares.Add((PositionToCell(ms.Position), MoveType.None));
+                        var moves = PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X].GetMoves(PieceGrid, new Point(HighlightedSquares[0].location.X, HighlightedSquares[0].location.Y));
+                        HighlightedSquares.AddRange(moves);
                     }
                 }
 
@@ -176,16 +221,17 @@ namespace Chess
             {
                 for (int y = 0; y < 8; y++)
                 {
-                    if (HighlightedSquares.Contains(new Point(x, y)))
-                    {
-                        color = Color.Yellow;
-                    }
-                    else
-                    {
-                        color = cellColor;
-                    }
+                    color = cellColor;
+
                     spriteBatch.Draw(Pixel, new Vector2(x * squaresize, y * squaresize), null, color, 0, new Vector2(0, 0), Vector2.One * squaresize, SpriteEffects.None, 0);
                     cellColor = cellColor == Color.White ? Color.Gray : Color.White;
+
+                    if (Contains(new Point(x, y)))
+                    {
+                        color = Color.Yellow * 0.3f;
+                    }
+
+                    spriteBatch.Draw(Pixel, new Vector2(x * squaresize, y * squaresize), null, color, 0, new Vector2(0, 0), Vector2.One * squaresize, SpriteEffects.None, 0);
                 }
 
                 cellColor = cellColor == Color.White ? Color.Gray : Color.White;

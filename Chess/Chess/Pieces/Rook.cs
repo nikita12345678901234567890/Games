@@ -14,9 +14,9 @@ namespace Chess.Pieces
         {
             IsWhite = isWhite;
         }
-        public override List<Point> GetMoves(Piece[,] PieceGrid, Point position)
+        public override List<(Point, MoveType)> GetMoves(Piece[,] PieceGrid, Point position)
         {
-            List<Point> Moves = new List<Point>();
+            List<(Point, MoveType)> Moves = new List<(Point, MoveType)>();
 
             
 

@@ -13,4 +13,11 @@ namespace Chess
         King,
         Queen
     };
+
+    public enum MoveType
+    { 
+        None,
+        Normal,
+        EnPassant
+    };
 }
