@@ -166,7 +166,14 @@ namespace Chess
                     {
                         case MoveType.EnPassant:
 
-                            PieceGrid[mouseCell.Y + 1, mouseCell.X] = null;
+                            if (PieceGrid[mouseCell.Y, mouseCell.X].IsWhite)
+                            {
+                                PieceGrid[mouseCell.Y + 1, mouseCell.X] = null;
+                            }
+                            else
+                            {
+                                PieceGrid[mouseCell.Y - 1, mouseCell.X] = null;
+                            }
 
                             break;
                     }
