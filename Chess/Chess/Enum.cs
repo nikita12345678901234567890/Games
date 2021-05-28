@@ -14,10 +14,22 @@ namespace Chess
         Queen
     };
 
-    public enum MoveType
+    public enum MoveTypes
     { 
         None,
         Normal,
         EnPassant
+    };
+
+    public enum Directions
+    { 
+        Up,
+        Down,
+        Left,
+        Right,
+        UpRight,
+        UpLeft,
+        DownRight,
+        DownLeft
     };
 }

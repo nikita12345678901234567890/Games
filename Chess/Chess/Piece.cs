@@ -11,6 +11,6 @@ namespace Chess
         public abstract PieceTypes PieceType { get; }
         public abstract bool IsWhite { get; set; }
 
-        public abstract List<(Point, MoveType)> GetMoves(Piece[,] PieceGrid, Point position);
+        public abstract List<(Point, MoveTypes)> GetMoves(Piece[,] PieceGrid, Point position);
     }
 }

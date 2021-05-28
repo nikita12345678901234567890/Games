@@ -18,25 +18,24 @@ namespace Chess.Pieces
             IsWhite = isWhite;
         }
 
-        public override List<(Point, MoveType)> GetMoves(Piece[,] PieceGrid, Point position)
+        public override List<(Point, MoveTypes)> GetMoves(Piece[,] PieceGrid, Point position)
         {
             /*
             To-Do:
-            Add en passant(or however you spell that)
             Add functionality for turning into another piece upon reaching the other side of the board.
             */
 
-            List<(Point, MoveType)> Moves = new List<(Point, MoveType)>();
+            List<(Point, MoveTypes)> Moves = new List<(Point, MoveTypes)>();
 
             //Moving forward:
             if (IsWhite)
             {
                 if (PieceGrid[position.Y - 1, position.X] == null)
                 {
-                    Moves.Add((new Point(position.X, position.Y - 1), MoveType.Normal));
+                    Moves.Add((new Point(position.X, position.Y - 1), MoveTypes.Normal));
                     if (position.Y == 6 && PieceGrid[position.Y - 2, position.X] == null)
                     {
-                        Moves.Add((new Point(position.X, position.Y - 2), MoveType.Normal));
+                        Moves.Add((new Point(position.X, position.Y - 2), MoveTypes.Normal));
                     }
                 }
             }
@@ -44,10 +43,10 @@ namespace Chess.Pieces
             {
                 if (PieceGrid[position.Y + 1, position.X] == null)
                 {
-                    Moves.Add((new Point(position.X, position.Y + 1), MoveType.Normal));
+                    Moves.Add((new Point(position.X, position.Y + 1), MoveTypes.Normal));
                     if (position.Y == 1 && PieceGrid[position.Y + 2, position.X] == null)
                     {
-                        Moves.Add((new Point(position.X, position.Y + 2), MoveType.Normal));
+                        Moves.Add((new Point(position.X, position.Y + 2), MoveTypes.Normal));
                     }
                 }
             }
@@ -58,13 +57,22 @@ namespace Chess.Pieces
                 //Right
                 if (position.X < 7 && PieceGrid[position.Y - 1, position.X + 1] != null)
                 {
-                    Moves.Add((new Point(position.X + 1, position.Y - 1), MoveType.Normal));
+                    var piece = PieceGrid[position.Y - 1, position.X + 1];
+
+                    if (piece == null || (piece != null && !piece.IsWhite))
+                    {
+                        Moves.Add((new Point(position.X + 1, position.Y - 1), MoveTypes.Normal));
+                    }
                 }
 
                 //Left:
                 if (position.X > 0 && PieceGrid[position.Y - 1, position.X - 1] != null)
                 {
-                    Moves.Add((new Point(position.X - 1, position.Y - 1), MoveType.Normal));
+                    var piece = PieceGrid[position.Y - 1, position.X - 1];
+                    if (piece == null || (piece != null && !piece.IsWhite))
+                    {
+                        Moves.Add((new Point(position.X - 1, position.Y - 1), MoveTypes.Normal));
+                    }
                 }
 
             }
@@ -73,13 +81,21 @@ namespace Chess.Pieces
                 //Right
                 if (position.X < 7 && PieceGrid[position.Y + 1, position.X + 1] != null)
                 {
-                    Moves.Add((new Point(position.X + 1, position.Y + 1), MoveType.Normal));
+                    var piece = PieceGrid[position.Y + 1, position.X + 1];
+                    if (piece == null || (piece != null && piece.IsWhite))
+                    {
+                        Moves.Add((new Point(position.X + 1, position.Y + 1), MoveTypes.Normal));
+                    }
                 }
 
                 //Left:
                 if (position.X > 0 && PieceGrid[position.Y + 1, position.X - 1] != null)
                 {
-                    Moves.Add((new Point(position.X - 1, position.Y + 1), MoveType.Normal));
+                    var piece = PieceGrid[position.Y + 1, position.X - 1];
+                    if (piece == null || (piece != null && piece.IsWhite))
+                    {
+                        Moves.Add((new Point(position.X - 1, position.Y + 1), MoveTypes.Normal));
+                    }
                 }
             }
 
@@ -91,7 +107,7 @@ namespace Chess.Pieces
                     Pawn pawn = (Pawn)PieceGrid[position.Y, position.X - 1];
                     if (pawn.DidMoveTwice)
                     {
-                        Moves.Add((new Point(position.X - 1, position.Y - 1), MoveType.EnPassant));
+                        Moves.Add((new Point(position.X - 1, position.Y - 1), MoveTypes.EnPassant));
                     }
                 }
 
@@ -100,7 +116,7 @@ namespace Chess.Pieces
                     Pawn pawn = (Pawn)PieceGrid[position.Y, position.X + 1];
                     if (pawn.DidMoveTwice)
                     {
-                        Moves.Add((new Point(position.X + 1, position.Y - 1), MoveType.EnPassant));
+                        Moves.Add((new Point(position.X + 1, position.Y - 1), MoveTypes.EnPassant));
                     }
                 }
             }
@@ -111,7 +127,7 @@ namespace Chess.Pieces
                     Pawn pawn = (Pawn)PieceGrid[position.Y, position.X - 1];
                     if (pawn.DidMoveTwice)
                     {
-                        Moves.Add((new Point(position.X - 1, position.Y + 1), MoveType.EnPassant));
+                        Moves.Add((new Point(position.X - 1, position.Y + 1), MoveTypes.EnPassant));
                     }
                 }
 
@@ -120,7 +136,7 @@ namespace Chess.Pieces
                     Pawn pawn = (Pawn)PieceGrid[position.Y, position.X + 1];
                     if (pawn.DidMoveTwice)
                     {
-                        Moves.Add((new Point(position.X + 1, position.Y + 1), MoveType.EnPassant));
+                        Moves.Add((new Point(position.X + 1, position.Y + 1), MoveTypes.EnPassant));
                     }
                 }
             }

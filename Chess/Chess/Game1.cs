@@ -25,7 +25,7 @@ namespace Chess
         //Specifically chess related stuff:
         public Piece[,] PieceGrid = new Piece[8, 8];
 
-        public List<(Point location, MoveType)> HighlightedSquares;
+        public List<(Point location, MoveTypes)> HighlightedSquares;
 
         public bool Whiteturn = true;
 
@@ -46,7 +46,7 @@ namespace Chess
 
             squaresize = graphics.PreferredBackBufferWidth / 8;
 
-            HighlightedSquares = new List<(Point, MoveType)>();
+            HighlightedSquares = new List<(Point, MoveTypes)>();
 
             base.Initialize();
         }
@@ -164,7 +164,7 @@ namespace Chess
                     PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X] = null;
                     switch (HighlightedSquares[IndexOf(mouseCell)].Item2)
                     {
-                        case MoveType.EnPassant:
+                        case MoveTypes.EnPassant:
 
                             if (PieceGrid[mouseCell.Y, mouseCell.X].IsWhite)
                             {
@@ -192,7 +192,7 @@ namespace Chess
                     if (PieceGrid[PositionToCell(ms.Position).Y, PositionToCell(ms.Position).X].IsWhite == Whiteturn)
                     {
                         HighlightedSquares.Clear();
-                        HighlightedSquares.Add((PositionToCell(ms.Position), MoveType.None));
+                        HighlightedSquares.Add((PositionToCell(ms.Position), MoveTypes.None));
                         var moves = PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X].GetMoves(PieceGrid, new Point(HighlightedSquares[0].location.X, HighlightedSquares[0].location.Y));
                         HighlightedSquares.AddRange(moves);
                     }
