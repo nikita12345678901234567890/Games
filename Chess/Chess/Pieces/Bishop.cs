@@ -34,15 +34,8 @@ namespace Chess.Pieces
                         }
                         else
                         {
-                            if (direction != Directions.DownLeft)
-                            {
-                                direction++;
-                                counter = position;
-                            }
-                            else
-                            {
-                                return Moves;
-                            }
+                            direction++;
+                            counter = position;
                             continue;
                         }
                         break;
@@ -55,15 +48,8 @@ namespace Chess.Pieces
                         }
                         else
                         {
-                            if (direction != Directions.DownLeft)
-                            {
-                                direction++;
-                                counter = position;
-                            }
-                            else
-                            {
-                                return Moves;
-                            }
+                            direction++;
+                            counter = position;
                             continue;
                         }
                         break;
@@ -76,15 +62,8 @@ namespace Chess.Pieces
                         }
                         else
                         {
-                            if (direction != Directions.DownLeft)
-                            {
-                                direction++;
-                                counter = position;
-                            }
-                            else
-                            {
-                                return Moves;
-                            }
+                            direction++;
+                            counter = position;
                             continue;
                         }
                         break;
@@ -97,16 +76,7 @@ namespace Chess.Pieces
                         }
                         else
                         {
-                            if (direction != Directions.DownLeft)
-                            {
-                                direction++;
-                                counter = position;
-                            }
-                            else
-                            {
-                                return Moves;
-                            }
-                            continue;
+                            return Moves;
                         }
                         break;
                 }
@@ -121,7 +91,7 @@ namespace Chess.Pieces
                     }
                     else
                     {
-                        break;
+                        return Moves;
                     }
                 }
                 else if (piece != null && piece.IsWhite == !IsWhite)
@@ -134,7 +104,7 @@ namespace Chess.Pieces
                     }
                     else
                     {
-                        break;
+                        return Moves;
                     }
                 }
                 else
