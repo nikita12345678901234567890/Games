@@ -3,6 +3,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Linq;
 
 using System.Collections.Generic;
 
@@ -30,6 +31,10 @@ namespace Chess
         public bool Whiteturn = true;
 
         public static Point LastMove;
+
+        public static bool WhiteInCheck = false;
+
+        public static bool BlackInCheck = false;
 
         public Game1()
         {
@@ -160,6 +165,12 @@ namespace Chess
                     }
 
                     //switch on the piece type, if it was normal you do this code:
+
+                    //Once you set the piece down run your "get moves" on that piece and see if any of those moves contain the position of the opponent's king
+
+                    //If king was in check, generate moves for ALL opponent pieces if ANY of those positions are the position of the king return 
+                    
+
                     PieceGrid[mouseCell.Y, mouseCell.X] = PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X];
                     PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X] = null;
                     switch (HighlightedSquares[IndexOf(mouseCell)].Item2)
@@ -182,7 +193,18 @@ namespace Chess
                     HighlightedSquares.Clear();
                     Whiteturn = !Whiteturn;
 
-                    //if it was an empassant
+                    //Checking if last move put someone in check:
+                    if (IsChecking(PieceGrid[LastMove.Y, LastMove.X], LastMove))
+                    {
+                        if (PieceGrid[LastMove.Y, LastMove.X].IsWhite)
+                        {
+                            BlackInCheck = true;
+                        }
+                        else
+                        {
+                            WhiteInCheck = true;
+                        }
+                    }
                 }
 
                 //Highlighting potential moves:
@@ -203,6 +225,22 @@ namespace Chess
 
             Lastms = ms;
             base.Update(gameTime);
+        }
+
+        public bool IsChecking(Piece piece, Point pieceGridPositiion)
+        {
+            var movesAndMoveTypes = piece.GetMoves(PieceGrid, pieceGridPositiion);
+            var moves = movesAndMoveTypes.Select((x) => x.Item1).ToList();
+
+            foreach (Point move in moves)
+            {
+                if (PieceGrid[move.Y, move.X] != null && PieceGrid[move.Y, move.X].IsWhite != piece.IsWhite && PieceGrid[move.Y, move.X].PieceType == PieceTypes.King)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public Point PositionToCell(Point position)
@@ -233,10 +271,30 @@ namespace Chess
                     spriteBatch.Draw(Pixel, new Vector2(x * squaresize, y * squaresize), null, color, 0, new Vector2(0, 0), Vector2.One * squaresize, SpriteEffects.None, 0);
                     cellColor = cellColor == Color.White ? Color.Gray : Color.White;
 
+                    //Changing the color of the highlighted squares:
                     if (Contains(new Point(x, y)))
                     {
                         color = Color.Yellow * 0.3f;
                     }
+
+                    //Highlighting the checked king red:
+                    if (WhiteInCheck)
+                    {
+                        Piece piece = PieceGrid[y, x];
+                        if (piece != null && piece.IsWhite && piece.PieceType == PieceTypes.King)
+                        {
+                            color = Color.Red * 0.3f;
+                        }
+                    }
+                    else if (BlackInCheck)
+                    {
+                        Piece piece = PieceGrid[y, x];
+                        if (piece != null && !piece.IsWhite && piece.PieceType == PieceTypes.King)
+                        {
+                            color = Color.Red * 0.3f;
+                        }
+                    }
+
 
                     spriteBatch.Draw(Pixel, new Vector2(x * squaresize, y * squaresize), null, color, 0, new Vector2(0, 0), Vector2.One * squaresize, SpriteEffects.None, 0);
                 }
