@@ -157,7 +157,7 @@ namespace Chess.Pieces
                 {
                     for (int y1 = 0; y1 < 8; y1++)
                     {
-                        if (PieceGrid[y1, x1] != null && Game1.IsChecking(PieceGrid[y1, x1], new Point(x1, y1), PieceGrid))
+                        if (PieceGrid[y1, x1] != null && PieceGrid[y1, x1].IsWhite != IsWhite && PieceGrid[y1, x1].PieceType != PieceTypes.Pawn && Game1.IsChecking(PieceGrid[y1, x1], new Point(x1, y1), PieceGrid))
                         {
                             skipMove = true;
                         }

@@ -23,6 +23,8 @@ namespace Chess.Pieces
 
             List<(Point, MoveTypes)> Moves = new List<(Point, MoveTypes)>();
 
+            List<(Point, MoveTypes)> potentialMoves = new List<(Point, MoveTypes)>();
+
             Point counter = position;
 
             Directions direction = Directions.Up;
@@ -75,10 +77,6 @@ namespace Chess.Pieces
                         {
                             counter.X++;
                         }
-                        else
-                        {
-                            return Moves;
-                        }
                         break;
                 }
 
@@ -92,12 +90,12 @@ namespace Chess.Pieces
                     }
                     else
                     {
-                        return Moves;
+                        break;
                     }
                 }
                 else if (piece != null && piece.IsWhite == !IsWhite)
                 {
-                    Moves.Add((counter, MoveTypes.Normal));
+                    potentialMoves.Add((counter, MoveTypes.Normal));
                     if (direction != Directions.Right)
                     {
                         direction++;
@@ -105,12 +103,43 @@ namespace Chess.Pieces
                     }
                     else
                     {
-                        return Moves;
+                        break;
                     }
                 }
                 else
                 {
-                    Moves.Add((counter, MoveTypes.Normal));
+                    potentialMoves.Add((counter, MoveTypes.Normal));
+                }
+            }
+
+            foreach (var move in potentialMoves)
+            {
+                bool skipMove = false;
+
+                //Exectuing the move:
+                Piece whatWasThere = PieceGrid[move.Item1.Y, move.Item1.X];
+                PieceGrid[move.Item1.Y, move.Item1.X] = PieceGrid[position.Y, position.X];
+                PieceGrid[position.Y, position.X] = null;
+
+                //Checking if this pieces color is in check:
+                for (int x1 = 0; x1 < 8; x1++)
+                {
+                    for (int y1 = 0; y1 < 8; y1++)
+                    {
+                        if (PieceGrid[y1, x1] != null && PieceGrid[y1, x1].IsWhite != IsWhite && PieceGrid[y1, x1].PieceType != PieceTypes.Pawn && Game1.IsChecking(PieceGrid[y1, x1], new Point(x1, y1), PieceGrid))
+                        {
+                            skipMove = true;
+                        }
+                    }
+                }
+
+                //Reversing the exectued moves:
+                PieceGrid[position.Y, position.X] = PieceGrid[move.Item1.Y, move.Item1.X];
+                PieceGrid[move.Item1.Y, move.Item1.X] = whatWasThere;
+
+                if (!skipMove)
+                {
+                    Moves.Add((new Point(move.Item1.X, move.Item1.Y), MoveTypes.Normal));
                 }
             }
 
