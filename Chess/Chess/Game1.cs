@@ -194,7 +194,7 @@ namespace Chess
                     Whiteturn = !Whiteturn;
 
                     //Checking if last move put someone in check:
-                    if (IsChecking(PieceGrid[LastMove.Y, LastMove.X], LastMove))
+                    if (IsChecking(PieceGrid[LastMove.Y, LastMove.X], LastMove, PieceGrid))
                     {
                         if (PieceGrid[LastMove.Y, LastMove.X].IsWhite)
                         {
@@ -227,8 +227,14 @@ namespace Chess
             base.Update(gameTime);
         }
 
-        public bool IsChecking(Piece piece, Point pieceGridPositiion)
+        public static bool IsChecking(Piece piece, Point pieceGridPositiion, Piece[,] PieceGrid)
         {
+            //Because kings cannot check:
+            if (piece.PieceType == PieceTypes.King)
+            {
+                return false;
+            }
+
             var movesAndMoveTypes = piece.GetMoves(PieceGrid, pieceGridPositiion);
             var moves = movesAndMoveTypes.Select((x) => x.Item1).ToList();
 
