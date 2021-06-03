@@ -164,13 +164,6 @@ namespace Chess
                         pawn.DidMoveTwice = true;
                     }
 
-                    //switch on the piece type, if it was normal you do this code:
-
-                    //Once you set the piece down run your "get moves" on that piece and see if any of those moves contain the position of the opponent's king
-
-                    //If king was in check, generate moves for ALL opponent pieces if ANY of those positions are the position of the king return 
-                    
-
                     PieceGrid[mouseCell.Y, mouseCell.X] = PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X];
                     PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X] = null;
                     switch (HighlightedSquares[IndexOf(mouseCell)].Item2)
@@ -224,9 +217,7 @@ namespace Chess
                         HighlightedSquares.AddRange(moves);
                     }
                 }
-
             }
-
 
             Lastms = ms;
             base.Update(gameTime);

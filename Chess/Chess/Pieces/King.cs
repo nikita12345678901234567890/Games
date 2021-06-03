@@ -33,10 +33,11 @@ namespace Chess.Pieces
                         {
                             bool skipMove = false;
                             //Exectuing the move:
+                            Piece whatWasThere = PieceGrid[y, x];
                             PieceGrid[y, x] = PieceGrid[position.Y, position.X];
                             PieceGrid[position.Y, position.X] = null;
 
-                            //Checking if that stopped the check:
+                            //Checking if this pieces color is in check:
                             for (int x1 = 0; x1 < 8; x1++)
                             {
                                 for (int y1 = 0; y1 < 8; y1++)
@@ -48,28 +49,9 @@ namespace Chess.Pieces
                                 }
                             }
 
-                            //Reversing the exectued move and adding it to Moves:
+                            //Reversing the exectued moves:
                             PieceGrid[position.Y, position.X] = PieceGrid[y, x];
-                            PieceGrid[y, x] = null;
-                            //Exectuing the move:
-                            PieceGrid[y, x] = PieceGrid[position.Y, position.X];
-                            PieceGrid[position.Y, position.X] = null;
-
-                            //Checking if that stopped the check:
-                            for (int x1 = 0; x1 < 8; x1++)
-                            {
-                                for (int y1 = 0; y1 < 8; y1++)
-                                {
-                                    if (PieceGrid[y1, x1] != null && PieceGrid[y1, x1].IsWhite != IsWhite && Game1.IsChecking(PieceGrid[y1, x1], new Point(x1, y1), PieceGrid))
-                                    {
-                                        skipMove = true;
-                                    }
-                                }
-                            }
-
-                            //Reversing the exectued move and adding it to Moves:
-                            PieceGrid[position.Y, position.X] = PieceGrid[y, x];
-                            PieceGrid[y, x] = null;
+                            PieceGrid[y, x] = whatWasThere;
 
                             if (!skipMove)
                             {
