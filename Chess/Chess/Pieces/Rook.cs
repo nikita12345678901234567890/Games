@@ -106,9 +106,13 @@ namespace Chess.Pieces
                         break;
                     }
                 }
-                else
+                else if (!potentialMoves.Contains((counter, MoveTypes.Normal)))
                 {
                     potentialMoves.Add((counter, MoveTypes.Normal));
+                }
+                else
+                {
+                    break;
                 }
             }
 
