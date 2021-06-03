@@ -205,6 +205,11 @@ namespace Chess
                             WhiteInCheck = true;
                         }
                     }
+                    else
+                    {
+                        WhiteInCheck = false;
+                        BlackInCheck = false;
+                    }
                 }
 
                 //Highlighting potential moves:
