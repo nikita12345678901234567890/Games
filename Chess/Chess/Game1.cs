@@ -264,7 +264,7 @@ namespace Chess
                             {
                                 for (int y1 = 0; y1 < 8; y1++)
                                 {
-                                    if (PieceGrid[y1, x1] != null && PieceGrid[y1, x1].IsWhite != IsWhite && PieceGrid[y1, x1].PieceType != PieceTypes.Pawn && PieceGrid[y1, x1].PieceType != PieceTypes.King)
+                                    if (PieceGrid[y1, x1] != null && PieceGrid[y1, x1].IsWhite != IsWhite && PieceGrid[y1, x1].PieceType != PieceTypes.King)
                                     {
                                         var temp = PieceGrid[y1, x1].GetMoves(PieceGrid, new Point(x1, y1));
                                         foreach (var move in temp)
