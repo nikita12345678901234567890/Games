@@ -116,13 +116,13 @@ namespace Chess.Pieces
                 }
             }
 
-            foreach (var move in potentialMoves)
+            foreach (var potentialMove in potentialMoves)
             {
                 bool skipMove = false;
 
                 //Exectuing the move:
-                Piece whatWasThere = PieceGrid[move.Item1.Y, move.Item1.X];
-                PieceGrid[move.Item1.Y, move.Item1.X] = PieceGrid[position.Y, position.X];
+                Piece whatWasThere = PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X];
+                PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X] = PieceGrid[position.Y, position.X];
                 PieceGrid[position.Y, position.X] = null;
 
                 //Checking if this pieces color is in check:
@@ -130,20 +130,31 @@ namespace Chess.Pieces
                 {
                     for (int y1 = 0; y1 < 8; y1++)
                     {
-                        if (PieceGrid[y1, x1] != null && PieceGrid[y1, x1].IsWhite != IsWhite && PieceGrid[y1, x1].PieceType != PieceTypes.Pawn && Game1.IsChecking(PieceGrid[y1, x1], new Point(x1, y1), PieceGrid))
+                        //Making sure it's not recursive:
+                        if (x1 != potentialMove.Item1.Y && y1 != potentialMove.Item1.X)
                         {
-                            skipMove = true;
+                            if (PieceGrid[y1, x1] != null && PieceGrid[y1, x1].IsWhite != IsWhite && PieceGrid[y1, x1].PieceType != PieceTypes.Pawn)
+                            {
+                                var temp = PieceGrid[y1, x1].GetMoves(PieceGrid, new Point(x1, y1));
+                                foreach (var move in temp)
+                                {
+                                    if (Game1.IsChecking(PieceGrid[y1, x1], new Point(x1, y1), PieceGrid, potentialMove.Item1))
+                                    {
+                                        skipMove = true;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
 
                 //Reversing the exectued moves:
-                PieceGrid[position.Y, position.X] = PieceGrid[move.Item1.Y, move.Item1.X];
-                PieceGrid[move.Item1.Y, move.Item1.X] = whatWasThere;
+                PieceGrid[position.Y, position.X] = PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X];
+                PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X] = whatWasThere;
 
                 if (!skipMove)
                 {
-                    Moves.Add((new Point(move.Item1.X, move.Item1.Y), MoveTypes.Normal));
+                    Moves.Add((new Point(potentialMove.Item1.X, potentialMove.Item1.Y), MoveTypes.Normal));
                 }
             }
 

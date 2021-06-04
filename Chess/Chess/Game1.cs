@@ -208,12 +208,17 @@ namespace Chess
                 //Highlighting potential moves:
                 if (PieceGrid[PositionToCell(ms.Position).Y, PositionToCell(ms.Position).X] != null)
                 {
-                    //Checking if the piece selected is of the same color as the turn:
+                    //Checking if the piece selected is of the same color as the turn:  
                     if (PieceGrid[PositionToCell(ms.Position).Y, PositionToCell(ms.Position).X].IsWhite == Whiteturn)
                     {
                         HighlightedSquares.Clear();
                         HighlightedSquares.Add((PositionToCell(ms.Position), MoveTypes.None));
                         var moves = PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X].GetMoves(PieceGrid, new Point(HighlightedSquares[0].location.X, HighlightedSquares[0].location.Y));
+                       
+                        //Treat moves as potential 
+                        //Then loop through each
+
+                        
                         HighlightedSquares.AddRange(moves);
                     }
                 }
@@ -240,6 +245,22 @@ namespace Chess
                 {
                     return true;
                 }
+            }
+
+            return false;
+        }
+
+        public static bool IsChecking(Piece piece, Point pieceGridPositiion, Piece[,] PieceGrid, Point move)
+        {
+            //Because kings cannot check:
+            if (piece.PieceType == PieceTypes.King)
+            {
+                return false;
+            }
+
+            if (PieceGrid[move.Y, move.X] != null && PieceGrid[move.Y, move.X].IsWhite != piece.IsWhite && PieceGrid[move.Y, move.X].PieceType == PieceTypes.King)
+            {
+                return true;
             }
 
             return false;
