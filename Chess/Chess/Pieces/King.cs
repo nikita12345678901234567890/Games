@@ -10,9 +10,13 @@ namespace Chess.Pieces
         public override PieceTypes PieceType => PieceTypes.King;
         public override bool IsWhite { get; set; }
 
+        public bool HasMoved { get; set; }
+
         public King(bool isWhite)
         {
             IsWhite = isWhite;
+
+            HasMoved = false;
         }
 
         public override List<(Point, MoveTypes)> GetMoves(Piece[,] PieceGrid, Point position)
@@ -24,39 +28,60 @@ namespace Chess.Pieces
             {
                 for (int y = position.Y - 1; y <= position.Y + 1; y++)
                 {
-                    //Skipping the ones that are out of bounds:
-                    if(x >= 0 && x <= 7 && y >= 0 && y <= 7)
+                    if (x >= 0 && x < PieceGrid.GetLength(1) && y >= 0 && y < PieceGrid.GetLength(0))
                     {
                         Piece piece = PieceGrid[y, x];
-                        //Skipping the ones that have a piece of the same color:
-                        if (piece == null || (piece != null && piece.IsWhite != IsWhite))
+
+                        if (piece == null || (piece != null && piece.IsWhite == !IsWhite))
                         {
-                            bool skipMove = false;
-                            //Exectuing the move:
-                            Piece whatWasThere = PieceGrid[y, x];
-                            PieceGrid[y, x] = PieceGrid[position.Y, position.X];
-                            PieceGrid[position.Y, position.X] = null;
+                            Moves.Add((new Point(x, y), MoveTypes.Normal));
+                        }
+                    }
+                }
+            }
 
-                            //Checking if this pieces color is in check:
-                            for (int x1 = 0; x1 < 8; x1++)
-                            {
-                                for (int y1 = 0; y1 < 8; y1++)
-                                {
-                                    if (PieceGrid[y1, x1] != null && Game1.IsChecking(PieceGrid[y1, x1], new Point(x1, y1), PieceGrid))
-                                    {
-                                        skipMove = true;
-                                    }
-                                }
-                            }
+            //Castling:
+            bool inCheck = false;
+            if (IsWhite && Game1.WhiteInCheck)
+            {
+                inCheck = true;
+            }
+            if (!IsWhite && Game1.BlackInCheck)
+            {
+                inCheck = true;
+            }
 
-                            //Reversing the exectued moves:
-                            PieceGrid[position.Y, position.X] = PieceGrid[y, x];
-                            PieceGrid[y, x] = whatWasThere;
+            if (!HasMoved && !inCheck)
+            {
+                //Checking if there's a rook of the same color in the left corner:
+                var leftCorner = PieceGrid[position.Y, 0];
+                if (leftCorner != null && leftCorner.IsWhite == IsWhite && leftCorner.PieceType == PieceTypes.Rook)
+                {
+                    //Checking if that rook hasn't moved and that the spaces between the king and the rook are empty:
+                    Rook leftRook = (Rook)leftCorner;
 
-                            if (!skipMove)
-                            {
-                                Moves.Add((new Point(x, y), MoveTypes.Normal));
-                            }
+                    if (!leftRook.HasMoved && PieceGrid[position.Y, position.X - 1] == null && PieceGrid[position.Y, position.X - 2] == null)
+                    {
+                        //Checking that the squares the king passes through aren't under attack:
+                        if (!Game1.UnderAttack(new Point(position.X - 1, position.Y), !IsWhite, PieceGrid) && !Game1.UnderAttack(new Point(position.X - 2, position.Y), !IsWhite, PieceGrid))
+                        {
+                            Moves.Add((new Point(position.X - 2, position.Y), MoveTypes.CastleLeft));
+                        }
+                    }
+                }
+
+                //Checking if there's a rook of the same color in the right corner:
+                var rightCorner = PieceGrid[position.Y, 0];
+                if (rightCorner != null && rightCorner.IsWhite == IsWhite && rightCorner.PieceType == PieceTypes.Rook)
+                {
+                    //Checking if that rook hasn't moved and that the spaces between the king and the rook are empty:
+                    Rook rightRook = (Rook)rightCorner;
+                    if (!rightRook.HasMoved && PieceGrid[position.Y, position.X + 1] == null && PieceGrid[position.Y, position.X + 2] == null)
+                    {
+                        //Checking that the squares the king passes through aren't under attack:
+                        if (!Game1.UnderAttack(new Point(position.X + 1, position.Y), !IsWhite, PieceGrid) && !Game1.UnderAttack(new Point(position.X + 2, position.Y), !IsWhite, PieceGrid))
+                        {
+                            Moves.Add((new Point(position.X + 2, position.Y), MoveTypes.CastleRight));
                         }
                     }
                 }

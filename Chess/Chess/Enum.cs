@@ -18,7 +18,9 @@ namespace Chess
     { 
         None,
         Normal,
-        EnPassant
+        EnPassant,
+        CastleRight,
+        CastleLeft
     };
 
     public enum Directions
