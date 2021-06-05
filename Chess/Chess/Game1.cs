@@ -278,6 +278,19 @@ namespace Chess
                                 }
                             }
 
+                            //Checking if this move results in moving a king next to a king:
+                            if (!skipMove && PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X].PieceType == PieceTypes.King)
+                            {
+                                var surrounding = PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X].GetMoves(PieceGrid, new Point(potentialMove.Item1.X, potentialMove.Item1.Y));
+                                foreach (var move in surrounding)
+                                {
+                                    if (PieceGrid[move.Item1.Y, move.Item1.X] != null && PieceGrid[move.Item1.Y, move.Item1.X].PieceType == PieceTypes.King)
+                                    {
+                                        skipMove = true;
+                                    }
+                                }
+                            }
+
                             //Reversing the exectued moves:
                             PieceGrid[position.Y, position.X] = PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X];
                             PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X] = whatWasThere;
@@ -297,12 +310,6 @@ namespace Chess
 
         public static bool IsChecking(Piece piece, Point pieceGridPositiion, Piece[,] PieceGrid)
         {
-            //Because kings cannot check:
-            if (piece.PieceType == PieceTypes.King)
-            {
-                return false;
-            }
-
             var movesAndMoveTypes = piece.GetMoves(PieceGrid, pieceGridPositiion);
             var moves = movesAndMoveTypes.Select((x) => x.Item1).ToList();
 
