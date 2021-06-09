@@ -36,6 +36,14 @@ namespace Chess
 
         public static bool BlackInCheck = false;
 
+        public bool Promotion = false;
+
+        public Point queen;
+        public Point rook;
+        public Point bishop;
+        public Point knight;
+
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -155,151 +163,194 @@ namespace Chess
             if (ms.LeftButton == ButtonState.Pressed && Lastms.LeftButton == ButtonState.Released && GraphicsDevice.Viewport.Bounds.Contains(ms.Position))
             {
                 var mouseCell = PositionToCell(ms.Position);
-                //Moving:
-                if (Contains(mouseCell) && HighlightedSquares[0].location != mouseCell)
+                if (!Promotion)
                 {
-                    //Setting DidMoveTwice:
-                    if (HighlightedSquares.Count >= 3 && mouseCell == HighlightedSquares[2].location && PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X] != null && PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X].PieceType == PieceTypes.Pawn)
+                    //Moving:
+                    if (Contains(mouseCell) && HighlightedSquares[0].location != mouseCell)
                     {
-                        Pawn pawn = (Pawn)PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X];
-                        pawn.DidMoveTwice = true;
-                    }
+                        //Setting DidMoveTwice:
+                        if (HighlightedSquares.Count >= 3 && mouseCell == HighlightedSquares[2].location && PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X] != null && PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X].PieceType == PieceTypes.Pawn)
+                        {
+                            Pawn pawn = (Pawn)PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X];
+                            pawn.DidMoveTwice = true;
+                        }
 
-                    PieceGrid[mouseCell.Y, mouseCell.X] = PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X];
-                    PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X] = null;
+                        PieceGrid[mouseCell.Y, mouseCell.X] = PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X];
+                        PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X] = null;
 
-                    switch (HighlightedSquares[IndexOf(mouseCell)].Item2)
-                    {
-                        case MoveTypes.EnPassant:
+                        switch (HighlightedSquares[IndexOf(mouseCell)].Item2)
+                        {
+                            case MoveTypes.EnPassant:
 
-                            if (PieceGrid[mouseCell.Y, mouseCell.X].IsWhite)
+                                if (PieceGrid[mouseCell.Y, mouseCell.X].IsWhite)
+                                {
+                                    PieceGrid[mouseCell.Y + 1, mouseCell.X] = null;
+                                }
+                                else
+                                {
+                                    PieceGrid[mouseCell.Y - 1, mouseCell.X] = null;
+                                }
+
+                                break;
+
+                            case MoveTypes.CastleLeft:
+
+                                PieceGrid[mouseCell.Y, mouseCell.X + 1] = PieceGrid[mouseCell.Y, 0];
+                                PieceGrid[mouseCell.Y, 0] = null;
+
+                                break;
+
+                            case MoveTypes.CastleRight:
+
+                                PieceGrid[mouseCell.Y, mouseCell.X - 1] = PieceGrid[mouseCell.Y, PieceGrid.GetLength(1) - 1];
+                                PieceGrid[mouseCell.Y, PieceGrid.GetLength(1) - 1] = null;
+
+                                break;
+
+                            case MoveTypes.Promotion:
+
+                                Promotion = true;
+                                if (PieceGrid[mouseCell.Y, mouseCell.X].IsWhite)
+                                {
+                                    queen = LastMove;
+                                    rook = new Point(LastMove.X, LastMove.Y + 1);
+                                    bishop = new Point(LastMove.X, LastMove.Y + 2);
+                                    knight = new Point(LastMove.X, LastMove.Y + 3);
+                                }
+                                else
+                                {
+                                    queen = mouseCell;
+                                    rook = new Point(mouseCell.X, mouseCell.Y - 1);
+                                    bishop = new Point(mouseCell.X, mouseCell.Y - 2);
+                                    knight = new Point(mouseCell.X, mouseCell.Y - 3);
+                                }
+
+                                break;
+                        }
+
+                        LastMove = mouseCell;
+                        HighlightedSquares.Clear();
+                        Whiteturn = !Whiteturn;
+
+                        //Setting HasMoved:
+                        var lastMovedPiece = PieceGrid[LastMove.Y, LastMove.X];
+                        if (lastMovedPiece.PieceType == PieceTypes.King)
+                        {
+                            King kingMoved = (King)lastMovedPiece;
+                            kingMoved.HasMoved = true;
+                        }
+                        if (lastMovedPiece.PieceType == PieceTypes.Rook)
+                        {
+                            Rook rookMoved = (Rook)lastMovedPiece;
+                            rookMoved.HasMoved = true;
+                        }
+
+                        //Checking if last move put someone in check:
+                        if (IsChecking(PieceGrid[LastMove.Y, LastMove.X], LastMove, PieceGrid))
+                        {
+                            if (PieceGrid[LastMove.Y, LastMove.X].IsWhite)
                             {
-                                PieceGrid[mouseCell.Y + 1, mouseCell.X] = null;
+                                BlackInCheck = true;
                             }
                             else
                             {
-                                PieceGrid[mouseCell.Y - 1, mouseCell.X] = null;
+                                WhiteInCheck = true;
                             }
-
-                            break;
-
-                        case MoveTypes.CastleLeft:
-
-                            PieceGrid[mouseCell.Y, mouseCell.X + 1] = PieceGrid[mouseCell.Y, 0];
-                            PieceGrid[mouseCell.Y, 0] = null;
-
-                            break;
-
-                        case MoveTypes.CastleRight:
-
-                            PieceGrid[mouseCell.Y, mouseCell.X - 1] = PieceGrid[mouseCell.Y, PieceGrid.GetLength(1) - 1];
-                            PieceGrid[mouseCell.Y, PieceGrid.GetLength(1) - 1] = null;
-
-                            break;
-                    }
-
-                    LastMove = mouseCell;
-                    HighlightedSquares.Clear();
-                    Whiteturn = !Whiteturn;
-
-                    //Setting HasMoved:
-                    var lastMovedPiece = PieceGrid[LastMove.Y, LastMove.X];
-                    if (lastMovedPiece.PieceType == PieceTypes.King)
-                    {
-                        King kingMoved = (King)lastMovedPiece;
-                        kingMoved.HasMoved = true;
-                    }
-                    if (lastMovedPiece.PieceType == PieceTypes.Rook)
-                    {
-                        Rook rookMoved = (Rook)lastMovedPiece;
-                        rookMoved.HasMoved = true;
-                    }
-
-                    //Checking if last move put someone in check:
-                    if (IsChecking(PieceGrid[LastMove.Y, LastMove.X], LastMove, PieceGrid))
-                    {
-                        if (PieceGrid[LastMove.Y, LastMove.X].IsWhite)
-                        {
-                            BlackInCheck = true;
                         }
                         else
                         {
-                            WhiteInCheck = true;
+                            WhiteInCheck = false;
+                            BlackInCheck = false;
                         }
                     }
-                    else
+
+                    //Highlighting potential moves:
+                    if (PieceGrid[PositionToCell(ms.Position).Y, PositionToCell(ms.Position).X] != null)
                     {
-                        WhiteInCheck = false;
-                        BlackInCheck = false;
-                    }
-                }
-
-                //Highlighting potential moves:
-                if (PieceGrid[PositionToCell(ms.Position).Y, PositionToCell(ms.Position).X] != null)
-                {
-                    //Checking if the piece selected is of the same color as the turn:  
-                    if (PieceGrid[PositionToCell(ms.Position).Y, PositionToCell(ms.Position).X].IsWhite == Whiteturn)
-                    {
-                        HighlightedSquares.Clear();
-                        HighlightedSquares.Add((PositionToCell(ms.Position), MoveTypes.None));
-                        var moves = PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X].GetMoves(PieceGrid, new Point(HighlightedSquares[0].location.X, HighlightedSquares[0].location.Y));
-
-                        Point position = HighlightedSquares[0].location; //The original location of the selected piece
-
-                        bool IsWhite = PieceGrid[position.Y, position.X].IsWhite; //The color of the selected piece
-
-                        //Treat moves as potential 
-                        //Then loop through each
-                        foreach (var potentialMove in moves)
+                        //Checking if the piece selected is of the same color as the turn:  
+                        if (PieceGrid[PositionToCell(ms.Position).Y, PositionToCell(ms.Position).X].IsWhite == Whiteturn)
                         {
-                            bool skipMove = false;
+                            HighlightedSquares.Clear();
+                            HighlightedSquares.Add((PositionToCell(ms.Position), MoveTypes.None));
+                            var moves = PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X].GetMoves(PieceGrid, new Point(HighlightedSquares[0].location.X, HighlightedSquares[0].location.Y));
 
-                            //Exectuing the move:
-                            Piece whatWasThere = PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X];
-                            PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X] = PieceGrid[position.Y, position.X];
-                            PieceGrid[position.Y, position.X] = null;
+                            Point position = HighlightedSquares[0].location; //The original location of the selected piece
 
-                            //Checking if this pieces color is in check:
-                            for (int x1 = 0; x1 < 8; x1++)
+                            bool IsWhite = PieceGrid[position.Y, position.X].IsWhite; //The color of the selected piece
+
+                            //Treat moves as potential 
+                            //Then loop through each
+                            foreach (var potentialMove in moves)
                             {
-                                for (int y1 = 0; y1 < 8; y1++)
+                                bool skipMove = false;
+
+                                //Exectuing the move:
+                                Piece whatWasThere = PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X];
+                                PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X] = PieceGrid[position.Y, position.X];
+                                PieceGrid[position.Y, position.X] = null;
+
+                                //Checking if this pieces color is in check:
+                                for (int x1 = 0; x1 < 8; x1++)
                                 {
-                                    if (PieceGrid[y1, x1] != null && PieceGrid[y1, x1].IsWhite != IsWhite && PieceGrid[y1, x1].PieceType != PieceTypes.King)
+                                    for (int y1 = 0; y1 < 8; y1++)
                                     {
-                                        var temp = PieceGrid[y1, x1].GetMoves(PieceGrid, new Point(x1, y1));
-                                        foreach (var move in temp)
+                                        if (PieceGrid[y1, x1] != null && PieceGrid[y1, x1].IsWhite != IsWhite && PieceGrid[y1, x1].PieceType != PieceTypes.King)
                                         {
-                                            if (IsChecking(PieceGrid[y1, x1], new Point(x1, y1), PieceGrid))
+                                            var temp = PieceGrid[y1, x1].GetMoves(PieceGrid, new Point(x1, y1));
+                                            foreach (var move in temp)
                                             {
-                                                skipMove = true;
+                                                if (IsChecking(PieceGrid[y1, x1], new Point(x1, y1), PieceGrid))
+                                                {
+                                                    skipMove = true;
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            }
 
-                            //Checking if this move results in moving a king next to a king:
-                            if (!skipMove && PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X].PieceType == PieceTypes.King)
-                            {
-                                var surrounding = PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X].GetMoves(PieceGrid, new Point(potentialMove.Item1.X, potentialMove.Item1.Y));
-                                foreach (var move in surrounding)
+                                //Checking if this move results in moving a king next to a king:
+                                if (!skipMove && PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X].PieceType == PieceTypes.King)
                                 {
-                                    if (PieceGrid[move.Item1.Y, move.Item1.X] != null && PieceGrid[move.Item1.Y, move.Item1.X].PieceType == PieceTypes.King)
+                                    var surrounding = PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X].GetMoves(PieceGrid, new Point(potentialMove.Item1.X, potentialMove.Item1.Y));
+                                    foreach (var move in surrounding)
                                     {
-                                        skipMove = true;
+                                        if (PieceGrid[move.Item1.Y, move.Item1.X] != null && PieceGrid[move.Item1.Y, move.Item1.X].PieceType == PieceTypes.King)
+                                        {
+                                            skipMove = true;
+                                        }
                                     }
                                 }
-                            }
 
-                            //Reversing the exectued moves:
-                            PieceGrid[position.Y, position.X] = PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X];
-                            PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X] = whatWasThere;
+                                //Reversing the exectued moves:
+                                PieceGrid[position.Y, position.X] = PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X];
+                                PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X] = whatWasThere;
 
-                            if (!skipMove)
-                            {
-                                HighlightedSquares.Add((new Point(potentialMove.Item1.X, potentialMove.Item1.Y), potentialMove.Item2));
+                                if (!skipMove)
+                                {
+                                    HighlightedSquares.Add((new Point(potentialMove.Item1.X, potentialMove.Item1.Y), potentialMove.Item2));
+                                }
                             }
                         }
+                    }
+                }
+
+                else
+                {
+                    if (mouseCell == queen)
+                    {
+                        PieceGrid[LastMove.Y, LastMove.X] = new Queen(PieceGrid[LastMove.Y, LastMove.X].IsWhite);
+                    }
+                    else if (mouseCell == rook)
+                    {
+                        PieceGrid[LastMove.Y, LastMove.X] = new Rook(PieceGrid[LastMove.Y, LastMove.X].IsWhite);
+                    }
+                    else if (mouseCell == bishop)
+                    {
+                        PieceGrid[LastMove.Y, LastMove.X] = new Bishop(PieceGrid[LastMove.Y, LastMove.X].IsWhite);
+                    }
+                    else if (mouseCell == knight)
+                    {
+                        PieceGrid[LastMove.Y, LastMove.X] = new Knight(PieceGrid[LastMove.Y, LastMove.X].IsWhite);
                     }
                 }
             }
@@ -428,6 +479,25 @@ namespace Chess
                         spriteBatch.Draw(texture, CellCenter(new Point(x, y)), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), scale, SpriteEffects.None, 0);
                     }
                 }
+            }
+
+            if (Promotion)
+            {
+                //Gray out whole screen:
+                spriteBatch.Draw(Pixel, graphics.GraphicsDevice.Viewport.Bounds, Color.White * 0.5f);
+
+                //Draw piece choices:
+                var texture = Textures[(PieceTypes.Queen, PieceGrid[LastMove.Y, LastMove.X].IsWhite)];
+                spriteBatch.Draw(texture, CellCenter(queen), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+
+                texture = Textures[(PieceTypes.Rook, PieceGrid[LastMove.Y, LastMove.X].IsWhite)];
+                spriteBatch.Draw(texture, CellCenter(rook), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+
+                texture = Textures[(PieceTypes.Bishop, PieceGrid[LastMove.Y, LastMove.X].IsWhite)];
+                spriteBatch.Draw(texture, CellCenter(bishop), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+
+                texture = Textures[(PieceTypes.Knight, PieceGrid[LastMove.Y, LastMove.X].IsWhite)];
+                spriteBatch.Draw(texture, CellCenter(knight), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
             }
 
             spriteBatch.End();

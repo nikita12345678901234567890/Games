@@ -20,7 +20,8 @@ namespace Chess
         Normal,
         EnPassant,
         CastleRight,
-        CastleLeft
+        CastleLeft,
+        Promotion
     };
 
     public enum Directions

@@ -32,9 +32,17 @@ namespace Chess.Pieces
             //Moving forward:
             if (IsWhite)
             {
-                if (PieceGrid[position.Y - 1, position.X] == null)
+                if (position.Y - 1 >= 0 && PieceGrid[position.Y - 1, position.X] == null)
                 {
-                    Moves.Add((new Point(position.X, position.Y - 1), MoveTypes.Normal));
+                    if (position.Y - 1 > 0)
+                    {
+                        Moves.Add((new Point(position.X, position.Y - 1), MoveTypes.Normal));
+                    }
+                    else
+                    {
+                        Moves.Add((new Point(position.X, position.Y - 1), MoveTypes.Promotion));
+                    }
+
                     if (position.Y == 6 && PieceGrid[position.Y - 2, position.X] == null)
                     {
                         Moves.Add((new Point(position.X, position.Y - 2), MoveTypes.Normal));
@@ -43,9 +51,17 @@ namespace Chess.Pieces
             }
             else
             {
-                if (PieceGrid[position.Y + 1, position.X] == null)
+                if (position.Y + 1 < PieceGrid.GetLength(0) && PieceGrid[position.Y + 1, position.X] == null)
                 {
-                    Moves.Add((new Point(position.X, position.Y + 1), MoveTypes.Normal));
+                    if (position.Y + 1 < PieceGrid.GetLength(0) - 1)
+                    {
+                        Moves.Add((new Point(position.X, position.Y + 1), MoveTypes.Normal));
+                    }
+                    else
+                    {
+                        Moves.Add((new Point(position.X, position.Y + 1), MoveTypes.Promotion));
+                    }
+
                     if (position.Y == 1 && PieceGrid[position.Y + 2, position.X] == null)
                     {
                         Moves.Add((new Point(position.X, position.Y + 2), MoveTypes.Normal));
@@ -57,23 +73,37 @@ namespace Chess.Pieces
             if (IsWhite)
             {
                 //Right
-                if (position.X < 7 && PieceGrid[position.Y - 1, position.X + 1] != null)
+                if (position.X < 7 && position.Y - 1 >= 0 && PieceGrid[position.Y - 1, position.X + 1] != null)
                 {
                     var piece = PieceGrid[position.Y - 1, position.X + 1];
 
                     if (piece == null || (piece != null && !piece.IsWhite))
                     {
-                        Moves.Add((new Point(position.X + 1, position.Y - 1), MoveTypes.Normal));
+                        if (position.Y - 1 > 0)
+                        {
+                            Moves.Add((new Point(position.X + 1, position.Y - 1), MoveTypes.Normal));
+                        }
+                        else
+                        {
+                            Moves.Add((new Point(position.X + 1, position.Y - 1), MoveTypes.Promotion));
+                        }
                     }
                 }
 
                 //Left:
-                if (position.X > 0 && PieceGrid[position.Y - 1, position.X - 1] != null)
+                if (position.X > 0 && position.Y - 1 >= 0 && PieceGrid[position.Y - 1, position.X - 1] != null)
                 {
                     var piece = PieceGrid[position.Y - 1, position.X - 1];
                     if (piece == null || (piece != null && !piece.IsWhite))
                     {
-                        Moves.Add((new Point(position.X - 1, position.Y - 1), MoveTypes.Normal));
+                        if (position.Y - 1 > 0)
+                        {
+                            Moves.Add((new Point(position.X - 1, position.Y - 1), MoveTypes.Normal));
+                        }
+                        else
+                        {
+                            Moves.Add((new Point(position.X - 1, position.Y - 1), MoveTypes.Promotion));
+                        }
                     }
                 }
 
@@ -81,22 +111,36 @@ namespace Chess.Pieces
             else
             {
                 //Right
-                if (position.X < 7 && PieceGrid[position.Y + 1, position.X + 1] != null)
+                if (position.X < 7 && position.Y + 1 < PieceGrid.GetLength(0) && PieceGrid[position.Y + 1, position.X + 1] != null)
                 {
                     var piece = PieceGrid[position.Y + 1, position.X + 1];
                     if (piece == null || (piece != null && piece.IsWhite))
                     {
-                        Moves.Add((new Point(position.X + 1, position.Y + 1), MoveTypes.Normal));
+                        if (position.Y + 1 > PieceGrid.GetLength(0) - 1)
+                        {
+                            Moves.Add((new Point(position.X + 1, position.Y + 1), MoveTypes.Normal));
+                        }
+                        else
+                        {
+                            Moves.Add((new Point(position.X + 1, position.Y + 1), MoveTypes.Promotion));
+                        }
                     }
                 }
 
                 //Left:
-                if (position.X > 0 && PieceGrid[position.Y + 1, position.X - 1] != null)
+                if (position.X > 0 && position.Y + 1 < PieceGrid.GetLength(0) && PieceGrid[position.Y + 1, position.X - 1] != null)
                 {
                     var piece = PieceGrid[position.Y + 1, position.X - 1];
                     if (piece == null || (piece != null && piece.IsWhite))
                     {
-                        Moves.Add((new Point(position.X - 1, position.Y + 1), MoveTypes.Normal));
+                        if (position.Y + 1 > PieceGrid.GetLength(0) - 1)
+                        {
+                            Moves.Add((new Point(position.X - 1, position.Y + 1), MoveTypes.Normal));
+                        }
+                        else
+                        {
+                            Moves.Add((new Point(position.X - 1, position.Y + 1), MoveTypes.Promotion));
+                        }
                     }
                 }
             }
