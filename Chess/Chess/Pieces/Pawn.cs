@@ -116,7 +116,7 @@ namespace Chess.Pieces
                     var piece = PieceGrid[position.Y + 1, position.X + 1];
                     if (piece == null || (piece != null && piece.IsWhite))
                     {
-                        if (position.Y + 1 > PieceGrid.GetLength(0) - 1)
+                        if (position.Y + 1 < PieceGrid.GetLength(0) - 1)
                         {
                             Moves.Add((new Point(position.X + 1, position.Y + 1), MoveTypes.Normal));
                         }
@@ -133,7 +133,7 @@ namespace Chess.Pieces
                     var piece = PieceGrid[position.Y + 1, position.X - 1];
                     if (piece == null || (piece != null && piece.IsWhite))
                     {
-                        if (position.Y + 1 > PieceGrid.GetLength(0) - 1)
+                        if (position.Y + 1 < PieceGrid.GetLength(0) - 1)
                         {
                             Moves.Add((new Point(position.X - 1, position.Y + 1), MoveTypes.Normal));
                         }

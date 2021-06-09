@@ -212,10 +212,10 @@ namespace Chess
                                 Promotion = true;
                                 if (PieceGrid[mouseCell.Y, mouseCell.X].IsWhite)
                                 {
-                                    queen = LastMove;
-                                    rook = new Point(LastMove.X, LastMove.Y + 1);
-                                    bishop = new Point(LastMove.X, LastMove.Y + 2);
-                                    knight = new Point(LastMove.X, LastMove.Y + 3);
+                                    queen = mouseCell;
+                                    rook = new Point(mouseCell.X, mouseCell.Y + 1);
+                                    bishop = new Point(mouseCell.X, mouseCell.Y + 2);
+                                    knight = new Point(mouseCell.X, mouseCell.Y + 3);
                                 }
                                 else
                                 {
@@ -339,18 +339,35 @@ namespace Chess
                     if (mouseCell == queen)
                     {
                         PieceGrid[LastMove.Y, LastMove.X] = new Queen(PieceGrid[LastMove.Y, LastMove.X].IsWhite);
+                        Promotion = false;
                     }
                     else if (mouseCell == rook)
                     {
                         PieceGrid[LastMove.Y, LastMove.X] = new Rook(PieceGrid[LastMove.Y, LastMove.X].IsWhite);
+                        Promotion = false;
                     }
                     else if (mouseCell == bishop)
                     {
                         PieceGrid[LastMove.Y, LastMove.X] = new Bishop(PieceGrid[LastMove.Y, LastMove.X].IsWhite);
+                        Promotion = false;
                     }
                     else if (mouseCell == knight)
                     {
                         PieceGrid[LastMove.Y, LastMove.X] = new Knight(PieceGrid[LastMove.Y, LastMove.X].IsWhite);
+                        Promotion = false;
+                    }
+
+                    //Checking if switching piece put someone in check:
+                    if (IsChecking(PieceGrid[LastMove.Y, LastMove.X], LastMove, PieceGrid))
+                    {
+                        if (PieceGrid[LastMove.Y, LastMove.X].IsWhite)
+                        {
+                            BlackInCheck = true;
+                        }
+                        else
+                        {
+                            WhiteInCheck = true;
+                        }
                     }
                 }
             }
