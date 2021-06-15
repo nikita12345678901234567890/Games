@@ -530,9 +530,13 @@ namespace Chess
 
         public Piece[,] DecodeFEN(string FEN)
         {
-            Piece[,] grid = new Piece[8,8]();
+            Piece[,] grid = new Piece[8, 8]();
 
             var rows = FEN.Split('/');
+
+            var ending = rows[7].Split(' ');
+
+            rows[7] = ending[0];
 
             for (int y = 0; y < rows.Length; y++)
             {
@@ -595,6 +599,17 @@ namespace Chess
                 }
                 
             }
+
+            if (ending[1] == "w")
+            {
+                Whiteturn = true;
+            }
+            else
+            {
+                Whiteturn = false;
+            }
+
+
         }
     }
 }
