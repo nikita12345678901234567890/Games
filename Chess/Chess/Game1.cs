@@ -6,9 +6,14 @@ using Microsoft.Xna.Framework.Input;
 using System.Linq;
 
 using System.Collections.Generic;
+using System.Text.Json;
+using Lidgren;
+using Lidgren.Network;
 
 namespace Chess
 {
+
+
     public class Game1 : Game
     {
         private GraphicsDeviceManager graphics;
@@ -20,8 +25,8 @@ namespace Chess
 
         public int squaresize;
 
+        
         public MouseState Lastms;
-
 
         //Specifically chess related stuff:
         public Piece[,] PieceGrid = new Piece[8, 8];
@@ -42,6 +47,7 @@ namespace Chess
         public Point rook;
         public Point bishop;
         public Point knight;
+        //NetServer server;
 
 
         public Game1()
@@ -49,6 +55,19 @@ namespace Chess
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+
+            //SomeClass s = new SomeClass() { x = 112, y = 21 };
+            //string str = JsonSerializer.Serialize<SomeClass>(s);
+
+            //SomeClass s2 = JsonSerializer.Deserialize<SomeClass>(str);
+            //;
+            //var config = new NetPeerConfiguration("fish");
+
+            //config.Port = 12345;
+
+            //server = new NetServer(config);
+            //server.Start();
+            //NetServer
         }
 
         protected override void Initialize()
@@ -158,6 +177,8 @@ namespace Chess
                 Exit();
 
             MouseState ms = Mouse.GetState();
+
+
 
             //Checking if mouse clicked:
             if (ms.LeftButton == ButtonState.Pressed && Lastms.LeftButton == ButtonState.Released && GraphicsDevice.Viewport.Bounds.Contains(ms.Position))
@@ -372,6 +393,8 @@ namespace Chess
                 }
             }
 
+
+
             Lastms = ms;
             base.Update(gameTime);
         }
@@ -530,7 +553,7 @@ namespace Chess
 
         public Piece[,] DecodeFEN(string FEN)
         {
-            Piece[,] grid = new Piece[8, 8]();
+            Piece[,] grid = new Piece[8, 8];
 
             var rows = FEN.Split('/');
 
@@ -609,7 +632,7 @@ namespace Chess
                 Whiteturn = false;
             }
 
-
+            return grid;
         }
     }
 }
