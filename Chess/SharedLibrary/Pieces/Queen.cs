@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Chess.Pieces
+namespace SharedLibrary.Pieces
 {
-    class Queen : Piece
+    public class Queen : Piece
     {
         public override PieceTypes PieceType => PieceTypes.Queen;
         public override bool IsWhite { get; set; }

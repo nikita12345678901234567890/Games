@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Chess
+namespace SharedLibrary
 {
     public enum PieceTypes
     {

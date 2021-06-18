@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Chess.Pieces
+namespace SharedLibrary.Pieces
 {
     public class Pawn : Piece
     {
