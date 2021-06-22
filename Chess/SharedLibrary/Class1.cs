@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
+using Microsoft.Xna.Framework.Input;
 using SharedLibrary;
 using SharedLibrary.Pieces;
 
@@ -23,6 +23,8 @@ namespace SharedLibrary
      */
     public class Class1
     {
+        public static Texture2D Pixel;
+
         //Specifically chess related stuff:
         public int squaresize;
 
@@ -55,9 +57,9 @@ namespace SharedLibrary
         public void Update(GameTime gameTime)
         {
             //Checking if mouse clicked:
-            if (ms.LeftButton == ButtonState.Pressed && Lastms.LeftButton == ButtonState.Released && GraphicsDevice.Viewport.Bounds.Contains(ms.Position))
+            if (InputManager.MouseState.LeftButton == ButtonState.Pressed && InputManager.LastMouseState.LeftButton == ButtonState.Released && GraphicsDevice.Viewport.Bounds.Contains(InputManager.MouseState.Position))
             {
-                var mouseCell = PositionToCell(ms.Position);
+                var mouseCell = PositionToCell(InputManager.MouseState.Position);
                 if (!Promotion)
                 {
                     //Moving:
@@ -160,13 +162,13 @@ namespace SharedLibrary
                     }
 
                     //Highlighting potential moves:
-                    if (PieceGrid[PositionToCell(ms.Position).Y, PositionToCell(ms.Position).X] != null)
+                    if (PieceGrid[PositionToCell(InputManager.MouseState.Position).Y, PositionToCell(InputManager.MouseState.Position).X] != null)
                     {
                         //Checking if the piece selected is of the same color as the turn:  
-                        if (PieceGrid[PositionToCell(ms.Position).Y, PositionToCell(ms.Position).X].IsWhite == Whiteturn)
+                        if (PieceGrid[PositionToCell(InputManager.MouseState.Position).Y, PositionToCell(InputManager.MouseState.Position).X].IsWhite == Whiteturn)
                         {
                             HighlightedSquares.Clear();
-                            HighlightedSquares.Add((PositionToCell(ms.Position), MoveTypes.None));
+                            HighlightedSquares.Add((PositionToCell(InputManager.MouseState.Position), MoveTypes.None));
                             var moves = PieceGrid[HighlightedSquares[0].location.Y, HighlightedSquares[0].location.X].GetMoves(PieceGrid, new Point(HighlightedSquares[0].location.X, HighlightedSquares[0].location.Y));
 
                             Point position = HighlightedSquares[0].location; //The original location of the selected piece
