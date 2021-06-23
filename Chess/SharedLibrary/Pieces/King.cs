@@ -42,11 +42,11 @@ namespace SharedLibrary.Pieces
 
             //Castling:
             bool inCheck = false;
-            if (IsWhite && Game1.WhiteInCheck)
+            if (IsWhite && Class1.WhiteInCheck)
             {
                 inCheck = true;
             }
-            if (!IsWhite && Game1.BlackInCheck)
+            if (!IsWhite && Class1.BlackInCheck)
             {
                 inCheck = true;
             }
@@ -63,7 +63,7 @@ namespace SharedLibrary.Pieces
                     if (!leftRook.HasMoved && PieceGrid[position.Y, position.X - 1] == null && PieceGrid[position.Y, position.X - 2] == null)
                     {
                         //Checking that the squares the king passes through aren't under attack:
-                        if (!Game1.UnderAttack(new Point(position.X - 1, position.Y), !IsWhite, PieceGrid) && !Game1.UnderAttack(new Point(position.X - 2, position.Y), !IsWhite, PieceGrid))
+                        if (!Class1.UnderAttack(new Point(position.X - 1, position.Y), !IsWhite, PieceGrid) && !Class1.UnderAttack(new Point(position.X - 2, position.Y), !IsWhite, PieceGrid))
                         {
                             Moves.Add((new Point(position.X - 2, position.Y), MoveTypes.CastleLeft));
                         }
@@ -79,7 +79,7 @@ namespace SharedLibrary.Pieces
                     if (!rightRook.HasMoved && PieceGrid[position.Y, position.X + 1] == null && PieceGrid[position.Y, position.X + 2] == null)
                     {
                         //Checking that the squares the king passes through aren't under attack:
-                        if (!Game1.UnderAttack(new Point(position.X + 1, position.Y), !IsWhite, PieceGrid) && !Game1.UnderAttack(new Point(position.X + 2, position.Y), !IsWhite, PieceGrid))
+                        if (!Class1.UnderAttack(new Point(position.X + 1, position.Y), !IsWhite, PieceGrid) && !Class1.UnderAttack(new Point(position.X + 2, position.Y), !IsWhite, PieceGrid))
                         {
                             Moves.Add((new Point(position.X + 2, position.Y), MoveTypes.CastleRight));
                         }

@@ -8,6 +8,7 @@ using System.Linq;
 
 using System.Collections.Generic;
 using System.Text.Json;
+using System;
 
 namespace Chess
 {
@@ -52,7 +53,7 @@ namespace Chess
 
             squaresize = graphics.PreferredBackBufferWidth / 8;
 
-            
+            HighlightedSquares = new List<Point>();
 
             base.Initialize();
         }
@@ -87,7 +88,30 @@ namespace Chess
 
             MouseState ms = Mouse.GetState();
 
+            //Checking if mouse clicked:
+            if (InputManager.MouseState.LeftButton == ButtonState.Pressed && InputManager.LastMouseState.LeftButton == ButtonState.Released && GraphicsDevice.Viewport.Bounds.Contains(InputManager.MouseState.Position))
+            {
+                var mouseCell = PositionToCell(InputManager.MouseState.Position);
 
+                //Selecting piece:
+                if (HighlightedSquares.Count <= 0)
+                {
+                    if (PieceGrid[mouseCell.Y, mouseCell.X].IsWhite = Whiteturn)
+                    {
+                        Point[] moves = GetMoves(PieceGrid[mouseCell.Y, mouseCell.X]);
+
+                        HighlightedSquares.AddRange(moves);
+                    }
+                }
+                //Selecting move:
+                else
+                {
+                    if (HighlightedSquares.Contains(mouseCell))
+                    {
+                        Move(HighlightedSquares[0], mouseCell);
+                    }
+                }
+            }
 
             Lastms = ms;
             base.Update(gameTime);
@@ -96,6 +120,11 @@ namespace Chess
         public Vector2 CellCenter(Point GridPosition)
         {
             return new Vector2((GridPosition.X * squaresize) + squaresize / 2, (GridPosition.Y * squaresize) + squaresize / 2);
+        }
+
+        public Point PositionToCell(Point position)
+        {
+            return new Point((position.X / squaresize), (position.Y / squaresize));
         }
 
         protected override void Draw(GameTime gameTime)
@@ -178,22 +207,29 @@ namespace Chess
                 spriteBatch.Draw(Pixel, graphics.GraphicsDevice.Viewport.Bounds, Color.White * 0.5f);
 
 
+                Point queen;
+                Point rook;
+                Point bishop;
+                Point knight;
                 //Calculating the positions of the piece choices:
                 if (promotionInfo.IsWhite)
                 {
-                    Point queen = promotionInfo.pawnLocation;
-                    Point rook = new Point(promotionInfo.pawnLocation.X, promotionInfo.pawnLocation.Y - 1);
-                    Point bishop;
-                    Point knight;
+                    queen = promotionInfo.pawnLocation;
+                    rook = new Point(promotionInfo.pawnLocation.X, promotionInfo.pawnLocation.Y - 1);
+                    bishop = new Point(promotionInfo.pawnLocation.X, promotionInfo.pawnLocation.Y - 2);
+                    knight = new Point(promotionInfo.pawnLocation.X, promotionInfo.pawnLocation.Y - 3);
                 }
                 else
-                { 
-                
+                {
+                    queen = promotionInfo.pawnLocation;
+                    rook = new Point(promotionInfo.pawnLocation.X, promotionInfo.pawnLocation.Y + 1);
+                    bishop = new Point(promotionInfo.pawnLocation.X, promotionInfo.pawnLocation.Y + 2);
+                    knight = new Point(promotionInfo.pawnLocation.X, promotionInfo.pawnLocation.Y + 3);
                 }
 
                 //Draw piece choices:
                 var texture = Textures[(PieceTypes.Queen, promotionInfo.IsWhite)];
-                spriteBatch.Draw(texture, CellCenter(promotionInfo.pawnLocation), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+                spriteBatch.Draw(texture, CellCenter(queen), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
 
                 texture = Textures[(PieceTypes.Rook, promotionInfo.IsWhite)];
                 spriteBatch.Draw(texture, CellCenter(rook), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
@@ -236,12 +272,6 @@ namespace Chess
             }
 
             return (promotion, isWhite, pawnLocation);
-        }
-
-
-        public string MakeFEN(Piece[,] PieceGrid)
-        {
-            return "yeet";
         }
 
         public Piece[,] DecodeFEN(string FEN)
@@ -325,7 +355,21 @@ namespace Chess
                 Whiteturn = false;
             }
 
+            throw new Exception("FEN decoder not ready yet");
+
             return grid;
+        }
+
+        public Point[] GetMoves(Piece piece)
+        {
+            //This should call the GetMoves function in Class1
+            throw new Exception("This function isn't ready yet");
+        }
+
+        public void Move(Point piece, Point destination)
+        {
+            //This should call the Move function in Class1
+            throw new Exception("This function isn't ready yet");
         }
     }
 }

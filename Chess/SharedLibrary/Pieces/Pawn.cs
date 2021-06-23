@@ -148,7 +148,7 @@ namespace SharedLibrary.Pieces
             //En passant:
             if (IsWhite)
             {
-                if (position.X >= 1 && PieceGrid[position.Y, position.X - 1] != null && PieceGrid[position.Y, position.X - 1].PieceType == PieceTypes.Pawn && Game1.LastMove == new Point(position.X - 1, position.Y))
+                if (position.X >= 1 && PieceGrid[position.Y, position.X - 1] != null && PieceGrid[position.Y, position.X - 1].PieceType == PieceTypes.Pawn && Class1.LastMove == new Point(position.X - 1, position.Y))
                 {
                     Pawn pawn = (Pawn)PieceGrid[position.Y, position.X - 1];
                     if (pawn.DidMoveTwice)
@@ -157,7 +157,7 @@ namespace SharedLibrary.Pieces
                     }
                 }
 
-                if (position.X <= 6 && PieceGrid[position.Y, position.X + 1] != null && PieceGrid[position.Y, position.X + 1].PieceType == PieceTypes.Pawn && Game1.LastMove == new Point(position.X + 1, position.Y))
+                if (position.X <= 6 && PieceGrid[position.Y, position.X + 1] != null && PieceGrid[position.Y, position.X + 1].PieceType == PieceTypes.Pawn && Class1.LastMove == new Point(position.X + 1, position.Y))
                 {
                     Pawn pawn = (Pawn)PieceGrid[position.Y, position.X + 1];
                     if (pawn.DidMoveTwice)
@@ -168,7 +168,7 @@ namespace SharedLibrary.Pieces
             }
             else
             {
-                if (position.X >= 1 && PieceGrid[position.Y, position.X - 1] != null && PieceGrid[position.Y, position.X - 1].PieceType == PieceTypes.Pawn && Game1.LastMove == new Point(position.X - 1, position.Y))
+                if (position.X >= 1 && PieceGrid[position.Y, position.X - 1] != null && PieceGrid[position.Y, position.X - 1].PieceType == PieceTypes.Pawn && Class1.LastMove == new Point(position.X - 1, position.Y))
                 {
                     Pawn pawn = (Pawn)PieceGrid[position.Y, position.X - 1];
                     if (pawn.DidMoveTwice)
@@ -177,7 +177,7 @@ namespace SharedLibrary.Pieces
                     }
                 }
 
-                if (position.X <= 6 && PieceGrid[position.Y, position.X + 1] != null && PieceGrid[position.Y, position.X + 1].PieceType == PieceTypes.Pawn && Game1.LastMove == new Point(position.X + 1, position.Y))
+                if (position.X <= 6 && PieceGrid[position.Y, position.X + 1] != null && PieceGrid[position.Y, position.X + 1].PieceType == PieceTypes.Pawn && Class1.LastMove == new Point(position.X + 1, position.Y))
                 {
                     Pawn pawn = (Pawn)PieceGrid[position.Y, position.X + 1];
                     if (pawn.DidMoveTwice)
