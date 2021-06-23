@@ -35,8 +35,6 @@ namespace Chess
 
         public Piece[,] PieceGrid = new Piece[8, 8];
 
-        
-
 
         public Game1()
         {
@@ -79,6 +77,8 @@ namespace Chess
             Textures.Add((PieceTypes.King, false), Content.Load<Texture2D>("blackking"));
             Textures.Add((PieceTypes.Queen, true), Content.Load<Texture2D>("whitequeen"));
             Textures.Add((PieceTypes.Queen, false), Content.Load<Texture2D>("blackqueen"));
+
+            throw new Exception("The ResetBoard function in Class1 needs to be called");
         }
 
         protected override void Update(GameTime gameTime)
@@ -168,7 +168,6 @@ namespace Chess
                             color = Color.Red * 0.3f;
                         }
                     }
-
 
                     spriteBatch.Draw(Pixel, new Vector2(x * squaresize, y * squaresize), null, color, 0, new Vector2(0, 0), Vector2.One * squaresize, SpriteEffects.None, 0);
                 }
@@ -343,9 +342,9 @@ namespace Chess
                             break;
                     }
                 }
-
             }
 
+            //Checking whose move it is:
             if (ending[1] == "w")
             {
                 Whiteturn = true;
@@ -355,7 +354,22 @@ namespace Chess
                 Whiteturn = false;
             }
 
-            throw new Exception("FEN decoder not ready yet");
+            //Checking whose in check:
+            if (ending[2] == "w")
+            {
+                WhiteInCheck = true;
+                BlackInCheck = false;
+            }
+            else if (ending[2] == "b")
+            {
+                WhiteInCheck = false;
+                BlackInCheck = true;
+            }
+            else
+            {
+                WhiteInCheck = false;
+                BlackInCheck = false;
+            }
 
             return grid;
         }

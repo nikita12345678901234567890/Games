@@ -377,8 +377,121 @@ namespace SharedLibrary
 
         public string MakeFEN(Piece[,] PieceGrid)
         {
-            throw new Exception("FEN maker not ready yet.");
-            return "yeet";
+            string FEN = "";
+            int spaces = 0;
+
+            for (int y = 0; y < PieceGrid.GetLength(0); y++)
+            {
+                for (int x = 0; x < PieceGrid.GetLength(1); x++)
+                {
+                    if (PieceGrid[y, x] == null)
+                    {
+                        spaces++;
+                        continue;
+                    }
+
+                    if (spaces > 0)
+                    {
+                        FEN += spaces;
+                        spaces = 0;
+                    }
+
+                    switch (PieceGrid[y, x].PieceType)
+                    {
+                        case PieceTypes.Pawn:
+                            if (PieceGrid[y, x].IsWhite)
+                            {
+                                FEN += "P";
+                            }
+                            else
+                            {
+                                FEN += "p";
+                            }
+                            break;
+
+                        case PieceTypes.Knight:
+                            if (PieceGrid[y, x].IsWhite)
+                            {
+                                FEN += "N";
+                            }
+                            else
+                            {
+                                FEN += "n";
+                            }
+                            break;
+
+                        case PieceTypes.Bishop:
+                            if (PieceGrid[y, x].IsWhite)
+                            {
+                                FEN += "B";
+                            }
+                            else
+                            {
+                                FEN += "b";
+                            }
+                            break;
+
+                        case PieceTypes.Rook:
+                            if (PieceGrid[y, x].IsWhite)
+                            {
+                                FEN += "R";
+                            }
+                            else
+                            {
+                                FEN += "r";
+                            }
+                            break;
+
+                        case PieceTypes.King:
+                            if (PieceGrid[y, x].IsWhite)
+                            {
+                                FEN += "K";
+                            }
+                            else
+                            {
+                                FEN += "k";
+                            }
+                            break;
+
+                        case PieceTypes.Queen:
+                            if (PieceGrid[y, x].IsWhite)
+                            {
+                                FEN += "Q";
+                            }
+                            else
+                            {
+                                FEN += "q";
+                            }
+                            break;
+                    }
+                }
+            }
+
+            FEN += " ";
+            if (Whiteturn)
+            {
+                FEN += "w";
+            }
+            else
+            {
+                FEN += "b";
+            }
+
+            FEN += " ";
+            if (WhiteInCheck)
+            {
+                FEN += "w";
+            }
+            else if (BlackInCheck)
+            {
+                FEN += "b";
+            }
+            else
+            {
+                FEN += "-";
+            }
+
+            return FEN;
         }
     }
 }
