@@ -20,8 +20,19 @@ namespace Chess
 
         public static Dictionary<(PieceTypes, bool), Texture2D> Textures;
 
-        
         public MouseState Lastms;
+
+        public int squaresize;
+
+        public List<Point> HighlightedSquares;
+
+        public bool WhiteInCheck = false;
+
+        public bool BlackInCheck = false;
+
+        public bool Whiteturn = true;
+
+        public Piece[,] PieceGrid = new Piece[8, 8];
 
         
 
@@ -67,8 +78,6 @@ namespace Chess
             Textures.Add((PieceTypes.King, false), Content.Load<Texture2D>("blackking"));
             Textures.Add((PieceTypes.Queen, true), Content.Load<Texture2D>("whitequeen"));
             Textures.Add((PieceTypes.Queen, false), Content.Load<Texture2D>("blackqueen"));
-
-            
         }
 
         protected override void Update(GameTime gameTime)
@@ -84,7 +93,10 @@ namespace Chess
             base.Update(gameTime);
         }
 
-        
+        public Vector2 CellCenter(Point GridPosition)
+        {
+            return new Vector2((GridPosition.X * squaresize) + squaresize / 2, (GridPosition.Y * squaresize) + squaresize / 2);
+        }
 
         protected override void Draw(GameTime gameTime)
         {
@@ -92,11 +104,138 @@ namespace Chess
 
             spriteBatch.Begin();
 
-            
+            //Drawing grid:
+            Color cellColor = Color.White;
+            Color color = cellColor;
+            for (int x = 0; x < 8; x++)
+            {
+                for (int y = 0; y < 8; y++)
+                {
+                    color = cellColor;
+
+                    spriteBatch.Draw(Pixel, new Vector2(x * squaresize, y * squaresize), null, color, 0, new Vector2(0, 0), Vector2.One * squaresize, SpriteEffects.None, 0);
+                    cellColor = cellColor == Color.White ? Color.Gray : Color.White;
+
+                    //Changing the color of the highlighted squares:
+                    if (HighlightedSquares.Contains(new Point(x, y)))
+                    {
+                        color = Color.Yellow * 0.3f;
+                    }
+
+                    //Highlighting the checked king red:
+                    if (WhiteInCheck)
+                    {
+                        Piece piece = PieceGrid[y, x];
+                        if (piece != null && piece.IsWhite && piece.PieceType == PieceTypes.King)
+                        {
+                            color = Color.Red * 0.3f;
+                        }
+                    }
+                    else if (BlackInCheck)
+                    {
+                        Piece piece = PieceGrid[y, x];
+                        if (piece != null && !piece.IsWhite && piece.PieceType == PieceTypes.King)
+                        {
+                            color = Color.Red * 0.3f;
+                        }
+                    }
+
+
+                    spriteBatch.Draw(Pixel, new Vector2(x * squaresize, y * squaresize), null, color, 0, new Vector2(0, 0), Vector2.One * squaresize, SpriteEffects.None, 0);
+                }
+
+                cellColor = cellColor == Color.White ? Color.Gray : Color.White;
+            }
+
+            //Drawing pieces:
+            float scale;
+            for (int y = 0; y < PieceGrid.GetLength(0); y++)
+            {
+                for (int x = 0; x < PieceGrid.GetLength(1); x++)
+                {
+                    if (PieceGrid[y, x] != null)
+                    {
+                        if (PieceGrid[y, x].PieceType == PieceTypes.Pawn)
+                        {
+                            scale = 1;
+                        }
+                        else
+                        {
+                            scale = 0.5f;
+                        }
+                        var texture = Textures[(PieceGrid[y, x].PieceType, PieceGrid[y, x].IsWhite)];
+                        spriteBatch.Draw(texture, CellCenter(new Point(x, y)), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), scale, SpriteEffects.None, 0);
+                    }
+                }
+            }
+
+
+            var promotionInfo = CheckPromotion();
+
+            if (promotionInfo.promotion)
+            {
+                //Gray out whole screen:
+                spriteBatch.Draw(Pixel, graphics.GraphicsDevice.Viewport.Bounds, Color.White * 0.5f);
+
+
+                //Calculating the positions of the piece choices:
+                if (promotionInfo.IsWhite)
+                {
+                    Point queen = promotionInfo.pawnLocation;
+                    Point rook = new Point(promotionInfo.pawnLocation.X, promotionInfo.pawnLocation.Y - 1);
+                    Point bishop;
+                    Point knight;
+                }
+                else
+                { 
+                
+                }
+
+                //Draw piece choices:
+                var texture = Textures[(PieceTypes.Queen, promotionInfo.IsWhite)];
+                spriteBatch.Draw(texture, CellCenter(promotionInfo.pawnLocation), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+
+                texture = Textures[(PieceTypes.Rook, promotionInfo.IsWhite)];
+                spriteBatch.Draw(texture, CellCenter(rook), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+
+                texture = Textures[(PieceTypes.Bishop, promotionInfo.IsWhite)];
+                spriteBatch.Draw(texture, CellCenter(bishop), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+
+                texture = Textures[(PieceTypes.Knight, promotionInfo.IsWhite)];
+                spriteBatch.Draw(texture, CellCenter(knight), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+            }
 
             spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        public (bool promotion, bool IsWhite, Point pawnLocation) CheckPromotion()
+        {
+            bool promotion = false;
+            bool isWhite = false;
+            Point pawnLocation = new Point(0, 0);
+
+            for (int x = 0; x < PieceGrid.GetLength(1); x++)
+            {
+                //Checking for a pawn in the top row:
+                if (PieceGrid[0, x].PieceType == PieceTypes.Pawn)
+                {
+                    promotion = true;
+                    isWhite = true;
+                    pawnLocation = new Point(x, 0);
+                }
+
+                //Checking for a pawn in the bottom row:
+                if (PieceGrid[PieceGrid.GetLength(0) - 1, x].PieceType == PieceTypes.Pawn)
+                {
+                    promotion = true;
+                    isWhite = false;
+                    pawnLocation = new Point(x, 0);
+                }
+            }
+
+            return (promotion, isWhite, pawnLocation);
         }
 
 

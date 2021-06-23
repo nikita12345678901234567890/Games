@@ -10,8 +10,6 @@ using System.Linq;
 
 namespace SharedLibrary
 {
-
-
     /*
      * 
      * 
@@ -26,7 +24,6 @@ namespace SharedLibrary
         public static Texture2D Pixel;
 
         //Specifically chess related stuff:
-        public int squaresize;
 
         public Piece[,] PieceGrid = new Piece[8, 8];
 
@@ -41,11 +38,6 @@ namespace SharedLibrary
         public static bool BlackInCheck = false;
 
         public bool Promotion = false;
-
-        public Point queen;
-        public Point rook;
-        public Point bishop;
-        public Point knight;
 
         public void Load()
         {
@@ -104,25 +96,25 @@ namespace SharedLibrary
 
                                 break;
 
-                            case MoveTypes.Promotion:
+                            //case MoveTypes.Promotion:
 
-                                Promotion = true;
-                                if (PieceGrid[mouseCell.Y, mouseCell.X].IsWhite)
-                                {
-                                    queen = mouseCell;
-                                    rook = new Point(mouseCell.X, mouseCell.Y + 1);
-                                    bishop = new Point(mouseCell.X, mouseCell.Y + 2);
-                                    knight = new Point(mouseCell.X, mouseCell.Y + 3);
-                                }
-                                else
-                                {
-                                    queen = mouseCell;
-                                    rook = new Point(mouseCell.X, mouseCell.Y - 1);
-                                    bishop = new Point(mouseCell.X, mouseCell.Y - 2);
-                                    knight = new Point(mouseCell.X, mouseCell.Y - 3);
-                                }
-
-                                break;
+                            //    Promotion = true;
+                            //    if (PieceGrid[mouseCell.Y, mouseCell.X].IsWhite)
+                            //    {
+                            //        queen = mouseCell;
+                            //        rook = new Point(mouseCell.X, mouseCell.Y + 1);
+                            //        bishop = new Point(mouseCell.X, mouseCell.Y + 2);
+                            //        knight = new Point(mouseCell.X, mouseCell.Y + 3);
+                            //    }
+                            //    else
+                            //    {
+                            //        queen = mouseCell;
+                            //        rook = new Point(mouseCell.X, mouseCell.Y - 1);
+                            //        bishop = new Point(mouseCell.X, mouseCell.Y - 2);
+                            //        knight = new Point(mouseCell.X, mouseCell.Y - 3);
+                            //    }
+                            //
+                            //    break;
                         }
 
                         LastMove = mouseCell;
@@ -269,94 +261,6 @@ namespace SharedLibrary
                 }
             }
         }
-
-        public void Draw(SpriteBatch spriteBatch)
-        {
-            //Drawing grid:
-            Color cellColor = Color.White;
-            Color color = cellColor;
-            for (int x = 0; x < 8; x++)
-            {
-                for (int y = 0; y < 8; y++)
-                {
-                    color = cellColor;
-
-                    spriteBatch.Draw(Pixel, new Vector2(x * squaresize, y * squaresize), null, color, 0, new Vector2(0, 0), Vector2.One * squaresize, SpriteEffects.None, 0);
-                    cellColor = cellColor == Color.White ? Color.Gray : Color.White;
-
-                    //Changing the color of the highlighted squares:
-                    if (Contains(new Point(x, y)))
-                    {
-                        color = Color.Yellow * 0.3f;
-                    }
-
-                    //Highlighting the checked king red:
-                    if (WhiteInCheck)
-                    {
-                        Piece piece = PieceGrid[y, x];
-                        if (piece != null && piece.IsWhite && piece.PieceType == PieceTypes.King)
-                        {
-                            color = Color.Red * 0.3f;
-                        }
-                    }
-                    else if (BlackInCheck)
-                    {
-                        Piece piece = PieceGrid[y, x];
-                        if (piece != null && !piece.IsWhite && piece.PieceType == PieceTypes.King)
-                        {
-                            color = Color.Red * 0.3f;
-                        }
-                    }
-
-
-                    spriteBatch.Draw(Pixel, new Vector2(x * squaresize, y * squaresize), null, color, 0, new Vector2(0, 0), Vector2.One * squaresize, SpriteEffects.None, 0);
-                }
-
-                cellColor = cellColor == Color.White ? Color.Gray : Color.White;
-            }
-
-            //Drawing pieces:
-            float scale;
-            for (int y = 0; y < PieceGrid.GetLength(0); y++)
-            {
-                for (int x = 0; x < PieceGrid.GetLength(1); x++)
-                {
-                    if (PieceGrid[y, x] != null)
-                    {
-                        if (PieceGrid[y, x].PieceType == PieceTypes.Pawn)
-                        {
-                            scale = 1;
-                        }
-                        else
-                        {
-                            scale = 0.5f;
-                        }
-                        var texture = Textures[(PieceGrid[y, x].PieceType, PieceGrid[y, x].IsWhite)];
-                        spriteBatch.Draw(texture, CellCenter(new Point(x, y)), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), scale, SpriteEffects.None, 0);
-                    }
-                }
-            }
-
-            if (Promotion)
-            {
-                //Gray out whole screen:
-                spriteBatch.Draw(Pixel, graphics.GraphicsDevice.Viewport.Bounds, Color.White * 0.5f);
-
-                //Draw piece choices:
-                var texture = Textures[(PieceTypes.Queen, PieceGrid[LastMove.Y, LastMove.X].IsWhite)];
-                spriteBatch.Draw(texture, CellCenter(queen), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
-
-                texture = Textures[(PieceTypes.Rook, PieceGrid[LastMove.Y, LastMove.X].IsWhite)];
-                spriteBatch.Draw(texture, CellCenter(rook), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
-
-                texture = Textures[(PieceTypes.Bishop, PieceGrid[LastMove.Y, LastMove.X].IsWhite)];
-                spriteBatch.Draw(texture, CellCenter(bishop), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
-
-                texture = Textures[(PieceTypes.Knight, PieceGrid[LastMove.Y, LastMove.X].IsWhite)];
-                spriteBatch.Draw(texture, CellCenter(knight), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
-            }
-        }
-
         
 
         public void ResetBoard()
@@ -471,11 +375,6 @@ namespace SharedLibrary
         public Point PositionToCell(Point position)
         {
             return new Point((position.X / squaresize), (position.Y / squaresize));
-        }
-
-        public Vector2 CellCenter(Point GridPosition)
-        {
-            return new Vector2((GridPosition.X * squaresize) + squaresize / 2, (GridPosition.Y * squaresize) + squaresize / 2);
         }
     }
 }
