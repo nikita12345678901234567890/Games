@@ -13,21 +13,21 @@ namespace SharedLibrary
     /*
      * 
      * 
-     * 
      * Chris said not to do it this way
      * 
      * 
      * 
      */
-    public class Class1
+    
+    public static class Class1
     {
         public static Texture2D Pixel;
 
         //Specifically chess related stuff:
 
-        public Piece[,] PieceGrid = new Piece[8, 8];
+        public static Piece[,] PieceGrid = new Piece[8, 8];
 
-        public bool Whiteturn = true;
+        public static bool Whiteturn = true;
 
         public static Point LastMove;
 
@@ -35,7 +35,7 @@ namespace SharedLibrary
 
         public static bool BlackInCheck = false;
 
-        public void ResetBoard()
+        public static void ResetBoard()
         {
             //Setting up grid:
             for (int x = 0; x < 8; x++)
@@ -79,7 +79,7 @@ namespace SharedLibrary
             PieceGrid[7, 3] = new Queen(true);
         }
 
-        public bool Contains(List<(Point, MoveTypes)> list, Point pos)
+        public static bool Contains(List<(Point, MoveTypes)> list, Point pos)
         {
             foreach (var square in list)
             {
@@ -91,7 +91,7 @@ namespace SharedLibrary
             return false;
         }
 
-        public int IndexOf(List<(Point, MoveTypes)> list, Point pos)
+        public static int IndexOf(List<(Point, MoveTypes)> list, Point pos)
         {
             for (int i = 0; i < list.Count; i++)
             {
@@ -144,7 +144,7 @@ namespace SharedLibrary
             return false;
         }
 
-        public Point[] GetMoves(Point piece)
+        public static Point[] GetMoves(Point piece)
         {
             List<Point> moves = new List<Point>();
 
@@ -213,7 +213,7 @@ namespace SharedLibrary
             return moves.ToArray();
         }
 
-        public List<(Point, MoveTypes)> GetMovesAndTypes(Point piece)
+        public static List<(Point, MoveTypes)> GetMovesAndTypes(Point piece)
         {
             List<(Point, MoveTypes)> moves = new List<(Point, MoveTypes)>();
 
@@ -282,7 +282,7 @@ namespace SharedLibrary
             return moves;
         }
 
-        public void Move(Point piece, Point destination)
+        public static void Move(Point piece, Point destination)
         {
             var moves = GetMovesAndTypes(piece);
             if (Contains(moves, destination))
@@ -375,7 +375,7 @@ namespace SharedLibrary
         }
 
 
-        public string MakeFEN(Piece[,] PieceGrid)
+        public static string MakeFEN(Piece[,] PieceGrid)
         {
             string FEN = "";
             int spaces = 0;

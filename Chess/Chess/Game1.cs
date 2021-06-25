@@ -33,8 +33,6 @@ namespace Chess
 
         public bool Whiteturn = true;
 
-        public Piece[,] PieceGrid = new Piece[8, 8];
-
 
         public Game1()
         {
@@ -78,7 +76,7 @@ namespace Chess
             Textures.Add((PieceTypes.Queen, true), Content.Load<Texture2D>("whitequeen"));
             Textures.Add((PieceTypes.Queen, false), Content.Load<Texture2D>("blackqueen"));
 
-            throw new Exception("The ResetBoard function in Class1 needs to be called");
+            Class1.ResetBoard();
         }
 
         protected override void Update(GameTime gameTime)
@@ -86,7 +84,7 @@ namespace Chess
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            MouseState ms = Mouse.GetState();
+            InputManager.MouseState = Mouse.GetState();
 
             //Checking if mouse clicked:
             if (InputManager.MouseState.LeftButton == ButtonState.Pressed && InputManager.LastMouseState.LeftButton == ButtonState.Released && GraphicsDevice.Viewport.Bounds.Contains(InputManager.MouseState.Position))
@@ -96,9 +94,9 @@ namespace Chess
                 //Selecting piece:
                 if (HighlightedSquares.Count <= 0)
                 {
-                    if (PieceGrid[mouseCell.Y, mouseCell.X].IsWhite = Whiteturn)
+                    if (Class1.PieceGrid[mouseCell.Y, mouseCell.X].IsWhite = Whiteturn)
                     {
-                        Point[] moves = GetMoves(PieceGrid[mouseCell.Y, mouseCell.X]);
+                        Point[] moves = GetMoves(new Point(mouseCell.X, mouseCell.Y));
 
                         HighlightedSquares.AddRange(moves);
                     }
@@ -109,11 +107,12 @@ namespace Chess
                     if (HighlightedSquares.Contains(mouseCell))
                     {
                         Move(HighlightedSquares[0], mouseCell);
+                        HighlightedSquares.Clear();
                     }
                 }
             }
 
-            Lastms = ms;
+            InputManager.LastMouseState = InputManager.MouseState;
             base.Update(gameTime);
         }
 
@@ -154,7 +153,7 @@ namespace Chess
                     //Highlighting the checked king red:
                     if (WhiteInCheck)
                     {
-                        Piece piece = PieceGrid[y, x];
+                        Piece piece = Class1.PieceGrid[y, x];
                         if (piece != null && piece.IsWhite && piece.PieceType == PieceTypes.King)
                         {
                             color = Color.Red * 0.3f;
@@ -162,7 +161,7 @@ namespace Chess
                     }
                     else if (BlackInCheck)
                     {
-                        Piece piece = PieceGrid[y, x];
+                        Piece piece = Class1.PieceGrid[y, x];
                         if (piece != null && !piece.IsWhite && piece.PieceType == PieceTypes.King)
                         {
                             color = Color.Red * 0.3f;
@@ -177,13 +176,13 @@ namespace Chess
 
             //Drawing pieces:
             float scale;
-            for (int y = 0; y < PieceGrid.GetLength(0); y++)
+            for (int y = 0; y < Class1.PieceGrid.GetLength(0); y++)
             {
-                for (int x = 0; x < PieceGrid.GetLength(1); x++)
+                for (int x = 0; x < Class1.PieceGrid.GetLength(1); x++)
                 {
-                    if (PieceGrid[y, x] != null)
+                    if (Class1.PieceGrid[y, x] != null)
                     {
-                        if (PieceGrid[y, x].PieceType == PieceTypes.Pawn)
+                        if (Class1.PieceGrid[y, x].PieceType == PieceTypes.Pawn)
                         {
                             scale = 1;
                         }
@@ -191,7 +190,7 @@ namespace Chess
                         {
                             scale = 0.5f;
                         }
-                        var texture = Textures[(PieceGrid[y, x].PieceType, PieceGrid[y, x].IsWhite)];
+                        var texture = Textures[(Class1.PieceGrid[y, x].PieceType, Class1.PieceGrid[y, x].IsWhite)];
                         spriteBatch.Draw(texture, CellCenter(new Point(x, y)), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), scale, SpriteEffects.None, 0);
                     }
                 }
@@ -251,10 +250,10 @@ namespace Chess
             bool isWhite = false;
             Point pawnLocation = new Point(0, 0);
 
-            for (int x = 0; x < PieceGrid.GetLength(1); x++)
+            for (int x = 0; x < Class1.PieceGrid.GetLength(1); x++)
             {
                 //Checking for a pawn in the top row:
-                if (PieceGrid[0, x].PieceType == PieceTypes.Pawn)
+                if (Class1.PieceGrid[0, x].PieceType == PieceTypes.Pawn)
                 {
                     promotion = true;
                     isWhite = true;
@@ -262,7 +261,7 @@ namespace Chess
                 }
 
                 //Checking for a pawn in the bottom row:
-                if (PieceGrid[PieceGrid.GetLength(0) - 1, x].PieceType == PieceTypes.Pawn)
+                if (Class1.PieceGrid[Class1.PieceGrid.GetLength(0) - 1, x].PieceType == PieceTypes.Pawn)
                 {
                     promotion = true;
                     isWhite = false;
@@ -374,16 +373,14 @@ namespace Chess
             return grid;
         }
 
-        public Point[] GetMoves(Piece piece)
+        public Point[] GetMoves(Point pieceLocation)
         {
-            //This should call the GetMoves function in Class1
-            throw new Exception("This function isn't ready yet");
+            return Class1.GetMoves(pieceLocation);
         }
 
         public void Move(Point piece, Point destination)
         {
-            //This should call the Move function in Class1
-            throw new Exception("This function isn't ready yet");
+            Class1.Move(piece, destination);
         }
     }
 }
