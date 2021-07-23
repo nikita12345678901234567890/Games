@@ -27,6 +27,10 @@ namespace Chess
 
         public List<Point> HighlightedSquares;
 
+        public bool choosingPromotion = false;
+
+        public PiecePromotion choices;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -84,20 +88,43 @@ namespace Chess
             {
                 var mouseCell = PositionToCell(InputManager.MouseState.Position);
 
-                //Selecting piece:
-                if (HighlightedSquares.Count <= 0)
+                //If choosing a piece for promotion:
+                if (choosingPromotion)
                 {
-                    if (Class1.PieceGrid[mouseCell.Y, mouseCell.X] != null && Class1.PieceGrid[mouseCell.Y, mouseCell.X].IsWhite == Class1.Whiteturn)
+                    if (mouseCell == choices.Queen)
                     {
-                        Point[] moves = GetMoves(new Point(mouseCell.X, mouseCell.Y));
+                        Class1.PieceGrid[choices.Queen.Y, choices.Queen.X] = new Queen(choices.white);
+                    }
 
-                        HighlightedSquares.AddRange(moves);
+                    else if (mouseCell == choices.Rook)
+                    {
+                        Class1.PieceGrid[choices.Queen.Y, choices.Queen.X] = new Rook(choices.white);
+                    }
+
+                    else if (mouseCell == choices.Bishop)
+                    {
+                        Class1.PieceGrid[choices.Queen.Y, choices.Queen.X] = new Bishop(choices.white);
+                    }
+
+                    else if (mouseCell == choices.Knight)
+                    {
+                        Class1.PieceGrid[choices.Queen.Y, choices.Queen.X] = new Knight(choices.white);
                     }
                 }
+                //Selecting piece:
+                if (Class1.PieceGrid[mouseCell.Y, mouseCell.X] != null && Class1.PieceGrid[mouseCell.Y, mouseCell.X].IsWhite == Class1.Whiteturn)
+                {
+                    HighlightedSquares.Clear();
+
+                    Point[] moves = GetMoves(new Point(mouseCell.X, mouseCell.Y));
+
+                    HighlightedSquares.AddRange(moves);
+                }
+
                 //Selecting move:
                 else
                 {
-                    if (HighlightedSquares.Contains(mouseCell))
+                    if (HighlightedSquares.Contains(mouseCell) && mouseCell != HighlightedSquares[0])
                     {
                         Move(HighlightedSquares[0], mouseCell);
                         HighlightedSquares.Clear();
@@ -192,44 +219,28 @@ namespace Chess
 
             var promotionInfo = CheckPromotion();
 
-            if (promotionInfo.promotion)
+            choosingPromotion = promotionInfo.promotion;
+
+            choices = new PiecePromotion(promotionInfo.IsWhite, promotionInfo.pawnLocation.X);
+
+            if (choosingPromotion)
             {
                 //Gray out whole screen:
                 spriteBatch.Draw(Pixel, graphics.GraphicsDevice.Viewport.Bounds, Color.White * 0.5f);
 
 
-                Point queen;
-                Point rook;
-                Point bishop;
-                Point knight;
-                //Calculating the positions of the piece choices:
-                if (promotionInfo.IsWhite)
-                {
-                    queen = promotionInfo.pawnLocation;
-                    rook = new Point(promotionInfo.pawnLocation.X, promotionInfo.pawnLocation.Y - 1);
-                    bishop = new Point(promotionInfo.pawnLocation.X, promotionInfo.pawnLocation.Y - 2);
-                    knight = new Point(promotionInfo.pawnLocation.X, promotionInfo.pawnLocation.Y - 3);
-                }
-                else
-                {
-                    queen = promotionInfo.pawnLocation;
-                    rook = new Point(promotionInfo.pawnLocation.X, promotionInfo.pawnLocation.Y + 1);
-                    bishop = new Point(promotionInfo.pawnLocation.X, promotionInfo.pawnLocation.Y + 2);
-                    knight = new Point(promotionInfo.pawnLocation.X, promotionInfo.pawnLocation.Y + 3);
-                }
-
                 //Draw piece choices:
                 var texture = Textures[(PieceTypes.Queen, promotionInfo.IsWhite)];
-                spriteBatch.Draw(texture, CellCenter(queen), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+                spriteBatch.Draw(texture, CellCenter(choices.Queen), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
 
                 texture = Textures[(PieceTypes.Rook, promotionInfo.IsWhite)];
-                spriteBatch.Draw(texture, CellCenter(rook), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+                spriteBatch.Draw(texture, CellCenter(choices.Rook), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
 
                 texture = Textures[(PieceTypes.Bishop, promotionInfo.IsWhite)];
-                spriteBatch.Draw(texture, CellCenter(bishop), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+                spriteBatch.Draw(texture, CellCenter(choices.Bishop), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
 
                 texture = Textures[(PieceTypes.Knight, promotionInfo.IsWhite)];
-                spriteBatch.Draw(texture, CellCenter(knight), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+                spriteBatch.Draw(texture, CellCenter(choices.Knight), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
             }
 
             spriteBatch.End();
