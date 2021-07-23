@@ -27,13 +27,6 @@ namespace Chess
 
         public List<Point> HighlightedSquares;
 
-        public bool WhiteInCheck = false;
-
-        public bool BlackInCheck = false;
-
-        public bool Whiteturn = true;
-
-
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -94,7 +87,7 @@ namespace Chess
                 //Selecting piece:
                 if (HighlightedSquares.Count <= 0)
                 {
-                    if (Class1.PieceGrid[mouseCell.Y, mouseCell.X].IsWhite = Whiteturn)
+                    if (Class1.PieceGrid[mouseCell.Y, mouseCell.X] != null && Class1.PieceGrid[mouseCell.Y, mouseCell.X].IsWhite == Class1.Whiteturn)
                     {
                         Point[] moves = GetMoves(new Point(mouseCell.X, mouseCell.Y));
 
@@ -151,7 +144,7 @@ namespace Chess
                     }
 
                     //Highlighting the checked king red:
-                    if (WhiteInCheck)
+                    if (Class1.WhiteInCheck)
                     {
                         Piece piece = Class1.PieceGrid[y, x];
                         if (piece != null && piece.IsWhite && piece.PieceType == PieceTypes.King)
@@ -159,7 +152,7 @@ namespace Chess
                             color = Color.Red * 0.3f;
                         }
                     }
-                    else if (BlackInCheck)
+                    else if (Class1.BlackInCheck)
                     {
                         Piece piece = Class1.PieceGrid[y, x];
                         if (piece != null && !piece.IsWhite && piece.PieceType == PieceTypes.King)
@@ -253,7 +246,7 @@ namespace Chess
             for (int x = 0; x < Class1.PieceGrid.GetLength(1); x++)
             {
                 //Checking for a pawn in the top row:
-                if (Class1.PieceGrid[0, x].PieceType == PieceTypes.Pawn)
+                if (Class1.PieceGrid[0, x] != null && Class1.PieceGrid[0, x].PieceType == PieceTypes.Pawn)
                 {
                     promotion = true;
                     isWhite = true;
@@ -261,7 +254,7 @@ namespace Chess
                 }
 
                 //Checking for a pawn in the bottom row:
-                if (Class1.PieceGrid[Class1.PieceGrid.GetLength(0) - 1, x].PieceType == PieceTypes.Pawn)
+                if (Class1.PieceGrid[Class1.PieceGrid.GetLength(0) - 1, x] != null && Class1.PieceGrid[Class1.PieceGrid.GetLength(0) - 1, x].PieceType == PieceTypes.Pawn)
                 {
                     promotion = true;
                     isWhite = false;
@@ -344,7 +337,7 @@ namespace Chess
             }
 
             //Checking whose move it is:
-            if (ending[1] == "w")
+            /*if (ending[1] == "w")
             {
                 Whiteturn = true;
             }
@@ -368,7 +361,7 @@ namespace Chess
             {
                 WhiteInCheck = false;
                 BlackInCheck = false;
-            }
+            }*/
 
             return grid;
         }

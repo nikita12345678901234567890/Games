@@ -14,7 +14,7 @@ namespace SharedLibrary
      * 
      * 
      * Chris said not to do it this way
-     * 
+     * Ryan did too
      * 
      * 
      */
@@ -146,6 +146,11 @@ namespace SharedLibrary
 
         public static Point[] GetMoves(Point piece)
         {
+            if (PieceGrid[piece.Y, piece.X] == null || PieceGrid[piece.Y, piece.X].IsWhite != Whiteturn)
+            {
+                return null;
+            }
+
             List<Point> moves = new List<Point>();
 
             moves.Add(piece);
