@@ -31,6 +31,10 @@ namespace Chess
 
         public PiecePromotion choices;
 
+        public bool whiteLost = false;
+
+        public bool blackLost = false;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -111,8 +115,15 @@ namespace Chess
                         Class1.PieceGrid[choices.Queen.Y, choices.Queen.X] = new Knight(choices.white);
                     }
                 }
+
+                //Deselecting piece:
+                if (Class1.PieceGrid[mouseCell.Y, mouseCell.X] != null && HighlightedSquares.Count > 0 && mouseCell == HighlightedSquares[0])
+                {
+                    HighlightedSquares.Clear();
+                }
+
                 //Selecting piece:
-                if (Class1.PieceGrid[mouseCell.Y, mouseCell.X] != null && Class1.PieceGrid[mouseCell.Y, mouseCell.X].IsWhite == Class1.Whiteturn)
+                else if (Class1.PieceGrid[mouseCell.Y, mouseCell.X] != null && Class1.PieceGrid[mouseCell.Y, mouseCell.X].IsWhite == Class1.Whiteturn)
                 {
                     HighlightedSquares.Clear();
 
@@ -372,7 +383,7 @@ namespace Chess
             {
                 WhiteInCheck = false;
                 BlackInCheck = false;
-            }*/
+            }*/ //add checking for checkmate;
 
             return grid;
         }

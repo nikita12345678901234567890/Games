@@ -33,7 +33,7 @@ namespace SharedLibrary
 
         public static bool WhiteInCheck = false;
 
-        public static bool BlackInCheck = false;
+        public static bool BlackInCheck = false;  //add checkmates!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         public static void ResetBoard()
         {
