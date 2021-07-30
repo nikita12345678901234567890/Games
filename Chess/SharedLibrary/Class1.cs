@@ -14,7 +14,7 @@ namespace SharedLibrary
      * 
      * 
      * Chris said not to do it this way
-     * Ryan did too
+     * Ryan did too, but then he changed his mind
      * 
      * 
      */
@@ -33,7 +33,7 @@ namespace SharedLibrary
 
         public static bool WhiteInCheck = false;
 
-        public static bool BlackInCheck = false;  //add checkmates!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        public static bool BlackInCheck = false;
 
         public static void ResetBoard()
         {
@@ -379,6 +379,23 @@ namespace SharedLibrary
             }
         }
 
+        public static bool CheckForCheckmate()
+        {
+            for (int x = 0; x < PieceGrid.GetLength(1); x++)
+            {
+                for (int y = 0; y < PieceGrid.GetLength(0); y++)
+                {
+                    if (PieceGrid[y, x] != null && PieceGrid[y, x].IsWhite == Whiteturn)
+                    {
+                        if (GetMoves(new Point(x, y)).Length > 1)
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
 
         public static string MakeFEN(Piece[,] PieceGrid)
         {

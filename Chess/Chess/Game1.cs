@@ -31,10 +31,6 @@ namespace Chess
 
         public PiecePromotion choices;
 
-        public bool whiteLost = false;
-
-        public bool blackLost = false;
-
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -84,6 +80,18 @@ namespace Chess
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+
+            if (Class1.CheckForCheckmate())
+            {
+                if (Class1.Whiteturn)
+                {
+                    System.Windows.Forms.MessageBox.Show("White in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
+                }
+                else
+                {
+                    System.Windows.Forms.MessageBox.Show("Black in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.OK);
+                }
+            }
 
             InputManager.MouseState = Mouse.GetState();
 
