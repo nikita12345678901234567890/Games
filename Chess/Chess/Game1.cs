@@ -85,11 +85,13 @@ namespace Chess
             {
                 if (Class1.Whiteturn)
                 {
-                    System.Windows.Forms.MessageBox.Show("White in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
+                    System.Windows.Forms.MessageBox.Show("White in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.OK);
+                    this.Exit();
                 }
                 else
                 {
                     System.Windows.Forms.MessageBox.Show("Black in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.OK);
+                    this.Exit();
                 }
             }
 
