@@ -35,6 +35,8 @@ namespace SharedLibrary
 
         public static bool BlackInCheck = false;
 
+        public static int moveCounter = 0;
+
         public static void ResetBoard()
         {
             for (int x = 0; x < PieceGrid.GetLength(1); x++)
@@ -93,7 +95,9 @@ namespace SharedLibrary
             WhiteInCheck = false;
 
             BlackInCheck = false;
-    }
+
+            moveCounter = 0;
+        }
 
         public static bool Contains(List<(Point, MoveTypes)> list, Point pos)
         {
@@ -308,6 +312,13 @@ namespace SharedLibrary
             var moves = GetMovesAndTypes(piece);
             if (Contains(moves, destination))
             {
+                //Checks for reseting the moveCounter
+                if (PieceGrid[piece.Y, piece.X].PieceType == PieceTypes.Pawn || PieceGrid[destination.Y, destination.X] != null)
+                {
+                    moveCounter = 0;
+                }
+
+
                 //Setting DidMoveTwice:
                 if (moves.Count >= 3 && destination == moves[2].Item1 && PieceGrid[piece.Y, piece.X] != null && PieceGrid[piece.Y, piece.X].PieceType == PieceTypes.Pawn)
                 {
@@ -392,10 +403,13 @@ namespace SharedLibrary
                         BlackInCheck = false;
                     }
                 }
+
+
+                moveCounter++;
             }
         }
 
-        public static bool CheckForCheckmate()
+        public static bool CheckForNoMoves()
         {
             for (int x = 0; x < PieceGrid.GetLength(1); x++)
             {
@@ -532,7 +546,7 @@ namespace SharedLibrary
             return FEN;
         }
 
-        public static Piece[,] DecodeFEN(string FEN)
+        public static void DecodeFEN(string FEN)
         {
             Piece[,] grid = new Piece[8, 8];
 
@@ -544,9 +558,10 @@ namespace SharedLibrary
 
             for (int y = 0; y < rows.Length; y++)
             {
-                for (int x = 0; x < rows[0].Length; x++)
+                int x = 0;
+                for (int i = 0; i < rows[y].Length; i++)
                 {
-                    switch (rows[y][x])
+                    switch (rows[y][i])
                     {
                         case 'p':
                             grid[y, x] = new Pawn(false);
@@ -597,7 +612,7 @@ namespace SharedLibrary
                             break;
 
                         default:
-                            x += (int)char.GetNumericValue(rows[y][x]) - 1;
+                            x += (int)char.GetNumericValue(rows[y][i]) - 1;
                             break;
                     }
                 }
@@ -613,7 +628,7 @@ namespace SharedLibrary
                 Whiteturn = false;
             }
 
-            return grid;
+            PieceGrid = grid;
         }
     }
 }

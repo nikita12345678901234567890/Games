@@ -76,6 +76,15 @@ namespace Chess
             Textures.Add((PieceTypes.Queen, false), Content.Load<Texture2D>("blackqueen"));
 
             Class1.ResetBoard();
+
+
+
+
+
+
+
+
+            Class1.DecodeFEN("8/4k3/8/8/8/8/4K3/8 w - - 0 1");
         }
 
         protected override void Update(GameTime gameTime)
@@ -83,16 +92,29 @@ namespace Chess
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            if (!spectating && Class1.CheckForCheckmate())
+            if (!spectating)
             {
-                System.Windows.Forms.DialogResult result;
-                if (Class1.Whiteturn)
+                System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
+
+                if (Class1.CheckForNoMoves())
                 {
-                    result = System.Windows.Forms.MessageBox.Show("White in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
+                    if (Class1.Whiteturn && Class1.WhiteInCheck)
+                    {
+                        result = System.Windows.Forms.MessageBox.Show("White in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
+                    }
+                    else if (!Class1.Whiteturn && Class1.BlackInCheck)
+                    {
+                        result = System.Windows.Forms.MessageBox.Show("Black in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
+                    }
+                    else
+                    {
+                        result = System.Windows.Forms.MessageBox.Show("Stalemate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
+                    }
                 }
-                else
+
+                else if (Class1.moveCounter >= 50)
                 {
-                    result = System.Windows.Forms.MessageBox.Show("Black in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
+                    result = System.Windows.Forms.MessageBox.Show("There have been 50 moves and nothing has happened", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
                 }
 
                 switch (result)
@@ -168,6 +190,8 @@ namespace Chess
                     }
                 }
             }
+
+
 
             InputManager.LastMouseState = InputManager.MouseState;
             base.Update(gameTime);
@@ -311,7 +335,7 @@ namespace Chess
             }
 
             return (promotion, isWhite, pawnLocation);
-        }  //FEN : 8/4k3/8/8/8/8/4K3/8 w - - 0 1 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        }
 
         public Point[] GetMoves(Point pieceLocation)
         {
