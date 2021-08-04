@@ -31,6 +31,8 @@ namespace Chess
 
         public PiecePromotion choices;
 
+        bool spectating = false;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -81,24 +83,38 @@ namespace Chess
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            if (Class1.CheckForCheckmate())
+            if (!spectating && Class1.CheckForCheckmate())
             {
+                System.Windows.Forms.DialogResult result;
                 if (Class1.Whiteturn)
                 {
-                    System.Windows.Forms.MessageBox.Show("White in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.OK);
-                    this.Exit();
+                    result = System.Windows.Forms.MessageBox.Show("White in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
                 }
                 else
                 {
-                    System.Windows.Forms.MessageBox.Show("Black in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.OK);
-                    this.Exit();
+                    result = System.Windows.Forms.MessageBox.Show("Black in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
+                }
+
+                switch (result)
+                {
+                    case System.Windows.Forms.DialogResult.Abort:
+                        this.Exit();
+                        break;
+
+                    case System.Windows.Forms.DialogResult.Retry:
+                        Class1.ResetBoard();
+                        break;
+
+                    case System.Windows.Forms.DialogResult.Ignore:
+                        spectating = true;
+                        break;
                 }
             }
 
             InputManager.MouseState = Mouse.GetState();
 
             //Checking if mouse clicked:
-            if (InputManager.MouseState.LeftButton == ButtonState.Pressed && InputManager.LastMouseState.LeftButton == ButtonState.Released && GraphicsDevice.Viewport.Bounds.Contains(InputManager.MouseState.Position))
+            if (!spectating && InputManager.MouseState.LeftButton == ButtonState.Pressed && InputManager.LastMouseState.LeftButton == ButtonState.Released && GraphicsDevice.Viewport.Bounds.Contains(InputManager.MouseState.Position))
             {
                 var mouseCell = PositionToCell(InputManager.MouseState.Position);
 
@@ -295,108 +311,7 @@ namespace Chess
             }
 
             return (promotion, isWhite, pawnLocation);
-        }
-
-        public Piece[,] DecodeFEN(string FEN)
-        {
-            Piece[,] grid = new Piece[8, 8];
-
-            var rows = FEN.Split('/');
-
-            var ending = rows[7].Split(' ');
-
-            rows[7] = ending[0];
-
-            for (int y = 0; y < rows.Length; y++)
-            {
-                for (int x = 0; x < rows[0].Length; x++)
-                {
-                    switch (rows[y][x])
-                    {
-                        case 'p':
-                            grid[y, x] = new Pawn(false);
-                            break;
-
-                        case 'P':
-                            grid[y, x] = new Pawn(true);
-                            break;
-
-                        case 'b':
-                            grid[y, x] = new Bishop(false);
-                            break;
-
-                        case 'B':
-                            grid[y, x] = new Bishop(true);
-                            break;
-
-                        case 'n':
-                            grid[y, x] = new Knight(false);
-                            break;
-
-                        case 'N':
-                            grid[y, x] = new Knight(true);
-                            break;
-
-                        case 'k':
-                            grid[y, x] = new King(false);
-                            break;
-
-                        case 'K':
-                            grid[y, x] = new King(true);
-                            break;
-
-                        case 'r':
-                            grid[y, x] = new Rook(false);
-                            break;
-
-                        case 'R':
-                            grid[y, x] = new Rook(true);
-                            break;
-
-                        case 'q':
-                            grid[y, x] = new Queen(false);
-                            break;
-
-                        case 'Q':
-                            grid[y, x] = new Queen(true);
-                            break;
-
-                        default:
-                            x += (int)char.GetNumericValue(rows[y][x]) - 1;
-                            break;
-                    }
-                }
-            }
-
-            //Checking whose move it is:
-            /*if (ending[1] == "w")
-            {
-                Whiteturn = true;
-            }
-            else
-            {
-                Whiteturn = false;
-            }
-
-            //Checking whose in check:
-            if (ending[2] == "w")
-            {
-                WhiteInCheck = true;
-                BlackInCheck = false;
-            }
-            else if (ending[2] == "b")
-            {
-                WhiteInCheck = false;
-                BlackInCheck = true;
-            }
-            else
-            {
-                WhiteInCheck = false;
-                BlackInCheck = false;
-            }*/ //add checking for checkmate;
-
-            return grid;
-        }
+        }  //FEN : 8/4k3/8/8/8/8/4K3/8 w - - 0 1 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         public Point[] GetMoves(Point pieceLocation)
         {

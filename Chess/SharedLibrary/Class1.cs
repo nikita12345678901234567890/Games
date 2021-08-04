@@ -37,6 +37,14 @@ namespace SharedLibrary
 
         public static void ResetBoard()
         {
+            for (int x = 0; x < PieceGrid.GetLength(1); x++)
+            {
+                for (int y = 0; y < PieceGrid.GetLength(0); y++)
+                {
+                    PieceGrid[y, x] = null;
+                }
+            }
+
             //Setting up grid:
             for (int x = 0; x < 8; x++)
             {
@@ -77,7 +85,15 @@ namespace SharedLibrary
             PieceGrid[0, 3] = new Queen(false);
             //White:
             PieceGrid[7, 3] = new Queen(true);
-        }
+
+            Whiteturn = true;
+
+            LastMove = default;
+
+            WhiteInCheck = false;
+
+            BlackInCheck = false;
+    }
 
         public static bool Contains(List<(Point, MoveTypes)> list, Point pos)
         {
@@ -514,6 +530,90 @@ namespace SharedLibrary
             }
 
             return FEN;
+        }
+
+        public static Piece[,] DecodeFEN(string FEN)
+        {
+            Piece[,] grid = new Piece[8, 8];
+
+            var rows = FEN.Split('/');
+
+            var ending = rows[7].Split(' ');
+
+            rows[7] = ending[0];
+
+            for (int y = 0; y < rows.Length; y++)
+            {
+                for (int x = 0; x < rows[0].Length; x++)
+                {
+                    switch (rows[y][x])
+                    {
+                        case 'p':
+                            grid[y, x] = new Pawn(false);
+                            break;
+
+                        case 'P':
+                            grid[y, x] = new Pawn(true);
+                            break;
+
+                        case 'b':
+                            grid[y, x] = new Bishop(false);
+                            break;
+
+                        case 'B':
+                            grid[y, x] = new Bishop(true);
+                            break;
+
+                        case 'n':
+                            grid[y, x] = new Knight(false);
+                            break;
+
+                        case 'N':
+                            grid[y, x] = new Knight(true);
+                            break;
+
+                        case 'k':
+                            grid[y, x] = new King(false);
+                            break;
+
+                        case 'K':
+                            grid[y, x] = new King(true);
+                            break;
+
+                        case 'r':
+                            grid[y, x] = new Rook(false);
+                            break;
+
+                        case 'R':
+                            grid[y, x] = new Rook(true);
+                            break;
+
+                        case 'q':
+                            grid[y, x] = new Queen(false);
+                            break;
+
+                        case 'Q':
+                            grid[y, x] = new Queen(true);
+                            break;
+
+                        default:
+                            x += (int)char.GetNumericValue(rows[y][x]) - 1;
+                            break;
+                    }
+                }
+            }
+
+            
+            if (ending[1] == "w")
+            {
+                Whiteturn = true;
+            }
+            else
+            {
+                Whiteturn = false;
+            }
+
+            return grid;
         }
     }
 }
