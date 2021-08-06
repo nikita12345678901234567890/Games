@@ -84,7 +84,7 @@ namespace Chess
 
 
 
-            Class1.DecodeFEN("8/4k3/8/8/8/8/4K3/8 w - - 0 1");
+            Class1.DecodeFEN("8/3kq3/8/7R/8/5K2/8/K2K3K w - - 0 1");
         }
 
         protected override void Update(GameTime gameTime)
@@ -168,6 +168,8 @@ namespace Chess
                 if (Class1.PieceGrid[mouseCell.Y, mouseCell.X] != null && HighlightedSquares.Count > 0 && mouseCell == HighlightedSquares[0])
                 {
                     HighlightedSquares.Clear();
+
+                    var yeet = Class1.MakeFEN(Class1.PieceGrid);
                 }
 
                 //Selecting piece:

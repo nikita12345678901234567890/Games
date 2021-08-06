@@ -439,13 +439,21 @@ namespace SharedLibrary
                     if (PieceGrid[y, x] == null)
                     {
                         spaces++;
-                        continue;
+                        if (x < 7)
+                        {
+                            continue;
+                        }
                     }
 
-                    if (spaces > 0)
+                    if (spaces > 0 || x == 7)
                     {
                         FEN += spaces;
                         spaces = 0;
+                    }
+
+                    if (PieceGrid[y, x] == null)
+                    {
+                        continue;
                     }
 
                     switch (PieceGrid[y, x].PieceType)
@@ -517,7 +525,11 @@ namespace SharedLibrary
                             break;
                     }
                 }
+                FEN += "/";
+                spaces = 0;
             }
+
+            FEN = FEN.Substring(0, FEN.Length - 1);
 
             FEN += " ";
             if (Whiteturn)
@@ -527,20 +539,6 @@ namespace SharedLibrary
             else
             {
                 FEN += "b";
-            }
-
-            FEN += " ";
-            if (WhiteInCheck)
-            {
-                FEN += "w";
-            }
-            else if (BlackInCheck)
-            {
-                FEN += "b";
-            }
-            else
-            {
-                FEN += "-";
             }
 
             return FEN;
@@ -615,6 +613,7 @@ namespace SharedLibrary
                             x += (int)char.GetNumericValue(rows[y][i]) - 1;
                             break;
                     }
+                    x++;
                 }
             }
 
