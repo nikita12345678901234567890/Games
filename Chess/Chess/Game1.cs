@@ -9,6 +9,8 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text.Json;
 using System;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Chess
 {
@@ -33,11 +35,26 @@ namespace Chess
 
         bool spectating = false;
 
+        int chrisIsFish = 15;
+
+        HttpClient client = new HttpClient();
+
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+            Task.Run(CallApi);
+
+        }
+
+        public async Task CallApi()
+        {
+
+            var result = await client.GetAsync($"https://localhost:44399/chess/Other?num={chrisIsFish}");
+            var temp = result.Content.ReadAsStringAsync();
+            ;
         }
 
         protected override void Initialize()
@@ -84,7 +101,7 @@ namespace Chess
 
 
 
-            Class1.DecodeFEN("8/3kq3/8/7R/8/5K2/8/K2K3K w - - 0 1");
+            //Class1.DecodeFEN("8/3kq3/8/7R/8/5K2/8/K2K3K w - - 0 1");
         }
 
         protected override void Update(GameTime gameTime)
