@@ -14,6 +14,12 @@ using System.Threading.Tasks;
 
 namespace Chess
 {
+    class Person
+    {
+        public string UserName { get; set; }
+        public string Password { get; set; }
+        public int Fish { get; set; }
+    }
     public class Game1 : Game
     {
         private GraphicsDeviceManager graphics;
@@ -35,9 +41,9 @@ namespace Chess
 
         bool spectating = false;
 
-        int chrisIsFish = 15;
+        //HttpClient client = new HttpClient();  //part of Api example
 
-        HttpClient client = new HttpClient();
+        //Gamedata to aviod unnessesary api calls:
 
 
         public Game1()
@@ -45,17 +51,30 @@ namespace Chess
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-            Task.Run(CallApi);
-
+            //Task.Run(CallApi);  //part of Api example 
         }
 
-        public async Task CallApi()
-        {
 
-            var result = await client.GetAsync($"https://localhost:44399/chess/Other?num={chrisIsFish}");
+        /*public async Task CallApi()
+        {
+            var result = await client.GetAsync($"https://localhost:44399/game/Other/15");
             var temp = result.Content.ReadAsStringAsync();
             ;
-        }
+        }*/  //Api example
+
+        //HttpClient client = new HttpClient();
+        //public async Task CallApi()
+        //{
+        //    Person p = new Person() { Fish = 5, Password = "1234", UserName = "abcd" };
+        //    string json = JsonSerializer.Serialize<Person>(p);
+        //    StringContent s = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+        //    var result = await client.PostAsync($"https://localhost:44399/game/Test", s);
+        //    var temp = result.Content.ReadAsStringAsync();
+        //    var res = temp.Result;
+            
+
+        //}//Jason majic example.
 
         protected override void Initialize()
         {
@@ -109,47 +128,6 @@ namespace Chess
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            if (!spectating)
-            {
-                System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
-
-                if (Class1.CheckForNoMoves())
-                {
-                    if (Class1.Whiteturn && Class1.WhiteInCheck)
-                    {
-                        result = System.Windows.Forms.MessageBox.Show("White in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
-                    }
-                    else if (!Class1.Whiteturn && Class1.BlackInCheck)
-                    {
-                        result = System.Windows.Forms.MessageBox.Show("Black in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
-                    }
-                    else
-                    {
-                        result = System.Windows.Forms.MessageBox.Show("Stalemate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
-                    }
-                }
-
-                else if (Class1.moveCounter >= 50)
-                {
-                    result = System.Windows.Forms.MessageBox.Show("There have been 50 moves and nothing has happened", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
-                }
-
-                switch (result)
-                {
-                    case System.Windows.Forms.DialogResult.Abort:
-                        this.Exit();
-                        break;
-
-                    case System.Windows.Forms.DialogResult.Retry:
-                        Class1.ResetBoard();
-                        break;
-
-                    case System.Windows.Forms.DialogResult.Ignore:
-                        spectating = true;
-                        break;
-                }
-            }
-
             InputManager.MouseState = Mouse.GetState();
 
             //Checking if mouse clicked:
@@ -179,6 +157,8 @@ namespace Chess
                     {
                         Class1.PieceGrid[choices.Queen.Y, choices.Queen.X] = new Knight(choices.white);
                     }
+
+                    CheckIfGameOver();
                 }
 
                 //Deselecting piece:
@@ -206,6 +186,8 @@ namespace Chess
                     {
                         Move(HighlightedSquares[0], mouseCell);
                         HighlightedSquares.Clear();
+
+                        CheckIfGameOver();
                     }
                 }
             }
@@ -214,6 +196,47 @@ namespace Chess
 
             InputManager.LastMouseState = InputManager.MouseState;
             base.Update(gameTime);
+        }
+
+        void CheckIfGameOver()
+        {
+            System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
+
+            if (ApiCalls.CheckForNoMoves().Result)
+            {
+                if (Class1.Whiteturn && Class1.WhiteInCheck)
+                {
+                    result = System.Windows.Forms.MessageBox.Show("White in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
+                }
+                else if (!Class1.Whiteturn && Class1.BlackInCheck)
+                {
+                    result = System.Windows.Forms.MessageBox.Show("Black in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
+                }
+                else
+                {
+                    result = System.Windows.Forms.MessageBox.Show("Stalemate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
+                }
+            }
+
+            else if (Class1.moveCounter >= 50)
+            {
+                result = System.Windows.Forms.MessageBox.Show("There have been 50 moves and nothing has happened", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
+            }
+
+            switch (result)
+            {
+                case System.Windows.Forms.DialogResult.Abort:
+                    this.Exit();
+                    break;
+
+                case System.Windows.Forms.DialogResult.Retry:
+                    Class1.ResetBoard();
+                    break;
+
+                case System.Windows.Forms.DialogResult.Ignore:
+                    spectating = true;
+                    break;
+            }
         }
 
         public Vector2 CellCenter(Point GridPosition)
