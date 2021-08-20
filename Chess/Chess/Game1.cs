@@ -11,15 +11,10 @@ using System.Text.Json;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Reflection;
 
 namespace Chess
 {
-    class Person
-    {
-        public string UserName { get; set; }
-        public string Password { get; set; }
-        public int Fish { get; set; }
-    }
     public class Game1 : Game
     {
         private GraphicsDeviceManager graphics;
@@ -72,7 +67,7 @@ namespace Chess
         //    var result = await client.PostAsync($"https://localhost:44399/game/Test", s);
         //    var temp = result.Content.ReadAsStringAsync();
         //    var res = temp.Result;
-            
+
 
         //}//Jason majic example.
 
@@ -85,6 +80,10 @@ namespace Chess
             squaresize = graphics.PreferredBackBufferWidth / 8;
 
             HighlightedSquares = new List<Point>();
+
+            //This generates a list of all exceptions:
+            var exceptions = Assembly.GetAssembly(typeof(int)).GetTypes().
+                             Where(x => x.IsSubclassOf(typeof(Exception))).ToArray();
 
             base.Initialize();
         }
@@ -112,6 +111,7 @@ namespace Chess
             Textures.Add((PieceTypes.Queen, false), Content.Load<Texture2D>("blackqueen"));
 
             Class1.ResetBoard();
+            throw new Exception("Fix tyhe line above this");
 
 
 
@@ -166,7 +166,8 @@ namespace Chess
                 {
                     HighlightedSquares.Clear();
 
-                    var yeet = Class1.MakeFEN(Class1.PieceGrid);
+                    throw new Exception("Fix this");
+                    //var yeet = Class1.MakeFEN(Class1.PieceGrid);
                 }
 
                 //Selecting piece:
@@ -231,6 +232,7 @@ namespace Chess
 
                 case System.Windows.Forms.DialogResult.Retry:
                     Class1.ResetBoard();
+                    throw new Exception("make this go through the api");
                     break;
 
                 case System.Windows.Forms.DialogResult.Ignore:

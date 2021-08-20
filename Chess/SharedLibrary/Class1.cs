@@ -99,7 +99,7 @@ namespace SharedLibrary
             moveCounter = 0;
         }
 
-        public static bool Contains(List<(Point, MoveTypes)> list, Point pos)
+        private static bool Contains(List<(Point, MoveTypes)> list, Point pos)
         {
             foreach (var square in list)
             {
@@ -111,7 +111,7 @@ namespace SharedLibrary
             return false;
         }
 
-        public static int IndexOf(List<(Point, MoveTypes)> list, Point pos)
+        private static int IndexOf(List<(Point, MoveTypes)> list, Point pos)
         {
             for (int i = 0; i < list.Count; i++)
             {
@@ -123,7 +123,7 @@ namespace SharedLibrary
             return -1;
         }
 
-        public static bool IsChecking(Piece piece, Point pieceGridPositiion, Piece[,] PieceGrid)
+        private static bool IsChecking(Piece piece, Point pieceGridPositiion, Piece[,] PieceGrid)
         {
             var movesAndMoveTypes = piece.GetMoves(PieceGrid, pieceGridPositiion);
             var moves = movesAndMoveTypes.Select((x) => x.Item1).ToList();
@@ -427,7 +427,7 @@ namespace SharedLibrary
             return true;
         }
 
-        public static string MakeFEN(Piece[,] PieceGrid)
+        public static string MakeFEN()
         {
             string FEN = "";
             int spaces = 0;

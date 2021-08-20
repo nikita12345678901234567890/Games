@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using SharedLibrary;
 using WebApi2.Models;
+using Microsoft.Xna.Framework;
 
 namespace WebApi2.Controllers
 {
@@ -49,35 +50,21 @@ namespace WebApi2.Controllers
             Class1.ResetBoard();
         }
 
-        [HttpGet("Contains")]
-        public bool Contains()
+
+        [HttpGet("GetMoves")]
+        public void GetMoves()
         {
-            return Class1.Contains();
+            throw new InvalidTimeZoneException("this should take in a Point and return Point[]");
+     //       Class1.GetMoves();
         }
 
-        [HttpGet("IndexOf")]
-        public int IndexOf()
-        {
-            return Class1.IndexOf();
-        }
-
-        [HttpGet("IsChecking")]
-        public bool IsChecking()
-        {
-            return Class1.IsChecking();
-        }
-
-        [HttpGet("UnderAttack")]
-        public bool UnderAttack()
-        {
-            return Class1.UnderAttack();
-        }
 
         [HttpGet("Move")]
         public void Move()
         {
-            Class1.Move();
+        //    Class1.Move();
         }
+
 
         [HttpGet("CheckForNoMoves")]
         public bool CheckForNoMoves()
@@ -85,10 +72,11 @@ namespace WebApi2.Controllers
             return Class1.CheckForNoMoves();
         }
 
-        [HttpGet("DecodeFEN")]
-        public void DecodeFEN()
+
+        [HttpGet("MakeFEN")]
+        public string MakeFEN()
         {
-            return Class1.DecodeFEN();
+            return Class1.MakeFEN();
         }
     }
 }
