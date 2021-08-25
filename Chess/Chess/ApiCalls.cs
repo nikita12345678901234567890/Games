@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Chess
@@ -21,19 +23,22 @@ namespace Chess
         }
 
 
-        public static async Task<bool> GetMoves()
+        public static async Task<Point[]> GetMoves(Point piece)
         {
-            throw new Exception("this should return a Point[] not a bool");
-            var result = await client.GetAsync($"https://localhost:44399/game/GetMoves");
+            string json = JsonSerializer.Serialize<Point>(piece);
+            StringContent s = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+
+            var result = await client.PostAsync($"https://localhost:44399/game/GetMoves", s);
             var temp = await result.Content.ReadAsStringAsync();
 
-            return bool.Parse(temp);
+            return JsonSerializer.Deserialize<Point[]>(temp);
         }
 
 
-        public static async Task Move()
+        public static async Task Move(Point piece, Point destination)
         {
-            var result = await client.GetAsync($"https://localhost:44399/game/Move");
+            var result = await client.GetAsync($"https://localhost:44399/game/Move/{piece}/{destination}");
             while (result.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 result = await client.GetAsync($"https://localhost:44399/game/Move");

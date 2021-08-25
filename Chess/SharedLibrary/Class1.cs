@@ -541,93 +541,17 @@ namespace SharedLibrary
                 FEN += "b";
             }
 
+            FEN += " ";
+            if (WhiteInCheck)
+            {
+                FEN += "w";
+            }
+            else if(BlackInCheck)
+            {
+                FEN += "b";
+            }
+
             return FEN;
-        }
-
-        public static void DecodeFEN(string FEN)
-        {
-            Piece[,] grid = new Piece[8, 8];
-
-            var rows = FEN.Split('/');
-
-            var ending = rows[7].Split(' ');
-
-            rows[7] = ending[0];
-
-            for (int y = 0; y < rows.Length; y++)
-            {
-                int x = 0;
-                for (int i = 0; i < rows[y].Length; i++)
-                {
-                    switch (rows[y][i])
-                    {
-                        case 'p':
-                            grid[y, x] = new Pawn(false);
-                            break;
-
-                        case 'P':
-                            grid[y, x] = new Pawn(true);
-                            break;
-
-                        case 'b':
-                            grid[y, x] = new Bishop(false);
-                            break;
-
-                        case 'B':
-                            grid[y, x] = new Bishop(true);
-                            break;
-
-                        case 'n':
-                            grid[y, x] = new Knight(false);
-                            break;
-
-                        case 'N':
-                            grid[y, x] = new Knight(true);
-                            break;
-
-                        case 'k':
-                            grid[y, x] = new King(false);
-                            break;
-
-                        case 'K':
-                            grid[y, x] = new King(true);
-                            break;
-
-                        case 'r':
-                            grid[y, x] = new Rook(false);
-                            break;
-
-                        case 'R':
-                            grid[y, x] = new Rook(true);
-                            break;
-
-                        case 'q':
-                            grid[y, x] = new Queen(false);
-                            break;
-
-                        case 'Q':
-                            grid[y, x] = new Queen(true);
-                            break;
-
-                        default:
-                            x += (int)char.GetNumericValue(rows[y][i]) - 1;
-                            break;
-                    }
-                    x++;
-                }
-            }
-
-            
-            if (ending[1] == "w")
-            {
-                Whiteturn = true;
-            }
-            else
-            {
-                Whiteturn = false;
-            }
-
-            PieceGrid = grid;
         }
     }
 }

@@ -12,6 +12,7 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Reflection;
+using System.Threading;
 
 namespace Chess
 {
@@ -36,9 +37,11 @@ namespace Chess
 
         bool spectating = false;
 
-        //HttpClient client = new HttpClient();  //part of Api example
 
-        //Gamedata to aviod unnessesary api calls:
+        GameState currentGameState;
+
+
+        //HttpClient client = new HttpClient();  //part of Api example
 
 
         public Game1()
@@ -110,17 +113,7 @@ namespace Chess
             Textures.Add((PieceTypes.Queen, true), Content.Load<Texture2D>("whitequeen"));
             Textures.Add((PieceTypes.Queen, false), Content.Load<Texture2D>("blackqueen"));
 
-            Class1.ResetBoard();
-            throw new Exception("Fix tyhe line above this");
-
-
-
-
-
-
-
-
-            //Class1.DecodeFEN("8/3kq3/8/7R/8/5K2/8/K2K3K w - - 0 1");
+            ApiCalls.ResetBoard();
         }
 
         protected override void Update(GameTime gameTime)
@@ -140,52 +133,59 @@ namespace Chess
                 {
                     if (mouseCell == choices.Queen)
                     {
-                        Class1.PieceGrid[choices.Queen.Y, choices.Queen.X] = new Queen(choices.white);
+                        currentGameState.PieceGrid[choices.Queen.Y, choices.Queen.X] = new Queen(choices.white);
                     }
 
                     else if (mouseCell == choices.Rook)
                     {
-                        Class1.PieceGrid[choices.Queen.Y, choices.Queen.X] = new Rook(choices.white);
+                        currentGameState.PieceGrid[choices.Queen.Y, choices.Queen.X] = new Rook(choices.white);
                     }
 
                     else if (mouseCell == choices.Bishop)
                     {
-                        Class1.PieceGrid[choices.Queen.Y, choices.Queen.X] = new Bishop(choices.white);
+                        currentGameState.PieceGrid[choices.Queen.Y, choices.Queen.X] = new Bishop(choices.white);
                     }
 
                     else if (mouseCell == choices.Knight)
                     {
-                        Class1.PieceGrid[choices.Queen.Y, choices.Queen.X] = new Knight(choices.white);
+                        currentGameState.PieceGrid[choices.Queen.Y, choices.Queen.X] = new Knight(choices.white);
                     }
 
                     CheckIfGameOver();
                 }
 
                 //Deselecting piece:
-                if (Class1.PieceGrid[mouseCell.Y, mouseCell.X] != null && HighlightedSquares.Count > 0 && mouseCell == HighlightedSquares[0])
+                if (currentGameState.PieceGrid[mouseCell.Y, mouseCell.X] != null && HighlightedSquares.Count > 0 && mouseCell == HighlightedSquares[0])
                 {
                     HighlightedSquares.Clear();
-
-                    throw new Exception("Fix this");
-                    //var yeet = Class1.MakeFEN(Class1.PieceGrid);
                 }
 
                 //Selecting piece:
-                else if (Class1.PieceGrid[mouseCell.Y, mouseCell.X] != null && Class1.PieceGrid[mouseCell.Y, mouseCell.X].IsWhite == Class1.Whiteturn)
+                else if (currentGameState.PieceGrid[mouseCell.Y, mouseCell.X] != null && currentGameState.PieceGrid[mouseCell.Y, mouseCell.X].IsWhite == currentGameState.Whiteturn)
                 {
                     HighlightedSquares.Clear();
 
-                    Point[] moves = GetMoves(new Point(mouseCell.X, mouseCell.Y));
+                    Thread resetThread = new Thread(new ThreadStart(async () =>
+                    {
+                        Point[] moves = await ApiCalls.GetMoves(new Point(mouseCell.X, mouseCell.Y));
 
-                    HighlightedSquares.AddRange(moves);
+                        HighlightedSquares.AddRange(moves);
+                    }));
+
+                    resetThread.Start();
                 }
-
                 //Selecting move:
                 else
                 {
                     if (HighlightedSquares.Contains(mouseCell) && mouseCell != HighlightedSquares[0])
                     {
-                        Move(HighlightedSquares[0], mouseCell);
+                        Thread resetThread = new Thread(new ThreadStart(async () =>
+                        {
+                            await ApiCalls.Move(HighlightedSquares[0], mouseCell);
+                        }));
+                        resetThread.Start();
+
+
                         HighlightedSquares.Clear();
 
                         CheckIfGameOver();
@@ -197,6 +197,7 @@ namespace Chess
 
             InputManager.LastMouseState = InputManager.MouseState;
             base.Update(gameTime);
+            //Call updateGameState when nessesary!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         }
 
         void CheckIfGameOver()
@@ -205,11 +206,11 @@ namespace Chess
 
             if (ApiCalls.CheckForNoMoves().Result)
             {
-                if (Class1.Whiteturn && Class1.WhiteInCheck)
+                if (currentGameState.Whiteturn && currentGameState.WhiteInCheck)
                 {
                     result = System.Windows.Forms.MessageBox.Show("White in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
                 }
-                else if (!Class1.Whiteturn && Class1.BlackInCheck)
+                else if (!currentGameState.Whiteturn && currentGameState.BlackInCheck)
                 {
                     result = System.Windows.Forms.MessageBox.Show("Black in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
                 }
@@ -219,7 +220,7 @@ namespace Chess
                 }
             }
 
-            else if (Class1.moveCounter >= 50)
+            else if (currentGameState.moveCounter >= 50)
             {
                 result = System.Windows.Forms.MessageBox.Show("There have been 50 moves and nothing has happened", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
             }
@@ -231,8 +232,7 @@ namespace Chess
                     break;
 
                 case System.Windows.Forms.DialogResult.Retry:
-                    Class1.ResetBoard();
-                    throw new Exception("make this go through the api");
+                    ApiCalls.ResetBoard();
                     break;
 
                 case System.Windows.Forms.DialogResult.Ignore:
@@ -276,17 +276,17 @@ namespace Chess
                     }
 
                     //Highlighting the checked king red:
-                    if (Class1.WhiteInCheck)
+                    if (currentGameState.WhiteInCheck)
                     {
-                        Piece piece = Class1.PieceGrid[y, x];
+                        Piece piece = currentGameState.PieceGrid[y, x];
                         if (piece != null && piece.IsWhite && piece.PieceType == PieceTypes.King)
                         {
                             color = Color.Red * 0.3f;
                         }
                     }
-                    else if (Class1.BlackInCheck)
+                    else if (currentGameState.BlackInCheck)
                     {
-                        Piece piece = Class1.PieceGrid[y, x];
+                        Piece piece = currentGameState.PieceGrid[y, x];
                         if (piece != null && !piece.IsWhite && piece.PieceType == PieceTypes.King)
                         {
                             color = Color.Red * 0.3f;
@@ -301,13 +301,13 @@ namespace Chess
 
             //Drawing pieces:
             float scale;
-            for (int y = 0; y < Class1.PieceGrid.GetLength(0); y++)
+            for (int y = 0; y < currentGameState.PieceGrid.GetLength(0); y++)
             {
-                for (int x = 0; x < Class1.PieceGrid.GetLength(1); x++)
+                for (int x = 0; x < currentGameState.PieceGrid.GetLength(1); x++)
                 {
-                    if (Class1.PieceGrid[y, x] != null)
+                    if (currentGameState.PieceGrid[y, x] != null)
                     {
-                        if (Class1.PieceGrid[y, x].PieceType == PieceTypes.Pawn)
+                        if (currentGameState.PieceGrid[y, x].PieceType == PieceTypes.Pawn)
                         {
                             scale = 1;
                         }
@@ -315,7 +315,7 @@ namespace Chess
                         {
                             scale = 0.5f;
                         }
-                        var texture = Textures[(Class1.PieceGrid[y, x].PieceType, Class1.PieceGrid[y, x].IsWhite)];
+                        var texture = Textures[(currentGameState.PieceGrid[y, x].PieceType, currentGameState.PieceGrid[y, x].IsWhite)];
                         spriteBatch.Draw(texture, CellCenter(new Point(x, y)), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), scale, SpriteEffects.None, 0);
                     }
                 }
@@ -359,10 +359,10 @@ namespace Chess
             bool isWhite = false;
             Point pawnLocation = new Point(0, 0);
 
-            for (int x = 0; x < Class1.PieceGrid.GetLength(1); x++)
+            for (int x = 0; x < currentGameState.PieceGrid.GetLength(1); x++)
             {
                 //Checking for a pawn in the top row:
-                if (Class1.PieceGrid[0, x] != null && Class1.PieceGrid[0, x].PieceType == PieceTypes.Pawn)
+                if (currentGameState.PieceGrid[0, x] != null && currentGameState.PieceGrid[0, x].PieceType == PieceTypes.Pawn)
                 {
                     promotion = true;
                     isWhite = true;
@@ -370,7 +370,7 @@ namespace Chess
                 }
 
                 //Checking for a pawn in the bottom row:
-                if (Class1.PieceGrid[Class1.PieceGrid.GetLength(0) - 1, x] != null && Class1.PieceGrid[Class1.PieceGrid.GetLength(0) - 1, x].PieceType == PieceTypes.Pawn)
+                if (currentGameState.PieceGrid[currentGameState.PieceGrid.GetLength(0) - 1, x] != null && currentGameState.PieceGrid[currentGameState.PieceGrid.GetLength(0) - 1, x].PieceType == PieceTypes.Pawn)
                 {
                     promotion = true;
                     isWhite = false;
@@ -381,14 +381,107 @@ namespace Chess
             return (promotion, isWhite, pawnLocation);
         }
 
-        public Point[] GetMoves(Point pieceLocation)
+
+        public async Task GetGameState()
         {
-            return Class1.GetMoves(pieceLocation);
+            currentGameState = DecodeFEN(await ApiCalls.MakeFEN());
         }
 
-        public void Move(Point piece, Point destination)
+        public GameState DecodeFEN(string FEN)
         {
-            Class1.Move(piece, destination);
+            GameState gamestate = new GameState();
+
+            gamestate.PieceGrid = new Piece[8, 8];
+
+            var rows = FEN.Split('/');
+
+            var ending = rows[7].Split(' ');
+
+            rows[7] = ending[0];
+
+            for (int y = 0; y < rows.Length; y++)
+            {
+                int x = 0;
+                for (int i = 0; i < rows[y].Length; i++)
+                {
+                    switch (rows[y][i])
+                    {
+                        case 'p':
+                            gamestate.PieceGrid[y, x] = new Pawn(false);
+                            break;
+
+                        case 'P':
+                            gamestate.PieceGrid[y, x] = new Pawn(true);
+                            break;
+
+                        case 'b':
+                            gamestate.PieceGrid[y, x] = new Bishop(false);
+                            break;
+
+                        case 'B':
+                            gamestate.PieceGrid[y, x] = new Bishop(true);
+                            break;
+
+                        case 'n':
+                            gamestate.PieceGrid[y, x] = new Knight(false);
+                            break;
+
+                        case 'N':
+                            gamestate.PieceGrid[y, x] = new Knight(true);
+                            break;
+
+                        case 'k':
+                            gamestate.PieceGrid[y, x] = new King(false);
+                            break;
+
+                        case 'K':
+                            gamestate.PieceGrid[y, x] = new King(true);
+                            break;
+
+                        case 'r':
+                            gamestate.PieceGrid[y, x] = new Rook(false);
+                            break;
+
+                        case 'R':
+                            gamestate.PieceGrid[y, x] = new Rook(true);
+                            break;
+
+                        case 'q':
+                            gamestate.PieceGrid[y, x] = new Queen(false);
+                            break;
+
+                        case 'Q':
+                            gamestate.PieceGrid[y, x] = new Queen(true);
+                            break;
+
+                        default:
+                            x += (int)char.GetNumericValue(rows[y][i]) - 1;
+                            break;
+                    }
+                    x++;
+                }
+            }
+
+
+            if (ending[1] == "w")
+            {
+                gamestate.Whiteturn = true;
+            }
+            else
+            {
+                gamestate.Whiteturn = false;
+            }
+
+            if (ending[2] == "w")
+            {
+                gamestate.WhiteInCheck = true;
+            }
+            else if(ending[2] == "b")
+            {
+                gamestate.BlackInCheck = false;
+            }
+
+            return gamestate;
         }
     }
 }

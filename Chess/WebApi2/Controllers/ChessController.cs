@@ -52,17 +52,16 @@ namespace WebApi2.Controllers
 
 
         [HttpGet("GetMoves")]
-        public void GetMoves()
+        public Point[] GetMoves([FromBody]Point piece)
         {
-            throw new InvalidTimeZoneException("this should take in a Point and return Point[]");
-     //       Class1.GetMoves();
+            return Class1.GetMoves(piece);
         }
 
 
-        [HttpGet("Move")]
-        public void Move()
+        [HttpGet("Move/{piece}/{destination}")]
+        public void Move(Point piece, Point destination)
         {
-        //    Class1.Move();
+            Class1.Move(piece, destination);
         }
 
 
