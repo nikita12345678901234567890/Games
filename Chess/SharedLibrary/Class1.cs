@@ -37,6 +37,10 @@ namespace SharedLibrary
 
         public static int moveCounter = 0;
 
+        public static PiecePromotion choices;
+
+        public static bool choosingPromotion = false;
+
         public static void ResetBoard()
         {
             for (int x = 0; x < PieceGrid.GetLength(1); x++)
@@ -551,7 +555,76 @@ namespace SharedLibrary
                 FEN += "b";
             }
 
+            FEN += " ";
+            if (choosingPromotion)
+            {
+                FEN += "y";
+            }
+            else
+            {
+                FEN += "n";
+            }
+
             return FEN;
+        }
+
+        public static void Promote(string pieceChoice)
+        {
+            if (choosingPromotion)
+            {
+                var promotionInfo = CheckPromotion();
+
+                choices = new PiecePromotion(promotionInfo.IsWhite, promotionInfo.pawnLocation.X);
+
+                switch (pieceChoice)
+                {
+                    case "Queen":
+                    //case "queen": I don't need this, but this will run the case in both situations.
+                        PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Queen(promotionInfo.IsWhite);
+                        break;
+
+                    case "Rook":
+                        PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Rook(promotionInfo.IsWhite);
+                        break;
+
+                    case "Bishop":
+                        PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Bishop(promotionInfo.IsWhite);
+                        break;
+
+                    case "Knight":
+                        PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Knight(promotionInfo.IsWhite);
+                        break;
+                }
+            }
+
+        }
+
+        private static (bool promotion, bool IsWhite, Point pawnLocation) CheckPromotion()
+        {
+            bool promotion = false;
+            bool isWhite = false;
+            Point pawnLocation = new Point(0, 0);
+
+            for (int x = 0; x < PieceGrid.GetLength(1); x++)
+            {
+                //Checking for a pawn in the top row:
+                if (PieceGrid[0, x] != null && PieceGrid[0, x].PieceType == PieceTypes.Pawn)
+                {
+                    promotion = true;
+                    isWhite = true;
+                    pawnLocation = new Point(x, 0);
+                }
+
+                //Checking for a pawn in the bottom row:
+                if (PieceGrid[PieceGrid.GetLength(0) - 1, x] != null && PieceGrid[PieceGrid.GetLength(0) - 1, x].PieceType == PieceTypes.Pawn)
+                {
+                    promotion = true;
+                    isWhite = false;
+                    pawnLocation = new Point(x, 0);
+                }
+            }
+
+            return (promotion, isWhite, pawnLocation);
         }
     }
 }

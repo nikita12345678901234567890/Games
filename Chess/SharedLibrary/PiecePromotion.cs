@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Chess
+namespace SharedLibrary
 {
     public struct PiecePromotion
     {
@@ -33,7 +33,3 @@ namespace Chess
         }
     }
 }
-
-/*
- * FizzBuzz but no conditions
- */

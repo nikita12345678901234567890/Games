@@ -9,5 +9,6 @@ namespace Chess
         public bool BlackInCheck;
         public Piece[,] PieceGrid;
         public int moveCounter;
+        public bool ChoosingPromotion;
     }
 }

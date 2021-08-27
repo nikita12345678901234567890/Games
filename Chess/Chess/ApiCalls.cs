@@ -41,7 +41,7 @@ namespace Chess
             var result = await client.GetAsync($"https://localhost:44399/game/Move/{piece}/{destination}");
             while (result.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                result = await client.GetAsync($"https://localhost:44399/game/Move");
+                result = await client.GetAsync($"https://localhost:44399/game/Move/{piece}/{destination}");
             }
         }
 
@@ -61,6 +61,16 @@ namespace Chess
             var temp = await result.Content.ReadAsStringAsync();
 
             return temp.ToString();
+        }
+
+
+        public static async Task Promote(string pieceChoice)
+        {
+            var result = await client.GetAsync($"https://localhost:44399/game/Promote/{pieceChoice}");
+            while (result.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                result = await client.GetAsync($"https://localhost:44399/game/Promote/{pieceChoice}");
+            }
         }
     }
 }

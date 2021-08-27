@@ -31,14 +31,14 @@ namespace Chess
 
         public List<Point> HighlightedSquares;
 
-        public bool choosingPromotion = false;
-
-        public PiecePromotion choices;
-
         bool spectating = false;
 
+        PiecePromotion choices;
+
+        (bool promotion, bool IsWhite, Point pawnLocation) promotionInfo;
 
         GameState currentGameState;
+
 
 
         //HttpClient client = new HttpClient();  //part of Api example
@@ -113,7 +113,8 @@ namespace Chess
             Textures.Add((PieceTypes.Queen, true), Content.Load<Texture2D>("whitequeen"));
             Textures.Add((PieceTypes.Queen, false), Content.Load<Texture2D>("blackqueen"));
 
-            ApiCalls.ResetBoard();
+            ApiCalls.ResetBoard().Wait();
+            GetGameState().Wait();
         }
 
         protected override void Update(GameTime gameTime)
@@ -129,28 +130,37 @@ namespace Chess
                 var mouseCell = PositionToCell(InputManager.MouseState.Position);
 
                 //If choosing a piece for promotion:
-                if (choosingPromotion)
+                if (currentGameState.ChoosingPromotion)
                 {
+                    promotionInfo = CheckPromotion();
+                    choices = new PiecePromotion(promotionInfo.IsWhite, promotionInfo.pawnLocation.X);
+
                     if (mouseCell == choices.Queen)
                     {
-                        currentGameState.PieceGrid[choices.Queen.Y, choices.Queen.X] = new Queen(choices.white);
+                        ApiCalls.Promote("Queen").Wait();
                     }
 
                     else if (mouseCell == choices.Rook)
                     {
-                        currentGameState.PieceGrid[choices.Queen.Y, choices.Queen.X] = new Rook(choices.white);
+                        /*Thread resetThread = new Thread(new ThreadStart(async () =>
+                        {
+                            await ApiCalls.Promote("Rook");
+                        }));
+                        resetThread.Start();*/
+                        ApiCalls.Promote("Rook").Wait();
                     }
 
                     else if (mouseCell == choices.Bishop)
                     {
-                        currentGameState.PieceGrid[choices.Queen.Y, choices.Queen.X] = new Bishop(choices.white);
+                        ApiCalls.Promote("Bishop").Wait();
                     }
 
                     else if (mouseCell == choices.Knight)
                     {
-                        currentGameState.PieceGrid[choices.Queen.Y, choices.Queen.X] = new Knight(choices.white);
+                        ApiCalls.Promote("Knight").Wait();
                     }
 
+                    GetGameState().Wait();
                     CheckIfGameOver();
                 }
 
@@ -165,29 +175,21 @@ namespace Chess
                 {
                     HighlightedSquares.Clear();
 
-                    Thread resetThread = new Thread(new ThreadStart(async () =>
-                    {
-                        Point[] moves = await ApiCalls.GetMoves(new Point(mouseCell.X, mouseCell.Y));
+                    Point[] moves = ApiCalls.GetMoves(new Point(mouseCell.X, mouseCell.Y)).Result;
 
-                        HighlightedSquares.AddRange(moves);
-                    }));
-
-                    resetThread.Start();
+                    HighlightedSquares.AddRange(moves);
                 }
                 //Selecting move:
                 else
                 {
                     if (HighlightedSquares.Contains(mouseCell) && mouseCell != HighlightedSquares[0])
                     {
-                        Thread resetThread = new Thread(new ThreadStart(async () =>
-                        {
-                            await ApiCalls.Move(HighlightedSquares[0], mouseCell);
-                        }));
-                        resetThread.Start();
+                        ApiCalls.Move(HighlightedSquares[0], mouseCell).Wait();
 
 
                         HighlightedSquares.Clear();
 
+                        GetGameState().Wait();
                         CheckIfGameOver();
                     }
                 }
@@ -197,7 +199,6 @@ namespace Chess
 
             InputManager.LastMouseState = InputManager.MouseState;
             base.Update(gameTime);
-            //Call updateGameState when nessesary!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         }
 
         void CheckIfGameOver()
@@ -322,13 +323,10 @@ namespace Chess
             }
 
 
-            var promotionInfo = CheckPromotion();
+            
 
-            choosingPromotion = promotionInfo.promotion;
 
-            choices = new PiecePromotion(promotionInfo.IsWhite, promotionInfo.pawnLocation.X);
-
-            if (choosingPromotion)
+            if (currentGameState.ChoosingPromotion)
             {
                 //Gray out whole screen:
                 spriteBatch.Draw(Pixel, graphics.GraphicsDevice.Viewport.Bounds, Color.White * 0.5f);
@@ -479,6 +477,15 @@ namespace Chess
             else if(ending[2] == "b")
             {
                 gamestate.BlackInCheck = false;
+            }
+
+            if (ending[3] == "y")
+            {
+                gamestate.ChoosingPromotion = true;
+            }
+            else
+            {
+                gamestate.ChoosingPromotion = false;
             }
 
             return gamestate;

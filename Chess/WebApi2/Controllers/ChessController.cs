@@ -77,5 +77,12 @@ namespace WebApi2.Controllers
         {
             return Class1.MakeFEN();
         }
+
+
+        [HttpGet("Promote/{pieceChoice}")]
+        public void Promote(string pieceChoice)
+        {
+            Class1.Promote(pieceChoice);
+        }
     }
 }
