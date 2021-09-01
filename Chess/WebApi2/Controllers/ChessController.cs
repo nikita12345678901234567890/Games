@@ -51,17 +51,17 @@ namespace WebApi2.Controllers
         }
 
 
-        [HttpGet("GetMoves")]
+        [HttpPost("GetMoves")]
         public Point[] GetMoves([FromBody]Point piece)
         {
             return Class1.GetMoves(piece);
         }
 
 
-        [HttpGet("Move/{piece}/{destination}")]
-        public void Move(Point piece, Point destination)
+        [HttpGet("Move/{pieceX}/{pieceY}/{destinationX}/{destinationY}")]
+        public void Move(int pieceX, int pieceY, int destinationX, int destinationY)
         {
-            Class1.Move(piece, destination);
+            Class1.Move(new Point(pieceX, pieceY), new Point(destinationX, destinationY));
         }
 
 

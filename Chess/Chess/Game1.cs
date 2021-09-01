@@ -196,7 +196,6 @@ namespace Chess
             }
 
 
-
             InputManager.LastMouseState = InputManager.MouseState;
             base.Update(gameTime);
         }

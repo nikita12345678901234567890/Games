@@ -25,14 +25,18 @@ namespace Chess
 
         public static async Task<Point[]> GetMoves(Point piece)
         {
-            string json = JsonSerializer.Serialize<Point>(piece);
-            StringContent s = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            //.NET 5 solution
+            var options = new JsonSerializerOptions { IncludeFields = true };
+            string json = JsonSerializer.Serialize(piece, options);
 
+            //new string(Array.ConvertAll<byte, char>(s._content, n => (char)n))
+
+            StringContent s = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
             var result = await client.PostAsync($"https://localhost:44399/game/GetMoves", s);
             var temp = await result.Content.ReadAsStringAsync();
 
-            return JsonSerializer.Deserialize<Point[]>(temp);
+            return JsonSerializer.Deserialize<Point[]>(temp, options);
         }
 
 
