@@ -1,5 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -7,10 +6,10 @@ namespace SharedLibrary
 {
     public struct PiecePromotion
     {
-        public Point Queen;
-        public Point Rook;
-        public Point Bishop;
-        public Point Knight;
+        public Square Queen;
+        public Square Rook;
+        public Square Bishop;
+        public Square Knight;
         public bool white;
 
         public PiecePromotion(bool white, int x)
@@ -18,17 +17,17 @@ namespace SharedLibrary
             this.white = white;
             if (white)
             {
-                Queen = new Point(x, 0);
-                Rook = new Point(x, 1);
-                Bishop = new Point(x, 2);
-                Knight = new Point(x, 3);
+                Queen = new Square(x, 0);
+                Rook = new Square(x, 1);
+                Bishop = new Square(x, 2);
+                Knight = new Square(x, 3);
             }
             else
             {
-                Queen = new Point(x, 7);
-                Rook = new Point(x, 6);
-                Bishop = new Point(x, 5);
-                Knight = new Point(x, 4);
+                Queen = new Square(x, 7);
+                Rook = new Square(x, 6);
+                Bishop = new Square(x, 5);
+                Knight = new Square(x, 4);
             }
         }
     }

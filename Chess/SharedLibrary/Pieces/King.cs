@@ -1,5 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -19,9 +18,9 @@ namespace SharedLibrary.Pieces
             HasMoved = false;
         }
 
-        public override List<(Point, MoveTypes)> GetMoves(Piece[,] PieceGrid, Point position)
+        public override List<(Square, MoveTypes)> GetMoves(Piece[,] PieceGrid, Square position)
         {
-            List<(Point, MoveTypes)> Moves = new List<(Point, MoveTypes)>();
+            List<(Square, MoveTypes)> Moves = new List<(Square, MoveTypes)>();
 
             //Looping through the 3x3 of surrounding tiles:
             for (int x = position.X - 1; x <= position.X + 1; x++)
@@ -34,7 +33,7 @@ namespace SharedLibrary.Pieces
 
                         if (piece == null || (piece != null && piece.IsWhite == !IsWhite))
                         {
-                            Moves.Add((new Point(x, y), MoveTypes.Normal));
+                            Moves.Add((new Square(x, y), MoveTypes.Normal));
                         }
                     }
                 }
@@ -63,9 +62,9 @@ namespace SharedLibrary.Pieces
                     if (!leftRook.HasMoved && PieceGrid[position.Y, position.X - 1] == null && PieceGrid[position.Y, position.X - 2] == null)
                     {
                         //Checking that the squares the king passes through aren't under attack:
-                        if (!Class1.UnderAttack(new Point(position.X - 1, position.Y), !IsWhite, PieceGrid) && !Class1.UnderAttack(new Point(position.X - 2, position.Y), !IsWhite, PieceGrid))
+                        if (!Class1.UnderAttack(new Square(position.X - 1, position.Y), !IsWhite, PieceGrid) && !Class1.UnderAttack(new Square(position.X - 2, position.Y), !IsWhite, PieceGrid))
                         {
-                            Moves.Add((new Point(position.X - 2, position.Y), MoveTypes.CastleLeft));
+                            Moves.Add((new Square(position.X - 2, position.Y), MoveTypes.CastleLeft));
                         }
                     }
                 }
@@ -79,9 +78,9 @@ namespace SharedLibrary.Pieces
                     if (!rightRook.HasMoved && PieceGrid[position.Y, position.X + 1] == null && PieceGrid[position.Y, position.X + 2] == null)
                     {
                         //Checking that the squares the king passes through aren't under attack:
-                        if (!Class1.UnderAttack(new Point(position.X + 1, position.Y), !IsWhite, PieceGrid) && !Class1.UnderAttack(new Point(position.X + 2, position.Y), !IsWhite, PieceGrid))
+                        if (!Class1.UnderAttack(new Square(position.X + 1, position.Y), !IsWhite, PieceGrid) && !Class1.UnderAttack(new Square(position.X + 2, position.Y), !IsWhite, PieceGrid))
                         {
-                            Moves.Add((new Point(position.X + 2, position.Y), MoveTypes.CastleRight));
+                            Moves.Add((new Square(position.X + 2, position.Y), MoveTypes.CastleRight));
                         }
                     }
                 }

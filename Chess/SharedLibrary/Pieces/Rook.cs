@@ -1,5 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -18,12 +17,12 @@ namespace SharedLibrary.Pieces
 
             HasMoved = false;
         }
-        public override List<(Point, MoveTypes)> GetMoves(Piece[,] PieceGrid, Point position)
+        public override List<(Square, MoveTypes)> GetMoves(Piece[,] PieceGrid, Square position)
         {
 
-            List<(Point, MoveTypes)> Moves = new List<(Point, MoveTypes)>();
+            List<(Square, MoveTypes)> Moves = new List<(Square, MoveTypes)>();
 
-            Point counter = position;
+            Square counter = position;
 
             Directions direction = Directions.Up;
 
