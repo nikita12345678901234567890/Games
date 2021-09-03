@@ -113,10 +113,8 @@ namespace Chess
             Textures.Add((PieceTypes.Queen, true), Content.Load<Texture2D>("whitequeen"));
             Textures.Add((PieceTypes.Queen, false), Content.Load<Texture2D>("blackqueen"));
 
-            Task.Run(async () => await ApiCalls.ResetBoard());
-            //ApiCalls.ResetBoard().Wait();
-            //GetGameState().Wait();
-            Task.Run(async () => await GetGameState());
+            Task.Run(async () => await ApiCalls.ResetBoard()).Wait();
+            Task.Run(async () => await GetGameState()).Wait();
         }
 
         protected override void Update(GameTime gameTime)
@@ -139,30 +137,25 @@ namespace Chess
 
                     if (mouseCell == choices.Queen.ToPoint())
                     {
-                        ApiCalls.Promote("Queen").Wait();
+                        Task.Run(async () => await ApiCalls.Promote("Queen")).Wait();
                     }
 
                     else if (mouseCell == choices.Rook.ToPoint())
                     {
-                        /*Thread resetThread = new Thread(new ThreadStart(async () =>
-                        {
-                            await ApiCalls.Promote("Rook");
-                        }));
-                        resetThread.Start();*/
-                        ApiCalls.Promote("Rook").Wait();
+                        Task.Run(async () => await ApiCalls.Promote("Rook")).Wait();
                     }
 
                     else if (mouseCell == choices.Bishop.ToPoint())
                     {
-                        ApiCalls.Promote("Bishop").Wait();
+                        Task.Run(async () => await ApiCalls.Promote("Bishop")).Wait();
                     }
 
                     else if (mouseCell == choices.Knight.ToPoint())
                     {
-                        ApiCalls.Promote("Knight").Wait();
+                        Task.Run(async () => await ApiCalls.Promote("Knight")).Wait();
                     }
 
-                    GetGameState().Wait();
+                    Task.Run(async () => await GetGameState()).Wait();
                     CheckIfGameOver();
                 }
 
@@ -177,7 +170,7 @@ namespace Chess
                 {
                     HighlightedSquares.Clear();
 
-                    Point[] moves = ApiCalls.GetMoves(new Point(mouseCell.X, mouseCell.Y)).Result;
+                    Point[] moves = Task.Run(async () => await ApiCalls.GetMoves(new Point(mouseCell.X, mouseCell.Y))).Result;
 
                     HighlightedSquares.AddRange(moves);
                 }
@@ -186,12 +179,12 @@ namespace Chess
                 {
                     if (HighlightedSquares.Contains(mouseCell) && mouseCell != HighlightedSquares[0])
                     {
-                        ApiCalls.Move(HighlightedSquares[0], mouseCell).Wait();
-
+                        Task.Run(async () => await ApiCalls.Move(HighlightedSquares[0], mouseCell)).Wait();
 
                         HighlightedSquares.Clear();
 
-                        GetGameState().Wait();
+                        Task.Run(async () => await GetGameState()).Wait();
+
                         CheckIfGameOver();
                     }
                 }
@@ -206,7 +199,8 @@ namespace Chess
         {
             System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
 
-            if (ApiCalls.CheckForNoMoves().Result)
+            var checkForMoveResults = Task.Run(async () => await ApiCalls.CheckForNoMoves()).Result;
+            if (checkForMoveResults)
             {
                 if (currentGameState.Whiteturn && currentGameState.WhiteInCheck)
                 {
@@ -234,7 +228,7 @@ namespace Chess
                     break;
 
                 case System.Windows.Forms.DialogResult.Retry:
-                    ApiCalls.ResetBoard().Wait();
+                    Task.Run(async () => await ApiCalls.ResetBoard()).Wait();
                     break;
 
                 case System.Windows.Forms.DialogResult.Ignore:

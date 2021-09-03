@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
+using SharedLibrary;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -17,17 +19,13 @@ namespace Chess
         public static async Task ResetBoard()
         {
             var result = await client.GetAsync($"https://localhost:5001/game/ResetBoard");
-            while (result.StatusCode != System.Net.HttpStatusCode.OK)
-            {
-                result = await client.GetAsync($"https://localhost:5001/game/ResetBoard");
-            }
         }
 
 
         public static async Task<Point[]> GetMoves(Point piece)
         {
             //.NET 5 solution
-            var options = new JsonSerializerOptions { IncludeFields = true };
+            var options = new JsonSerializerOptions { IncludeFields = true, PropertyNamingPolicy = null };
             string json = JsonSerializer.Serialize(piece, options);
 
             //new string(Array.ConvertAll<byte, char>(s._content, n => (char)n))
@@ -37,17 +35,14 @@ namespace Chess
             var result = await client.PostAsync($"https://localhost:5001/game/GetMoves", s);
             var temp = await result.Content.ReadAsStringAsync();
 
-            return JsonSerializer.Deserialize<Point[]>(temp, options);
+            var squares = JsonSerializer.Deserialize<Square[]>(temp, options);
+            return squares.Select(s => s.ToPoint()).ToArray();
         }
 
 
         public static async Task Move(Point piece, Point destination)
         {
-            var result = await client.GetAsync($"https://localhost:5001/game/Move/{piece}/{destination}");
-            while (result.StatusCode != System.Net.HttpStatusCode.OK)
-            {
-                result = await client.GetAsync($"https://localhost:5001/game/Move/{piece}/{destination}");
-            }
+            var result = await client.GetAsync($"https://localhost:5001/game/Move/{piece.X}/{piece.Y}/{destination.X}/{destination.Y}");
         }
 
 
@@ -72,10 +67,6 @@ namespace Chess
         public static async Task Promote(string pieceChoice)
         {
             var result = await client.GetAsync($"https://localhost:5001/game/Promote/{pieceChoice}");
-            while (result.StatusCode != System.Net.HttpStatusCode.OK)
-            {
-                result = await client.GetAsync($"https://localhost:5001/game/Promote/{pieceChoice}");
-            }
         }
     }
 }
