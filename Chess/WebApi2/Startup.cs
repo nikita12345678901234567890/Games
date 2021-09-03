@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace WebApi2
@@ -27,7 +28,11 @@ namespace WebApi2
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers()
-                    .AddJsonOptions(jsonOptions => jsonOptions.JsonSerializerOptions.IncludeFields = true);            
+                    .AddJsonOptions(jsonOptions =>
+                    {
+                        jsonOptions.JsonSerializerOptions.IncludeFields = true;
+                        jsonOptions.JsonSerializerOptions.PropertyNamingPolicy = null;  // match model
+                    });            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
