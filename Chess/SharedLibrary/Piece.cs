@@ -1,6 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -11,6 +9,6 @@ namespace SharedLibrary
         public abstract PieceTypes PieceType { get; }
         public abstract bool IsWhite { get; set; }
 
-        public abstract List<(Point, MoveTypes)> GetMoves(Piece[,] PieceGrid, Point position);
+        public abstract List<(Square, MoveTypes)> GetMoves(Piece[,] PieceGrid, Square position);
     }
 }

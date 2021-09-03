@@ -21,7 +21,8 @@ namespace WebApi2
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseStartup<Startup>()
+                              .UseKestrel();
                 });
     }
 }

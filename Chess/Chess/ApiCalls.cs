@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Chess
 {
+
     public static class ApiCalls
     {
         static HttpClient client = new HttpClient();
@@ -15,10 +16,10 @@ namespace Chess
 
         public static async Task ResetBoard()
         {
-            var result = await client.GetAsync($"https://localhost:44399/game/ResetBoard");
+            var result = await client.GetAsync($"https://localhost:5001/game/ResetBoard");
             while (result.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                result = await client.GetAsync($"https://localhost:44399/game/ResetBoard");
+                result = await client.GetAsync($"https://localhost:5001/game/ResetBoard");
             }
         }
 
@@ -33,7 +34,7 @@ namespace Chess
 
             StringContent s = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
-            var result = await client.PostAsync($"https://localhost:44399/game/GetMoves", s);
+            var result = await client.PostAsync($"https://localhost:5001/game/GetMoves", s);
             var temp = await result.Content.ReadAsStringAsync();
 
             return JsonSerializer.Deserialize<Point[]>(temp, options);
@@ -42,17 +43,17 @@ namespace Chess
 
         public static async Task Move(Point piece, Point destination)
         {
-            var result = await client.GetAsync($"https://localhost:44399/game/Move/{piece}/{destination}");
+            var result = await client.GetAsync($"https://localhost:5001/game/Move/{piece}/{destination}");
             while (result.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                result = await client.GetAsync($"https://localhost:44399/game/Move/{piece}/{destination}");
+                result = await client.GetAsync($"https://localhost:5001/game/Move/{piece}/{destination}");
             }
         }
 
 
         public static async Task<bool> CheckForNoMoves()
         {
-            var result = await client.GetAsync($"https://localhost:44399/game/CheckForNoMoves");
+            var result = await client.GetAsync($"https://localhost:5001/game/CheckForNoMoves");
             var temp = await result.Content.ReadAsStringAsync();
 
             return bool.Parse(temp);
@@ -61,7 +62,7 @@ namespace Chess
 
         public static async Task<string> MakeFEN()
         {
-            var result = await client.GetAsync($"https://localhost:44399/game/MakeFEN");
+            var result = await client.GetAsync($"https://localhost:5001/game/MakeFEN");
             var temp = await result.Content.ReadAsStringAsync();
 
             return temp.ToString();
@@ -70,10 +71,10 @@ namespace Chess
 
         public static async Task Promote(string pieceChoice)
         {
-            var result = await client.GetAsync($"https://localhost:44399/game/Promote/{pieceChoice}");
+            var result = await client.GetAsync($"https://localhost:5001/game/Promote/{pieceChoice}");
             while (result.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                result = await client.GetAsync($"https://localhost:44399/game/Promote/{pieceChoice}");
+                result = await client.GetAsync($"https://localhost:5001/game/Promote/{pieceChoice}");
             }
         }
     }

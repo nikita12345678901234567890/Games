@@ -1,7 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using SharedLibrary;
+﻿using SharedLibrary;
 using SharedLibrary.Pieces;
 
 using System;
@@ -10,6 +7,9 @@ using System.Linq;
 
 namespace SharedLibrary
 {
+
+
+
     /*
      * 
      * 
@@ -18,18 +18,16 @@ namespace SharedLibrary
      * 
      * 
      */
-    
+
     public static class Class1
     {
-        public static Texture2D Pixel;
-
         //Specifically chess related stuff:
 
         public static Piece[,] PieceGrid = new Piece[8, 8];
 
         public static bool Whiteturn = true;
 
-        public static Point LastMove;
+        public static Square LastMove;
 
         public static bool WhiteInCheck = false;
 
@@ -103,7 +101,7 @@ namespace SharedLibrary
             moveCounter = 0;
         }
 
-        private static bool Contains(List<(Point, MoveTypes)> list, Point pos)
+        private static bool Contains(List<(Square, MoveTypes)> list, Square pos)
         {
             foreach (var square in list)
             {
@@ -115,7 +113,7 @@ namespace SharedLibrary
             return false;
         }
 
-        private static int IndexOf(List<(Point, MoveTypes)> list, Point pos)
+        private static int IndexOf(List<(Square, MoveTypes)> list, Square pos)
         {
             for (int i = 0; i < list.Count; i++)
             {
@@ -127,12 +125,12 @@ namespace SharedLibrary
             return -1;
         }
 
-        private static bool IsChecking(Piece piece, Point pieceGridPositiion, Piece[,] PieceGrid)
+        private static bool IsChecking(Piece piece, Square pieceGridPositiion, Piece[,] PieceGrid)
         {
             var movesAndMoveTypes = piece.GetMoves(PieceGrid, pieceGridPositiion);
             var moves = movesAndMoveTypes.Select((x) => x.Item1).ToList();
 
-            foreach (Point move in moves)
+            foreach (Square move in moves)
             {
                 if (PieceGrid[move.Y, move.X] != null && PieceGrid[move.Y, move.X].IsWhite != piece.IsWhite && PieceGrid[move.Y, move.X].PieceType == PieceTypes.King)
                 {
@@ -143,14 +141,14 @@ namespace SharedLibrary
             return false;
         }
 
-        public static bool UnderAttack(Point square, bool attackedByWhite, Piece[,] PieceGrid)
+        public static bool UnderAttack(Square square, bool attackedByWhite, Piece[,] PieceGrid)
         {
             for (int x = 0; x < PieceGrid.GetLength(1); x++)
             {
                 for (int y = 0; y < PieceGrid.GetLength(0); y++)
                 {
                     Piece piece = PieceGrid[y, x];
-                    if (piece != null && piece.IsWhite == attackedByWhite && piece.PieceType != PieceTypes.King && piece.GetMoves(PieceGrid, new Point(x, y)).Contains((square, MoveTypes.Normal)))
+                    if (piece != null && piece.IsWhite == attackedByWhite && piece.PieceType != PieceTypes.King && piece.GetMoves(PieceGrid, new Square(x, y)).Contains((square, MoveTypes.Normal)))
                     {
                         return true;
                     }
@@ -158,7 +156,7 @@ namespace SharedLibrary
                     {
                         King kingInQuestion = (King)piece;
 
-                        if (kingInQuestion.HasMoved && kingInQuestion.GetMoves(PieceGrid, new Point(x, y)).Contains((square, MoveTypes.Normal)))
+                        if (kingInQuestion.HasMoved && kingInQuestion.GetMoves(PieceGrid, new Square(x, y)).Contains((square, MoveTypes.Normal)))
                         {
                             return true;
                         }
@@ -168,20 +166,20 @@ namespace SharedLibrary
             return false;
         }
 
-        public static Point[] GetMoves(Point piece)
+        public static Square[] GetMoves(Square piece)
         {
             if (PieceGrid[piece.Y, piece.X] == null || PieceGrid[piece.Y, piece.X].IsWhite != Whiteturn)
             {
                 return null;
             }
 
-            List<Point> moves = new List<Point>();
+            List<Square> moves = new List<Square>();
 
             moves.Add(piece);
 
-            List<(Point, MoveTypes)> potentialMoves = PieceGrid[piece.Y, piece.X].GetMoves(PieceGrid, piece);
+            List<(Square, MoveTypes)> potentialMoves = PieceGrid[piece.Y, piece.X].GetMoves(PieceGrid, piece);
 
-            Point position = piece; //The original location of the selected piece
+            Square position = piece; //The original location of the selected piece
 
             bool IsWhite = PieceGrid[position.Y, position.X].IsWhite; //The color of the selected piece
 
@@ -203,10 +201,10 @@ namespace SharedLibrary
                     {
                         if (PieceGrid[y1, x1] != null && PieceGrid[y1, x1].IsWhite != IsWhite && PieceGrid[y1, x1].PieceType != PieceTypes.King)
                         {
-                            var temp = PieceGrid[y1, x1].GetMoves(PieceGrid, new Point(x1, y1));
+                            var temp = PieceGrid[y1, x1].GetMoves(PieceGrid, new Square(x1, y1));
                             foreach (var move in temp)
                             {
-                                if (IsChecking(PieceGrid[y1, x1], new Point(x1, y1), PieceGrid))
+                                if (IsChecking(PieceGrid[y1, x1], new Square(x1, y1), PieceGrid))
                                 {
                                     skipMove = true;
                                 }
@@ -218,7 +216,7 @@ namespace SharedLibrary
                 //Checking if this move results in moving a king next to a king:
                 if (!skipMove && PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X].PieceType == PieceTypes.King)
                 {
-                    var surrounding = PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X].GetMoves(PieceGrid, new Point(potentialMove.Item1.X, potentialMove.Item1.Y));
+                    var surrounding = PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X].GetMoves(PieceGrid, new Square(potentialMove.Item1.X, potentialMove.Item1.Y));
                     foreach (var move in surrounding)
                     {
                         if (PieceGrid[move.Item1.Y, move.Item1.X] != null && PieceGrid[move.Item1.Y, move.Item1.X].PieceType == PieceTypes.King)
@@ -234,7 +232,7 @@ namespace SharedLibrary
 
                 if (!skipMove)
                 {
-                    moves.Add(new Point(potentialMove.Item1.X, potentialMove.Item1.Y));
+                    moves.Add(new Square(potentialMove.Item1.X, potentialMove.Item1.Y));
                 }
             }
 
@@ -242,15 +240,15 @@ namespace SharedLibrary
             return moves.ToArray();
         }
 
-        public static List<(Point, MoveTypes)> GetMovesAndTypes(Point piece)
+        public static List<(Square, MoveTypes)> GetMovesAndTypes(Square piece)
         {
-            List<(Point, MoveTypes)> moves = new List<(Point, MoveTypes)>();
+            List<(Square, MoveTypes)> moves = new List<(Square, MoveTypes)>();
 
             moves.Add((piece, MoveTypes.None));
 
-            List<(Point, MoveTypes)> potentialMoves = PieceGrid[piece.Y, piece.X].GetMoves(PieceGrid, piece);
+            List<(Square, MoveTypes)> potentialMoves = PieceGrid[piece.Y, piece.X].GetMoves(PieceGrid, piece);
 
-            Point position = piece; //The original location of the selected piece
+            Square position = piece; //The original location of the selected piece
 
             bool IsWhite = PieceGrid[position.Y, position.X].IsWhite; //The color of the selected piece
 
@@ -272,10 +270,10 @@ namespace SharedLibrary
                     {
                         if (PieceGrid[y1, x1] != null && PieceGrid[y1, x1].IsWhite != IsWhite && PieceGrid[y1, x1].PieceType != PieceTypes.King)
                         {
-                            var temp = PieceGrid[y1, x1].GetMoves(PieceGrid, new Point(x1, y1));
+                            var temp = PieceGrid[y1, x1].GetMoves(PieceGrid, new Square(x1, y1));
                             foreach (var move in temp)
                             {
-                                if (IsChecking(PieceGrid[y1, x1], new Point(x1, y1), PieceGrid))
+                                if (IsChecking(PieceGrid[y1, x1], new Square(x1, y1), PieceGrid))
                                 {
                                     skipMove = true;
                                 }
@@ -287,7 +285,7 @@ namespace SharedLibrary
                 //Checking if this move results in moving a king next to a king:
                 if (!skipMove && PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X].PieceType == PieceTypes.King)
                 {
-                    var surrounding = PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X].GetMoves(PieceGrid, new Point(potentialMove.Item1.X, potentialMove.Item1.Y));
+                    var surrounding = PieceGrid[potentialMove.Item1.Y, potentialMove.Item1.X].GetMoves(PieceGrid, new Square(potentialMove.Item1.X, potentialMove.Item1.Y));
                     foreach (var move in surrounding)
                     {
                         if (PieceGrid[move.Item1.Y, move.Item1.X] != null && PieceGrid[move.Item1.Y, move.Item1.X].PieceType == PieceTypes.King)
@@ -303,7 +301,7 @@ namespace SharedLibrary
 
                 if (!skipMove)
                 {
-                    moves.Add((new Point(potentialMove.Item1.X, potentialMove.Item1.Y), potentialMove.Item2));
+                    moves.Add((new Square(potentialMove.Item1.X, potentialMove.Item1.Y), potentialMove.Item2));
                 }
             }
 
@@ -311,7 +309,7 @@ namespace SharedLibrary
             return moves;
         }
 
-        public static void Move(Point piece, Point destination)
+        public static void Move(Square piece, Square destination)
         {
             var moves = GetMovesAndTypes(piece);
             if (Contains(moves, destination))
@@ -421,7 +419,7 @@ namespace SharedLibrary
                 {
                     if (PieceGrid[y, x] != null && PieceGrid[y, x].IsWhite == Whiteturn)
                     {
-                        if (GetMoves(new Point(x, y)).Length > 1)
+                        if (GetMoves(new Square(x, y)).Length > 1)
                         {
                             return false;
                         }
@@ -599,11 +597,11 @@ namespace SharedLibrary
 
         }
 
-        private static (bool promotion, bool IsWhite, Point pawnLocation) CheckPromotion()
+        private static (bool promotion, bool IsWhite, Square pawnLocation) CheckPromotion()
         {
             bool promotion = false;
             bool isWhite = false;
-            Point pawnLocation = new Point(0, 0);
+            Square pawnLocation = new Square(0, 0);
 
             for (int x = 0; x < PieceGrid.GetLength(1); x++)
             {
@@ -612,7 +610,7 @@ namespace SharedLibrary
                 {
                     promotion = true;
                     isWhite = true;
-                    pawnLocation = new Point(x, 0);
+                    pawnLocation = new Square(x, 0);
                 }
 
                 //Checking for a pawn in the bottom row:
@@ -620,7 +618,7 @@ namespace SharedLibrary
                 {
                     promotion = true;
                     isWhite = false;
-                    pawnLocation = new Point(x, 0);
+                    pawnLocation = new Square(x, 0);
                 }
             }
 

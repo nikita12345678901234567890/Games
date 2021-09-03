@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using SharedLibrary;
 using WebApi2.Models;
-using Microsoft.Xna.Framework;
 
 namespace WebApi2.Controllers
 {
@@ -52,7 +51,7 @@ namespace WebApi2.Controllers
 
 
         [HttpPost("GetMoves")]
-        public Point[] GetMoves([FromBody]Point piece)
+        public Square[] GetMoves([FromBody]Square piece)
         {
             return Class1.GetMoves(piece);
         }
@@ -61,7 +60,7 @@ namespace WebApi2.Controllers
         [HttpGet("Move/{pieceX}/{pieceY}/{destinationX}/{destinationY}")]
         public void Move(int pieceX, int pieceY, int destinationX, int destinationY)
         {
-            Class1.Move(new Point(pieceX, pieceY), new Point(destinationX, destinationY));
+            Class1.Move(new Square(pieceX, pieceY), new Square(destinationX, destinationY));
         }
 
 

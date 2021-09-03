@@ -113,8 +113,10 @@ namespace Chess
             Textures.Add((PieceTypes.Queen, true), Content.Load<Texture2D>("whitequeen"));
             Textures.Add((PieceTypes.Queen, false), Content.Load<Texture2D>("blackqueen"));
 
-            ApiCalls.ResetBoard().Wait();
-            GetGameState().Wait();
+            Task.Run(async () => await ApiCalls.ResetBoard());
+            //ApiCalls.ResetBoard().Wait();
+            //GetGameState().Wait();
+            Task.Run(async () => await GetGameState());
         }
 
         protected override void Update(GameTime gameTime)
@@ -135,12 +137,12 @@ namespace Chess
                     promotionInfo = CheckPromotion();
                     choices = new PiecePromotion(promotionInfo.IsWhite, promotionInfo.pawnLocation.X);
 
-                    if (mouseCell == choices.Queen)
+                    if (mouseCell == choices.Queen.ToPoint())
                     {
                         ApiCalls.Promote("Queen").Wait();
                     }
 
-                    else if (mouseCell == choices.Rook)
+                    else if (mouseCell == choices.Rook.ToPoint())
                     {
                         /*Thread resetThread = new Thread(new ThreadStart(async () =>
                         {
@@ -150,12 +152,12 @@ namespace Chess
                         ApiCalls.Promote("Rook").Wait();
                     }
 
-                    else if (mouseCell == choices.Bishop)
+                    else if (mouseCell == choices.Bishop.ToPoint())
                     {
                         ApiCalls.Promote("Bishop").Wait();
                     }
 
-                    else if (mouseCell == choices.Knight)
+                    else if (mouseCell == choices.Knight.ToPoint())
                     {
                         ApiCalls.Promote("Knight").Wait();
                     }
@@ -232,7 +234,7 @@ namespace Chess
                     break;
 
                 case System.Windows.Forms.DialogResult.Retry:
-                    ApiCalls.ResetBoard();
+                    ApiCalls.ResetBoard().Wait();
                     break;
 
                 case System.Windows.Forms.DialogResult.Ignore:
@@ -333,16 +335,16 @@ namespace Chess
 
                 //Draw piece choices:
                 var texture = Textures[(PieceTypes.Queen, promotionInfo.IsWhite)];
-                spriteBatch.Draw(texture, CellCenter(choices.Queen), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+                spriteBatch.Draw(texture, CellCenter(choices.Queen.ToPoint()), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
 
                 texture = Textures[(PieceTypes.Rook, promotionInfo.IsWhite)];
-                spriteBatch.Draw(texture, CellCenter(choices.Rook), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+                spriteBatch.Draw(texture, CellCenter(choices.Rook.ToPoint()), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
 
                 texture = Textures[(PieceTypes.Bishop, promotionInfo.IsWhite)];
-                spriteBatch.Draw(texture, CellCenter(choices.Bishop), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+                spriteBatch.Draw(texture, CellCenter(choices.Bishop.ToPoint()), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
 
                 texture = Textures[(PieceTypes.Knight, promotionInfo.IsWhite)];
-                spriteBatch.Draw(texture, CellCenter(choices.Knight), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+                spriteBatch.Draw(texture, CellCenter(choices.Knight.ToPoint()), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
             }
 
             spriteBatch.End();

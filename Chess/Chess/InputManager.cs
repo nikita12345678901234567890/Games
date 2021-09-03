@@ -1,10 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Input;
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SharedLibrary
+namespace Chess
 {
     public static class InputManager
     {
