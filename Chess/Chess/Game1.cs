@@ -183,6 +183,8 @@ namespace Chess
 
                         HighlightedSquares.Clear();
 
+                        Task.Run(async () => await ApiCalls.CheckPromotion()).Wait();
+
                         Task.Run(async () => await GetGameState()).Wait();
 
                         CheckIfGameOver();
@@ -326,6 +328,8 @@ namespace Chess
                 //Gray out whole screen:
                 spriteBatch.Draw(Pixel, graphics.GraphicsDevice.Viewport.Bounds, Color.White * 0.5f);
 
+                promotionInfo = CheckPromotion();
+                choices = new PiecePromotion(promotionInfo.IsWhite, promotionInfo.pawnLocation.X);
 
                 //Draw piece choices:
                 var texture = Textures[(PieceTypes.Queen, promotionInfo.IsWhite)];

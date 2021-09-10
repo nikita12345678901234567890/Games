@@ -1,0 +1,5 @@
+Promotion
+Win screen always stalemate
+black in check not highlighting
+Fix retry button
+Make it draw before pop-up

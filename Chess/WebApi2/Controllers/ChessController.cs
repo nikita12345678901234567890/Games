@@ -19,28 +19,17 @@ namespace WebApi2.Controllers
         }
 
 
-        //Start of example:
-        [HttpGet("Do")]
-        public int DoSomething()
+        [HttpGet("GetPlayerId")]
+        public Guid GetPlayerId()
         {
-            return 5;
+            return Guid.NewGuid();
         }
 
-        [HttpGet("Other/{num}")]
-        public int OtherFunction(int num)
+        [HttpGet("GetGameColor/{wantsWhite}")]
+        public bool? GetGameColor(Guid playerId, bool wantsWhite)
         {
-            return 5 * num;
+            return Class1.GetGameColor(playerId, wantsWhite);
         }
-        //end of example.
-
-        //Start of Jason example:
-        [HttpPost("Test")]
-        public string TestFunction([FromBody]Person p)
-        {
-
-            return "blah";
-        }
-        //End of Jason example.
 
 
         [HttpGet("ResetBoard")]
@@ -77,6 +66,11 @@ namespace WebApi2.Controllers
             return Class1.MakeFEN();
         }
 
+        [HttpGet("CheckPromotion")]
+        public void CheckPromotion()
+        {
+            Class1.CheckPromotion();
+        }
 
         [HttpGet("Promote/{pieceChoice}")]
         public void Promote(string pieceChoice)

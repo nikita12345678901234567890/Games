@@ -22,6 +22,18 @@ namespace Chess
         }
 
 
+        public static async Task<Guid> GetPlayerId()
+        {
+
+        }
+
+
+        public static async Task<bool?> GetGameColor()
+        { 
+        
+        }
+
+
         public static async Task<Point[]> GetMoves(Point piece)
         {
             //.NET 5 solution
@@ -63,6 +75,10 @@ namespace Chess
             return temp.ToString();
         }
 
+        public static async Task CheckPromotion()
+        {
+            var result = await client.GetAsync($"https://localhost:5001/game/CheckPromotion");
+        }
 
         public static async Task Promote(string pieceChoice)
         {

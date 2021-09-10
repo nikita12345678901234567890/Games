@@ -7,9 +7,6 @@ using System.Linq;
 
 namespace SharedLibrary
 {
-
-
-
     /*
      * 
      * 
@@ -38,6 +35,45 @@ namespace SharedLibrary
         public static PiecePromotion choices;
 
         public static bool choosingPromotion = false;
+
+
+        private static Guid whitePlayerID = Guid.Empty;
+        private static Guid blackPlayerID = Guid.Empty;
+
+        public static bool? GetGameColor(Guid playerID, bool wantsWhite)
+        {
+            if (wantsWhite)
+            {
+                if (whitePlayerID == Guid.Empty)
+                {
+                    whitePlayerID = playerID;
+                    return true;
+                }
+                else if (blackPlayerID == Guid.Empty)
+                {
+                    blackPlayerID = playerID;
+                    return false;
+                }
+            }
+            else
+            {
+                if (blackPlayerID == Guid.Empty)
+                {
+                    blackPlayerID = playerID;
+                    return false;
+                }
+                else if (whitePlayerID == Guid.Empty)
+                {
+                    whitePlayerID = playerID;
+                    return true;
+                }
+            }
+            return null;
+        }
+
+
+
+
 
         public static void ResetBoard()
         {
@@ -570,7 +606,7 @@ namespace SharedLibrary
         {
             if (choosingPromotion)
             {
-                var promotionInfo = CheckPromotion();
+                var promotionInfo = GetPromotionInfo();
 
                 choices = new PiecePromotion(promotionInfo.IsWhite, promotionInfo.pawnLocation.X);
 
@@ -594,10 +630,9 @@ namespace SharedLibrary
                         break;
                 }
             }
-
         }
 
-        private static (bool promotion, bool IsWhite, Square pawnLocation) CheckPromotion()
+        private static (bool promotion, bool IsWhite, Square pawnLocation) GetPromotionInfo()
         {
             bool promotion = false;
             bool isWhite = false;
@@ -623,6 +658,28 @@ namespace SharedLibrary
             }
 
             return (promotion, isWhite, pawnLocation);
+        }
+
+        public static void CheckPromotion()
+        {
+            bool promotion = false;
+
+            for (int x = 0; x < PieceGrid.GetLength(1); x++)
+            {
+                //Checking for a pawn in the top row:
+                if (PieceGrid[0, x] != null && PieceGrid[0, x].PieceType == PieceTypes.Pawn)
+                {
+                    promotion = true;
+                }
+
+                //Checking for a pawn in the bottom row:
+                if (PieceGrid[PieceGrid.GetLength(0) - 1, x] != null && PieceGrid[PieceGrid.GetLength(0) - 1, x].PieceType == PieceTypes.Pawn)
+                {
+                    promotion = true;
+                }
+            }
+
+            choosingPromotion = promotion;
         }
     }
 }
