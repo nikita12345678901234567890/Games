@@ -16,21 +16,27 @@ namespace Chess
         static HttpClient client = new HttpClient();
 
 
-        public static async Task ResetBoard()
+        public static async Task ResetBoard(Guid playerID)
         {
-            var result = await client.GetAsync($"https://localhost:5001/game/ResetBoard");
+            var result = await client.GetAsync($"https://localhost:5001/game/ResetBoard/{playerID}");
         }
 
 
         public static async Task<Guid> GetPlayerId()
         {
+            var result = await client.GetAsync($"https://localhost:5001/game/GetPlayerID");
+            var temp = await result.Content.ReadAsStringAsync();
 
+            return Guid.Parse(temp);
         }
 
 
-        public static async Task<bool?> GetGameColor()
-        { 
-        
+        public static async Task<bool?> GetGameColor(Guid playerID, bool wantsWhite)
+        {
+            var result = await client.GetAsync($"https://localhost:5001/game/GetGameColor/{playerID}/{wantsWhite}");
+            var temp = await result.Content.ReadAsStringAsync();
+
+            return bool.Parse(temp);
         }
 
 

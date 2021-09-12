@@ -25,17 +25,17 @@ namespace WebApi2.Controllers
             return Guid.NewGuid();
         }
 
-        [HttpGet("GetGameColor/{wantsWhite}")]
-        public bool? GetGameColor(Guid playerId, bool wantsWhite)
+        [HttpGet("GetGameColor/{playerID}/{wantsWhite}")]
+        public bool? GetGameColor(Guid playerID, bool wantsWhite)
         {
-            return Class1.GetGameColor(playerId, wantsWhite);
+            return Class1.GetGameColor(playerID, wantsWhite);
         }
 
 
-        [HttpGet("ResetBoard")]
-        public void ResetBoard()
+        [HttpGet("ResetBoard/{playerID}")]
+        public void ResetBoard(Guid playerID)
         {
-            Class1.ResetBoard();
+            Class1.ResetBoard(playerID);
         }
 
 
@@ -46,10 +46,10 @@ namespace WebApi2.Controllers
         }
 
 
-        [HttpGet("Move/{pieceX}/{pieceY}/{destinationX}/{destinationY}")]
-        public void Move(int pieceX, int pieceY, int destinationX, int destinationY)
+        [HttpGet("Move/{playerID}/{pieceX}/{pieceY}/{destinationX}/{destinationY}")]
+        public void Move(Guid playerID, int pieceX, int pieceY, int destinationX, int destinationY)
         {
-            Class1.Move(new Square(pieceX, pieceY), new Square(destinationX, destinationY));
+            Class1.Move(playerID, new Square(pieceX, pieceY), new Square(destinationX, destinationY));
         }
 
 
@@ -72,10 +72,10 @@ namespace WebApi2.Controllers
             Class1.CheckPromotion();
         }
 
-        [HttpGet("Promote/{pieceChoice}")]
-        public void Promote(string pieceChoice)
+        [HttpGet("Promote/{playerID}/{pieceChoice}")]
+        public void Promote(Guid playerID, string pieceChoice)
         {
-            Class1.Promote(pieceChoice);
+            Class1.Promote(playerID, pieceChoice);
         }
     }
 }

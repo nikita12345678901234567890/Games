@@ -25,6 +25,8 @@ namespace Chess
 
         public static Dictionary<(PieceTypes, bool), Texture2D> Textures;
 
+        public MenuScreen menu;
+
         public MouseState Lastms;
 
         public int squaresize;
@@ -40,8 +42,11 @@ namespace Chess
         GameState currentGameState;
 
 
+        bool inMenu = true;
 
-        //HttpClient client = new HttpClient();  //part of Api example
+        Guid playerID;
+
+        bool amWhite;
 
 
         public Game1()
@@ -52,28 +57,6 @@ namespace Chess
             //Task.Run(CallApi);  //part of Api example 
         }
 
-
-        /*public async Task CallApi()
-        {
-            var result = await client.GetAsync($"https://localhost:44399/game/Other/15");
-            var temp = result.Content.ReadAsStringAsync();
-            ;
-        }*/  //Api example
-
-        //HttpClient client = new HttpClient();
-        //public async Task CallApi()
-        //{
-        //    Person p = new Person() { Fish = 5, Password = "1234", UserName = "abcd" };
-        //    string json = JsonSerializer.Serialize<Person>(p);
-        //    StringContent s = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-
-        //    var result = await client.PostAsync($"https://localhost:44399/game/Test", s);
-        //    var temp = result.Content.ReadAsStringAsync();
-        //    var res = temp.Result;
-
-
-        //}//Jason majic example.
-
         protected override void Initialize()
         {
             graphics.PreferredBackBufferWidth = 800;
@@ -83,6 +66,8 @@ namespace Chess
             squaresize = graphics.PreferredBackBufferWidth / 8;
 
             HighlightedSquares = new List<Point>();
+
+            menu = new MenuScreen(Content, graphics);
 
             //This generates a list of all exceptions:
             var exceptions = Assembly.GetAssembly(typeof(int)).GetTypes().
@@ -113,8 +98,10 @@ namespace Chess
             Textures.Add((PieceTypes.Queen, true), Content.Load<Texture2D>("whitequeen"));
             Textures.Add((PieceTypes.Queen, false), Content.Load<Texture2D>("blackqueen"));
 
-            Task.Run(async () => await ApiCalls.ResetBoard()).Wait();
-            Task.Run(async () => await GetGameState()).Wait();
+            //Task.Run(async () => await ApiCalls.ResetBoard()).Wait();
+            //Task.Run(async () => await GetGameState()).Wait();
+
+            playerID = Task.Run(async () => await ApiCalls.GetPlayerId()).Result; //No connection could be made because the target machine actively refused it. (localhost:5001)
         }
 
         protected override void Update(GameTime gameTime)
@@ -124,8 +111,42 @@ namespace Chess
 
             InputManager.MouseState = Mouse.GetState();
 
+            if (inMenu)
+            {
+                var result = menu.Update(gameTime);
+                if (result.moveOn)
+                {
+                    if (result.spectating)
+                    {
+                        inMenu = false;
+                        spectating = true;
+                    }
+                    else
+                    {
+                        var color = Task.Run(async () => await ApiCalls.GetGameColor(playerID, result.playingWhite)).Result;
+                        if (color == null)
+                        {
+
+                        }
+                        else
+                        {
+                            amWhite = (bool)color;
+
+                            Task.Run(async () => await ApiCalls.ResetBoard(playerID)).Wait();
+
+                            inMenu = false;
+                        }
+                    }
+                }
+            }
+
+            else if (spectating)
+            { 
+                
+            }
+
             //Checking if mouse clicked:
-            if (!spectating && InputManager.MouseState.LeftButton == ButtonState.Pressed && InputManager.LastMouseState.LeftButton == ButtonState.Released && GraphicsDevice.Viewport.Bounds.Contains(InputManager.MouseState.Position))
+            else if (InputManager.MouseState.LeftButton == ButtonState.Pressed && InputManager.LastMouseState.LeftButton == ButtonState.Released && GraphicsDevice.Viewport.Bounds.Contains(InputManager.MouseState.Position))
             {
                 var mouseCell = PositionToCell(InputManager.MouseState.Position);
 
@@ -230,7 +251,7 @@ namespace Chess
                     break;
 
                 case System.Windows.Forms.DialogResult.Retry:
-                    Task.Run(async () => await ApiCalls.ResetBoard()).Wait();
+                    //Task.Run(async () => await ApiCalls.ResetBoard()).Wait();
                     break;
 
                 case System.Windows.Forms.DialogResult.Ignore:
@@ -255,94 +276,102 @@ namespace Chess
 
             spriteBatch.Begin();
 
-            //Drawing grid:
-            Color cellColor = Color.White;
-            Color color = cellColor;
-            for (int x = 0; x < 8; x++)
+            if (inMenu)
             {
-                for (int y = 0; y < 8; y++)
-                {
-                    color = cellColor;
+                menu.Draw(spriteBatch);
+            }
 
-                    spriteBatch.Draw(Pixel, new Vector2(x * squaresize, y * squaresize), null, color, 0, new Vector2(0, 0), Vector2.One * squaresize, SpriteEffects.None, 0);
+            else
+            {
+                //Drawing grid:
+                Color cellColor = Color.White;
+                Color color = cellColor;
+                for (int x = 0; x < 8; x++)
+                {
+                    for (int y = 0; y < 8; y++)
+                    {
+                        color = cellColor;
+
+                        spriteBatch.Draw(Pixel, new Vector2(x * squaresize, y * squaresize), null, color, 0, new Vector2(0, 0), Vector2.One * squaresize, SpriteEffects.None, 0);
+                        cellColor = cellColor == Color.White ? Color.Gray : Color.White;
+
+                        //Changing the color of the highlighted squares:
+                        if (HighlightedSquares.Contains(new Point(x, y)))
+                        {
+                            color = Color.Yellow * 0.3f;
+                        }
+
+                        //Highlighting the checked king red:
+                        if (currentGameState.WhiteInCheck)
+                        {
+                            Piece piece = currentGameState.PieceGrid[y, x];
+                            if (piece != null && piece.IsWhite && piece.PieceType == PieceTypes.King)
+                            {
+                                color = Color.Red * 0.3f;
+                            }
+                        }
+                        else if (currentGameState.BlackInCheck)
+                        {
+                            Piece piece = currentGameState.PieceGrid[y, x];
+                            if (piece != null && !piece.IsWhite && piece.PieceType == PieceTypes.King)
+                            {
+                                color = Color.Red * 0.3f;
+                            }
+                        }
+
+                        spriteBatch.Draw(Pixel, new Vector2(x * squaresize, y * squaresize), null, color, 0, new Vector2(0, 0), Vector2.One * squaresize, SpriteEffects.None, 0);
+                    }
+
                     cellColor = cellColor == Color.White ? Color.Gray : Color.White;
-
-                    //Changing the color of the highlighted squares:
-                    if (HighlightedSquares.Contains(new Point(x, y)))
-                    {
-                        color = Color.Yellow * 0.3f;
-                    }
-
-                    //Highlighting the checked king red:
-                    if (currentGameState.WhiteInCheck)
-                    {
-                        Piece piece = currentGameState.PieceGrid[y, x];
-                        if (piece != null && piece.IsWhite && piece.PieceType == PieceTypes.King)
-                        {
-                            color = Color.Red * 0.3f;
-                        }
-                    }
-                    else if (currentGameState.BlackInCheck)
-                    {
-                        Piece piece = currentGameState.PieceGrid[y, x];
-                        if (piece != null && !piece.IsWhite && piece.PieceType == PieceTypes.King)
-                        {
-                            color = Color.Red * 0.3f;
-                        }
-                    }
-
-                    spriteBatch.Draw(Pixel, new Vector2(x * squaresize, y * squaresize), null, color, 0, new Vector2(0, 0), Vector2.One * squaresize, SpriteEffects.None, 0);
                 }
 
-                cellColor = cellColor == Color.White ? Color.Gray : Color.White;
-            }
-
-            //Drawing pieces:
-            float scale;
-            for (int y = 0; y < currentGameState.PieceGrid.GetLength(0); y++)
-            {
-                for (int x = 0; x < currentGameState.PieceGrid.GetLength(1); x++)
+                //Drawing pieces:
+                float scale;
+                for (int y = 0; y < currentGameState.PieceGrid.GetLength(0); y++)
                 {
-                    if (currentGameState.PieceGrid[y, x] != null)
+                    for (int x = 0; x < currentGameState.PieceGrid.GetLength(1); x++)
                     {
-                        if (currentGameState.PieceGrid[y, x].PieceType == PieceTypes.Pawn)
+                        if (currentGameState.PieceGrid[y, x] != null)
                         {
-                            scale = 1;
+                            if (currentGameState.PieceGrid[y, x].PieceType == PieceTypes.Pawn)
+                            {
+                                scale = 1;
+                            }
+                            else
+                            {
+                                scale = 0.5f;
+                            }
+                            var texture = Textures[(currentGameState.PieceGrid[y, x].PieceType, currentGameState.PieceGrid[y, x].IsWhite)];
+                            spriteBatch.Draw(texture, CellCenter(new Point(x, y)), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), scale, SpriteEffects.None, 0);
                         }
-                        else
-                        {
-                            scale = 0.5f;
-                        }
-                        var texture = Textures[(currentGameState.PieceGrid[y, x].PieceType, currentGameState.PieceGrid[y, x].IsWhite)];
-                        spriteBatch.Draw(texture, CellCenter(new Point(x, y)), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), scale, SpriteEffects.None, 0);
                     }
                 }
-            }
 
 
-            
 
 
-            if (currentGameState.ChoosingPromotion)
-            {
-                //Gray out whole screen:
-                spriteBatch.Draw(Pixel, graphics.GraphicsDevice.Viewport.Bounds, Color.White * 0.5f);
 
-                promotionInfo = CheckPromotion();
-                choices = new PiecePromotion(promotionInfo.IsWhite, promotionInfo.pawnLocation.X);
+                if (currentGameState.ChoosingPromotion)
+                {
+                    //Gray out whole screen:
+                    spriteBatch.Draw(Pixel, graphics.GraphicsDevice.Viewport.Bounds, Color.White * 0.5f);
 
-                //Draw piece choices:
-                var texture = Textures[(PieceTypes.Queen, promotionInfo.IsWhite)];
-                spriteBatch.Draw(texture, CellCenter(choices.Queen.ToPoint()), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+                    promotionInfo = CheckPromotion();
+                    choices = new PiecePromotion(promotionInfo.IsWhite, promotionInfo.pawnLocation.X);
 
-                texture = Textures[(PieceTypes.Rook, promotionInfo.IsWhite)];
-                spriteBatch.Draw(texture, CellCenter(choices.Rook.ToPoint()), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+                    //Draw piece choices:
+                    var texture = Textures[(PieceTypes.Queen, promotionInfo.IsWhite)];
+                    spriteBatch.Draw(texture, CellCenter(choices.Queen.ToPoint()), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
 
-                texture = Textures[(PieceTypes.Bishop, promotionInfo.IsWhite)];
-                spriteBatch.Draw(texture, CellCenter(choices.Bishop.ToPoint()), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+                    texture = Textures[(PieceTypes.Rook, promotionInfo.IsWhite)];
+                    spriteBatch.Draw(texture, CellCenter(choices.Rook.ToPoint()), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
 
-                texture = Textures[(PieceTypes.Knight, promotionInfo.IsWhite)];
-                spriteBatch.Draw(texture, CellCenter(choices.Knight.ToPoint()), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+                    texture = Textures[(PieceTypes.Bishop, promotionInfo.IsWhite)];
+                    spriteBatch.Draw(texture, CellCenter(choices.Bishop.ToPoint()), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+
+                    texture = Textures[(PieceTypes.Knight, promotionInfo.IsWhite)];
+                    spriteBatch.Draw(texture, CellCenter(choices.Knight.ToPoint()), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+                }
             }
 
             spriteBatch.End();

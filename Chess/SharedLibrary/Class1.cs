@@ -69,14 +69,16 @@ namespace SharedLibrary
                 }
             }
             return null;
-        }
+        } //if desired color is available, gives them that, oitherwise gives them the other color. I both are taken, returns null.
 
 
 
 
 
-        public static void ResetBoard()
+        public static void ResetBoard(Guid playerID) //Only the white player can reset the board to ensure it only happens once
         {
+            if (playerID != whitePlayerID) return;
+
             for (int x = 0; x < PieceGrid.GetLength(1); x++)
             {
                 for (int y = 0; y < PieceGrid.GetLength(0); y++)
@@ -345,8 +347,10 @@ namespace SharedLibrary
             return moves;
         }
 
-        public static void Move(Square piece, Square destination)
+        public static void Move(Guid playerID, Square piece, Square destination)
         {
+            if (!ValidPlayer(playerID)) return;
+
             var moves = GetMovesAndTypes(piece);
             if (Contains(moves, destination))
             {
@@ -602,8 +606,10 @@ namespace SharedLibrary
             return FEN;
         }
 
-        public static void Promote(string pieceChoice)
+        public static void Promote(Guid playerID, string pieceChoice)
         {
+            if (!ValidPlayer(playerID)) return;
+
             if (choosingPromotion)
             {
                 var promotionInfo = GetPromotionInfo();
@@ -680,6 +686,18 @@ namespace SharedLibrary
             }
 
             choosingPromotion = promotion;
+        }
+
+
+
+
+        private static bool ValidPlayer(Guid playerID)
+        {
+            if ((playerID == whitePlayerID && Whiteturn) || (playerID == blackPlayerID && !Whiteturn))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }
