@@ -24,9 +24,9 @@ namespace Chess
 
         public static async Task<Guid> GetPlayerId()
         {
-            var result = await client.GetAsync($"https://localhost:5001/game/GetPlayerID");
+           var result = await client.GetAsync($"https://localhost:5001/game/GetPlayerID");
             var temp = await result.Content.ReadAsStringAsync();
-
+            temp = temp.Substring(1, temp.Length - 2);
             return Guid.Parse(temp);
         }
 
@@ -58,9 +58,9 @@ namespace Chess
         }
 
 
-        public static async Task Move(Point piece, Point destination)
+        public static async Task Move(Guid playerID, Point piece, Point destination)
         {
-            var result = await client.GetAsync($"https://localhost:5001/game/Move/{piece.X}/{piece.Y}/{destination.X}/{destination.Y}");
+            var result = await client.GetAsync($"https://localhost:5001/game/Move/{playerID}/{piece.X}/{piece.Y}/{destination.X}/{destination.Y}");
         }
 
 
@@ -86,9 +86,9 @@ namespace Chess
             var result = await client.GetAsync($"https://localhost:5001/game/CheckPromotion");
         }
 
-        public static async Task Promote(string pieceChoice)
+        public static async Task Promote(Guid playerID, string pieceChoice)
         {
-            var result = await client.GetAsync($"https://localhost:5001/game/Promote/{pieceChoice}");
+            var result = await client.GetAsync($"https://localhost:5001/game/Promote/{playerID}/{pieceChoice}");
         }
     }
 }

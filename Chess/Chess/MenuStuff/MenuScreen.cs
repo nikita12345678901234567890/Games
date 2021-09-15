@@ -27,9 +27,9 @@ namespace Chess
             font = content.Load<SpriteFont>("SpriteFont");
             Texture2D ButtonTexture = content.Load<Texture2D>("Button");
 
-            WhiteButton = new Button("Play\nWhite", ButtonTexture, new Vector2(100, 100), new Vector2(5, 5), new Vector2(0, 0), Color.White, font);
-            BlackButton = new Button("Play\nBlack", ButtonTexture, new Vector2(300, 100), new Vector2(5, 5), new Vector2(0, 0), Color.White, font);
-            SpectateButton = new Button("Spectate", ButtonTexture, new Vector2(200, 400), new Vector2(5, 5), new Vector2(0, 0), Color.White, font);
+            WhiteButton = new Button("Play\nWhite", ButtonTexture, new Vector2(100, 100), new Vector2(10, 20), new Vector2(0, 0), Color.White, font);
+            BlackButton = new Button("Play\nBlack", ButtonTexture, new Vector2(300, 100), new Vector2(10, 20), new Vector2(0, 0), Color.White, font);
+            SpectateButton = new Button("Spectate", ButtonTexture, new Vector2(200, 400), new Vector2(10, 5), new Vector2(0, 0), Color.White, font);
         }
 
         public (bool moveOn, bool spectating, bool playingWhite) Update(GameTime gameTime) //returns true if menu exited

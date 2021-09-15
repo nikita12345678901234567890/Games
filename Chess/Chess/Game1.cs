@@ -48,6 +48,10 @@ namespace Chess
 
         bool amWhite;
 
+        const int delayMillis = 250;
+
+        TimeSpan prevTime;
+
 
         public Game1()
         {
@@ -98,8 +102,6 @@ namespace Chess
             Textures.Add((PieceTypes.Queen, true), Content.Load<Texture2D>("whitequeen"));
             Textures.Add((PieceTypes.Queen, false), Content.Load<Texture2D>("blackqueen"));
 
-            //Task.Run(async () => await ApiCalls.ResetBoard()).Wait();
-            //Task.Run(async () => await GetGameState()).Wait();
 
             playerID = Task.Run(async () => await ApiCalls.GetPlayerId()).Result; //No connection could be made because the target machine actively refused it. (localhost:5001)
         }
@@ -110,6 +112,13 @@ namespace Chess
                 Exit();
 
             InputManager.MouseState = Mouse.GetState();
+
+            prevTime += gameTime.ElapsedGameTime;
+            if (prevTime.TotalMilliseconds >= delayMillis)
+            {
+                Task.Run(async () => await GetGameState()).Wait();
+            }
+
 
             if (inMenu)
             {
@@ -123,7 +132,7 @@ namespace Chess
                     }
                     else
                     {
-                        var color = Task.Run(async () => await ApiCalls.GetGameColor(playerID, result.playingWhite)).Result;
+                        bool? color = Task.Run(async () => await ApiCalls.GetGameColor(playerID, result.playingWhite)).Result;
                         if (color == null)
                         {
 
@@ -133,6 +142,7 @@ namespace Chess
                             amWhite = (bool)color;
 
                             Task.Run(async () => await ApiCalls.ResetBoard(playerID)).Wait();
+                            Task.Run(async () => await GetGameState()).Wait();
 
                             inMenu = false;
                         }
@@ -146,7 +156,7 @@ namespace Chess
             }
 
             //Checking if mouse clicked:
-            else if (InputManager.MouseState.LeftButton == ButtonState.Pressed && InputManager.LastMouseState.LeftButton == ButtonState.Released && GraphicsDevice.Viewport.Bounds.Contains(InputManager.MouseState.Position))
+            else if (InputManager.MouseState.LeftButton == ButtonState.Pressed && InputManager.LastMouseState.LeftButton == ButtonState.Released && GraphicsDevice.Viewport.Bounds.Contains(InputManager.MouseState.Position) && currentGameState.Whiteturn == amWhite)
             {
                 var mouseCell = PositionToCell(InputManager.MouseState.Position);
 
@@ -158,22 +168,22 @@ namespace Chess
 
                     if (mouseCell == choices.Queen.ToPoint())
                     {
-                        Task.Run(async () => await ApiCalls.Promote("Queen")).Wait();
+                        Task.Run(async () => await ApiCalls.Promote(playerID, "Queen")).Wait();
                     }
 
                     else if (mouseCell == choices.Rook.ToPoint())
                     {
-                        Task.Run(async () => await ApiCalls.Promote("Rook")).Wait();
+                        Task.Run(async () => await ApiCalls.Promote(playerID, "Rook")).Wait();
                     }
 
                     else if (mouseCell == choices.Bishop.ToPoint())
                     {
-                        Task.Run(async () => await ApiCalls.Promote("Bishop")).Wait();
+                        Task.Run(async () => await ApiCalls.Promote(playerID, "Bishop")).Wait();
                     }
 
                     else if (mouseCell == choices.Knight.ToPoint())
                     {
-                        Task.Run(async () => await ApiCalls.Promote("Knight")).Wait();
+                        Task.Run(async () => await ApiCalls.Promote(playerID, "Knight")).Wait();
                     }
 
                     Task.Run(async () => await GetGameState()).Wait();
@@ -187,7 +197,7 @@ namespace Chess
                 }
 
                 //Selecting piece:
-                else if (currentGameState.PieceGrid[mouseCell.Y, mouseCell.X] != null && currentGameState.PieceGrid[mouseCell.Y, mouseCell.X].IsWhite == currentGameState.Whiteturn)
+                else if (currentGameState.PieceGrid[mouseCell.Y, mouseCell.X] != null && currentGameState.PieceGrid[mouseCell.Y, mouseCell.X].IsWhite == amWhite)
                 {
                     HighlightedSquares.Clear();
 
@@ -200,13 +210,15 @@ namespace Chess
                 {
                     if (HighlightedSquares.Contains(mouseCell) && mouseCell != HighlightedSquares[0])
                     {
-                        Task.Run(async () => await ApiCalls.Move(HighlightedSquares[0], mouseCell)).Wait();
+                        Task.Run(async () => await ApiCalls.Move(playerID, HighlightedSquares[0], mouseCell)).Wait();
 
                         HighlightedSquares.Clear();
 
                         Task.Run(async () => await ApiCalls.CheckPromotion()).Wait();
 
                         Task.Run(async () => await GetGameState()).Wait();
+
+
 
                         CheckIfGameOver();
                     }
@@ -225,11 +237,11 @@ namespace Chess
             var checkForMoveResults = Task.Run(async () => await ApiCalls.CheckForNoMoves()).Result;
             if (checkForMoveResults)
             {
-                if (currentGameState.Whiteturn && currentGameState.WhiteInCheck)
+                if (amWhite && currentGameState.WhiteInCheck)
                 {
                     result = System.Windows.Forms.MessageBox.Show("White in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
                 }
-                else if (!currentGameState.Whiteturn && currentGameState.BlackInCheck)
+                else if (!amWhite && currentGameState.BlackInCheck)
                 {
                     result = System.Windows.Forms.MessageBox.Show("Black in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
                 }
