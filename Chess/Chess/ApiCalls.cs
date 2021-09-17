@@ -13,8 +13,14 @@ namespace Chess
 
     public static class ApiCalls
     {
-        static HttpClient client = new HttpClient();
+        static HttpClient client;
+        
+        static ApiCalls()
+        {
+            client = new HttpClient();
+        }
 
+        
 
         public static async Task ResetBoard(Guid playerID)
         {
@@ -24,7 +30,7 @@ namespace Chess
 
         public static async Task<Guid> GetPlayerId()
         {
-           var result = await client.GetAsync($"https://localhost:5001/game/GetPlayerID");
+            var result = await client.GetAsync($"https://localhost:5001/game/GetPlayerID");
             var temp = await result.Content.ReadAsStringAsync();
             temp = temp.Substring(1, temp.Length - 2);
             return Guid.Parse(temp);

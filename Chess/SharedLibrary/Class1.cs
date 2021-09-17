@@ -410,7 +410,6 @@ namespace SharedLibrary
                 }
 
                 LastMove = destination;
-                Whiteturn = !Whiteturn;
 
                 //Setting HasMoved:
                 var lastMovedPiece = PieceGrid[LastMove.Y, LastMove.X];
@@ -427,6 +426,8 @@ namespace SharedLibrary
 
                 if (!IsPromotion)
                 {
+                    Whiteturn = !Whiteturn;
+
                     //Checking if last move put someone in check:
                     if (IsChecking(PieceGrid[LastMove.Y, LastMove.X], LastMove, PieceGrid))
                     {
@@ -619,20 +620,27 @@ namespace SharedLibrary
                 switch (pieceChoice)
                 {
                     case "Queen":
-                    //case "queen": I don't need this, but this will run the case in both situations.
                         PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Queen(promotionInfo.IsWhite);
+                        choosingPromotion = false;
+                        Whiteturn = !Whiteturn;
                         break;
 
                     case "Rook":
                         PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Rook(promotionInfo.IsWhite);
+                        choosingPromotion = false;
+                        Whiteturn = !Whiteturn;
                         break;
 
                     case "Bishop":
                         PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Bishop(promotionInfo.IsWhite);
+                        choosingPromotion = false;
+                        Whiteturn = !Whiteturn;
                         break;
 
                     case "Knight":
                         PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Knight(promotionInfo.IsWhite);
+                        choosingPromotion = false;
+                        Whiteturn = !Whiteturn;
                         break;
                 }
             }
@@ -659,7 +667,7 @@ namespace SharedLibrary
                 {
                     promotion = true;
                     isWhite = false;
-                    pawnLocation = new Square(x, 0);
+                    pawnLocation = new Square(x, 7);
                 }
             }
 

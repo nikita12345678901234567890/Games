@@ -1,4 +1,3 @@
-Promotion
 Win screen always stalemate
 black in check not highlighting
 Fix retry button
