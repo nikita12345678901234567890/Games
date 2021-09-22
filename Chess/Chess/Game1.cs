@@ -191,7 +191,7 @@ namespace Chess
                 }
 
                 //Deselecting piece:
-                if (currentGameState.PieceGrid[mouseCell.Y, mouseCell.X] != null && HighlightedSquares.Count > 0 && mouseCell == HighlightedSquares[0])
+                else if (currentGameState.PieceGrid[mouseCell.Y, mouseCell.X] != null && HighlightedSquares.Count > 0 && mouseCell == HighlightedSquares[0])
                 {
                     HighlightedSquares.Clear();
                 }
@@ -237,11 +237,11 @@ namespace Chess
             var checkForMoveResults = Task.Run(async () => await ApiCalls.CheckForNoMoves()).Result;
             if (checkForMoveResults)
             {
-                if (amWhite && currentGameState.WhiteInCheck)
+                if (currentGameState.WhiteInCheck)
                 {
                     result = System.Windows.Forms.MessageBox.Show("White in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
                 }
-                else if (!amWhite && currentGameState.BlackInCheck)
+                else if (currentGameState.BlackInCheck)
                 {
                     result = System.Windows.Forms.MessageBox.Show("Black in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
                 }
@@ -263,7 +263,7 @@ namespace Chess
                     break;
 
                 case System.Windows.Forms.DialogResult.Retry:
-                    //Task.Run(async () => await ApiCalls.ResetBoard()).Wait();
+                    Task.Run(async () => await ApiCalls.ResetBoard(playerID)).Wait();
                     break;
 
                 case System.Windows.Forms.DialogResult.Ignore:
@@ -516,7 +516,7 @@ namespace Chess
             }
             else if(ending[2] == "b")
             {
-                gamestate.BlackInCheck = false;
+                gamestate.BlackInCheck = true;
             }
 
             if (ending[3] == "y")
