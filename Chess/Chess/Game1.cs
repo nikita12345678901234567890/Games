@@ -187,7 +187,7 @@ namespace Chess
                     }
 
                     Task.Run(async () => await GetGameState()).Wait();
-                    CheckIfGameOver();
+                    CheckIfGameOver(gameTime);
                 }
 
                 //Deselecting piece:
@@ -220,7 +220,7 @@ namespace Chess
 
 
 
-                        CheckIfGameOver();
+                        CheckIfGameOver(gameTime);
                     }
                 }
             }
@@ -230,13 +230,14 @@ namespace Chess
             base.Update(gameTime);
         }
 
-        void CheckIfGameOver()
+        void CheckIfGameOver(GameTime gameTime)
         {
             System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
 
             var checkForMoveResults = Task.Run(async () => await ApiCalls.CheckForNoMoves()).Result;
             if (checkForMoveResults)
             {
+                Draw(gameTime);
                 if (currentGameState.WhiteInCheck)
                 {
                     result = System.Windows.Forms.MessageBox.Show("White in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
@@ -253,6 +254,7 @@ namespace Chess
 
             else if (currentGameState.moveCounter >= 50)
             {
+                Draw(gameTime);
                 result = System.Windows.Forms.MessageBox.Show("There have been 50 moves and nothing has happened", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
             }
 
