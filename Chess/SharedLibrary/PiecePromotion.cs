@@ -15,20 +15,20 @@ namespace SharedLibrary
         public PiecePromotion(bool white, int x)
         {
             this.white = white;
-            if (white)
-            {
+            //if (white)
+            //{
                 Queen = new Square(x, 0);
                 Rook = new Square(x, 1);
                 Bishop = new Square(x, 2);
                 Knight = new Square(x, 3);
-            }
-            else
-            {
-                Queen = new Square(x, 7);
-                Rook = new Square(x, 6);
-                Bishop = new Square(x, 5);
-                Knight = new Square(x, 4);
-            }
+            //}
+            //else
+            //{
+            //    Queen = new Square(x, 7);
+            //    Rook = new Square(x, 6);
+            //    Bishop = new Square(x, 5);
+            //    Knight = new Square(x, 4);
+            //}
         }
     }
 }

@@ -20,11 +20,6 @@ namespace SharedLibrary.Pieces
 
         public override List<(Square, MoveTypes)> GetMoves(Piece[,] PieceGrid, Square position)
         {
-            /*
-            To-Do:
-            Add functionality for turning into another piece upon reaching the other side of the board.
-            */
-
             List<(Square, MoveTypes)> Moves = new List<(Square, MoveTypes)>();
 
             //Moving forward:
