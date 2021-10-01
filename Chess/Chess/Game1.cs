@@ -153,8 +153,8 @@ namespace Chess
             }
 
             else if (spectating)
-            { 
-                
+            {
+
             }
 
 
@@ -439,6 +439,7 @@ namespace Chess
                 return;
             }
             currentGameState = DecodeFEN(newFEN);
+            lastFEN = newFEN;
         }
 
         public GameState DecodeFEN(string FEN)
@@ -600,7 +601,7 @@ namespace Chess
             {
                 gamestate.WhiteInCheck = true;
             }
-            else if(ending[2] == "b")
+            else if (ending[2] == "b")
             {
                 gamestate.BlackInCheck = true;
             }
