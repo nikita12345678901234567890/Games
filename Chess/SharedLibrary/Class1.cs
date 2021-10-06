@@ -488,7 +488,7 @@ namespace SharedLibrary
                         }
                     }
 
-                    if (spaces > 0 || x == 7)
+                    if (spaces > 0)
                     {
                         FEN += spaces;
                         spaces = 0;

@@ -1,2 +1,1 @@
 Make it draw before pop-up
-Get rid of the zeros in FEN
