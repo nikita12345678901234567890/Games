@@ -14,7 +14,9 @@ namespace Chess
     public static class ApiCalls
     {
         static HttpClient client;
-        
+        static readonly string baseURL = "https://localhost:5001";
+
+
         static ApiCalls()
         {
             client = new HttpClient();
@@ -24,13 +26,13 @@ namespace Chess
 
         public static async Task ResetBoard(Guid playerID)
         {
-            var result = await client.GetAsync($"https://localhost:5001/game/ResetBoard/{playerID}");
+            var result = await client.GetAsync($"{baseURL}/game/ResetBoard/{playerID}");
         }
 
 
         public static async Task<Guid> GetPlayerId()
         {
-            var result = await client.GetAsync($"https://localhost:5001/game/GetPlayerID");
+            var result = await client.GetAsync($"{baseURL}/game/GetPlayerID");
             var temp = await result.Content.ReadAsStringAsync();
             temp = temp.Substring(1, temp.Length - 2);
             return Guid.Parse(temp);
@@ -39,7 +41,7 @@ namespace Chess
 
         public static async Task<bool?> GetGameColor(Guid playerID, bool wantsWhite)
         {
-            var result = await client.GetAsync($"https://localhost:5001/game/GetGameColor/{playerID}/{wantsWhite}");
+            var result = await client.GetAsync($"{baseURL}/game/GetGameColor/{playerID}/{wantsWhite}");
             var temp = await result.Content.ReadAsStringAsync();
 
             return bool.Parse(temp);
@@ -56,7 +58,7 @@ namespace Chess
 
             StringContent s = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
-            var result = await client.PostAsync($"https://localhost:5001/game/GetMoves", s);
+            var result = await client.PostAsync($"{baseURL}/game/GetMoves", s);
             var temp = await result.Content.ReadAsStringAsync();
 
             var squares = JsonSerializer.Deserialize<Square[]>(temp, options);
@@ -66,13 +68,13 @@ namespace Chess
 
         public static async Task Move(Guid playerID, Point piece, Point destination)
         {
-            var result = await client.GetAsync($"https://localhost:5001/game/Move/{playerID}/{piece.X}/{piece.Y}/{destination.X}/{destination.Y}");
+            var result = await client.GetAsync($"{baseURL}/game/Move/{playerID}/{piece.X}/{piece.Y}/{destination.X}/{destination.Y}");
         }
 
 
         public static async Task<bool> CheckForNoMoves()
         {
-            var result = await client.GetAsync($"https://localhost:5001/game/CheckForNoMoves");
+            var result = await client.GetAsync($"{baseURL}/game/CheckForNoMoves");
             var temp = await result.Content.ReadAsStringAsync();
 
             return bool.Parse(temp);
@@ -81,7 +83,7 @@ namespace Chess
 
         public static async Task<string> MakeFEN()
         {
-            var result = await client.GetAsync($"https://localhost:5001/game/MakeFEN");
+            var result = await client.GetAsync($"{baseURL}/game/MakeFEN");
             var temp = await result.Content.ReadAsStringAsync();
 
             return temp.ToString();
@@ -89,12 +91,12 @@ namespace Chess
 
         public static async Task CheckPromotion()
         {
-            var result = await client.GetAsync($"https://localhost:5001/game/CheckPromotion");
+            var result = await client.GetAsync($"{baseURL}/game/CheckPromotion");
         }
 
         public static async Task Promote(Guid playerID, string pieceChoice)
         {
-            var result = await client.GetAsync($"https://localhost:5001/game/Promote/{playerID}/{pieceChoice}");
+            var result = await client.GetAsync($"{baseURL}/game/Promote/{playerID}/{pieceChoice}");
         }
     }
 }
