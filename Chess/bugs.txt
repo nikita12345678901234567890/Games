@@ -1,1 +1,2 @@
 Make it draw before pop-up
+Promotion shows up on both screens

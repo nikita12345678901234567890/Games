@@ -158,14 +158,8 @@ namespace Chess
             }
 
 
-            //Populate piecegrid flipped
-            //Populate highlighted squares flipped
-            //Unflip highlighted squares before sending them to server
-            //Flip mousecell when sending to server
-
-
             //Checking if mouse clicked:
-            else if (InputManager.MouseState.LeftButton == ButtonState.Pressed && InputManager.LastMouseState.LeftButton == ButtonState.Released && GraphicsDevice.Viewport.Bounds.Contains(InputManager.MouseState.Position) && currentGameState.Whiteturn == amWhite)
+            else if (InputManager.MouseState.LeftButton == ButtonState.Pressed && InputManager.LastMouseState.LeftButton == ButtonState.Released && GraphicsDevice.Viewport.Bounds.Contains(InputManager.MouseState.Position) && currentGameState.Whiteturn == amWhite && IsActive)
             {
                 var mouseCell = PositionToCell(InputManager.MouseState.Position);
 
@@ -210,16 +204,35 @@ namespace Chess
                 {
                     HighlightedSquares.Clear();
 
-                    Point[] moves = Task.Run(async () => await ApiCalls.GetMoves(new Point(mouseCell.X, mouseCell.Y))).Result;
+                    Point[] moves;
+                    if (amWhite)
+                    {
+                        moves = Task.Run(async () => await ApiCalls.GetMoves(mouseCell)).Result;
 
-                    HighlightedSquares.AddRange(moves);
+                        HighlightedSquares.AddRange(moves);
+                    }
+                    else
+                    {
+                        moves = Task.Run(async () => await ApiCalls.GetMoves(Flip(mouseCell))).Result;
+
+                        HighlightedSquares.AddRange(FlipSquares(moves));
+                    }
+
+                    
                 }
                 //Selecting move:
                 else
                 {
                     if (HighlightedSquares.Contains(mouseCell) && mouseCell != HighlightedSquares[0])
                     {
-                        Task.Run(async () => await ApiCalls.Move(playerID, HighlightedSquares[0], mouseCell)).Wait();
+                        if (amWhite)
+                        {
+                            Task.Run(async () => await ApiCalls.Move(playerID, HighlightedSquares[0], mouseCell)).Wait();
+                        }
+                        else
+                        {
+                            Task.Run(async () => await ApiCalls.Move(playerID, Flip(HighlightedSquares[0]), Flip(mouseCell))).Wait();
+                        }
 
                         HighlightedSquares.Clear();
 
@@ -291,6 +304,22 @@ namespace Chess
         public Point PositionToCell(Point position)
         {
             return new Point((position.X / squaresize), (position.Y / squaresize));
+        }
+
+        public Point Flip(Point square)
+        {
+            return new Point(7 - square.X, 7 - square.Y);
+        }
+        public Point[] FlipSquares(Point[] squares)
+        {
+            Point[] flipped = new Point[squares.Length];
+
+            for (int i = 0; i < squares.Length; i++)
+            {
+                flipped[i] = new Point(7 - squares[i].X, 7 - squares[i].Y);
+            }
+
+            return flipped;
         }
 
         protected override void Draw(GameTime gameTime)
@@ -425,6 +454,11 @@ namespace Chess
                     isWhite = false;
                     pawnLocation = new Point(x, 0);
                 }
+            }
+
+            if (promotion && isWhite != amWhite)
+            {
+                promotion = false;
             }
 
             return (promotion, isWhite, pawnLocation);
