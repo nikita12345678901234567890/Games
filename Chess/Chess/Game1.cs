@@ -37,8 +37,6 @@ namespace Chess
 
         PiecePromotion choices;
 
-        (bool promotion, bool IsWhite, Point pawnLocation) promotionInfo;
-
         GameState currentGameState;
 
 
@@ -166,8 +164,8 @@ namespace Chess
                 //If choosing a piece for promotion:
                 if (currentGameState.ChoosingPromotion)
                 {
-                    promotionInfo = CheckPromotion();
-                    choices = new PiecePromotion(promotionInfo.IsWhite, promotionInfo.pawnLocation.X);
+                    var promotionInfo = CheckPromotion();
+                    choices = new PiecePromotion(amWhite, promotionInfo.pawnLocation.X);
 
                     if (mouseCell == choices.Queen.ToPoint())
                     {
@@ -240,6 +238,11 @@ namespace Chess
 
                         Task.Run(async () => await GetGameState()).Wait();
 
+                        var promotionInfo = CheckPromotion();
+                        if (promotionInfo.promotion)
+                        {
+                            choices = new PiecePromotion(amWhite, promotionInfo.pawnLocation.X);
+                        }
 
 
                         CheckIfGameOver(gameTime);
@@ -403,25 +406,23 @@ namespace Chess
 
 
 
-                if (currentGameState.ChoosingPromotion)
+                if (currentGameState.ChoosingPromotion && currentGameState.Whiteturn == amWhite)
                 {
                     //Gray out whole screen:
                     spriteBatch.Draw(Pixel, graphics.GraphicsDevice.Viewport.Bounds, Color.White * 0.5f);
 
-                    promotionInfo = CheckPromotion();
-                    choices = new PiecePromotion(promotionInfo.IsWhite, promotionInfo.pawnLocation.X);
 
                     //Draw piece choices:
-                    var texture = Textures[(PieceTypes.Queen, promotionInfo.IsWhite)];
+                    var texture = Textures[(PieceTypes.Queen, amWhite)];
                     spriteBatch.Draw(texture, CellCenter(choices.Queen.ToPoint()), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
 
-                    texture = Textures[(PieceTypes.Rook, promotionInfo.IsWhite)];
+                    texture = Textures[(PieceTypes.Rook, amWhite)];
                     spriteBatch.Draw(texture, CellCenter(choices.Rook.ToPoint()), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
 
-                    texture = Textures[(PieceTypes.Bishop, promotionInfo.IsWhite)];
+                    texture = Textures[(PieceTypes.Bishop, amWhite)];
                     spriteBatch.Draw(texture, CellCenter(choices.Bishop.ToPoint()), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
 
-                    texture = Textures[(PieceTypes.Knight, promotionInfo.IsWhite)];
+                    texture = Textures[(PieceTypes.Knight, amWhite)];
                     spriteBatch.Draw(texture, CellCenter(choices.Knight.ToPoint()), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
                 }
             }
@@ -443,22 +444,9 @@ namespace Chess
                 if (currentGameState.PieceGrid[0, x] != null && currentGameState.PieceGrid[0, x].PieceType == PieceTypes.Pawn)
                 {
                     promotion = true;
-                    isWhite = true;
+                    isWhite = amWhite;
                     pawnLocation = new Point(x, 0);
                 }
-
-                //Checking for a pawn in the bottom row:
-                if (currentGameState.PieceGrid[currentGameState.PieceGrid.GetLength(0) - 1, x] != null && currentGameState.PieceGrid[currentGameState.PieceGrid.GetLength(0) - 1, x].PieceType == PieceTypes.Pawn)
-                {
-                    promotion = true;
-                    isWhite = false;
-                    pawnLocation = new Point(x, 0);
-                }
-            }
-
-            if (promotion && isWhite != amWhite)
-            {
-                promotion = false;
             }
 
             return (promotion, isWhite, pawnLocation);
