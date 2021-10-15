@@ -18,6 +18,8 @@ namespace Chess
 {
     public class Game1 : Game
     {
+        private ChessGame chessGame;
+
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
@@ -44,6 +46,8 @@ namespace Chess
 
         Guid playerID;
 
+        Guid gameID;
+
         bool amWhite;
 
         const int delayMillis = 250;
@@ -52,13 +56,14 @@ namespace Chess
 
         string lastFEN = String.Empty;
 
-
-        public Game1()
+        public Game1(Guid gameID)
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-            //Task.Run(CallApi);  //part of Api example 
+
+            this.gameID = gameID;
+
         }
 
         protected override void Initialize()
@@ -77,6 +82,8 @@ namespace Chess
             var exceptions = Assembly.GetAssembly(typeof(int)).GetTypes().
                              Where(x => x.IsSubclassOf(typeof(Exception))).ToArray();
 
+            chessGame = new ChessGame();
+            
             base.Initialize();
         }
 
@@ -103,7 +110,7 @@ namespace Chess
             Textures.Add((PieceTypes.Queen, false), Content.Load<Texture2D>("blackqueen"));
 
 
-            playerID = Task.Run(async () => await ApiCalls.GetPlayerId()).Result; //No connection could be made because the target machine actively refused it. (localhost:5001)
+            playerID = Task.Run(async () => await ApiCalls.GetPlayerId(gameID)).Result; //No connection could be made because the target machine actively refused it. (localhost:5001)
         }
 
         protected override void Update(GameTime gameTime)
@@ -132,16 +139,17 @@ namespace Chess
                     }
                     else
                     {
-                        bool? color = Task.Run(async () => await ApiCalls.GetGameColor(playerID, result.playingWhite)).Result;
+                        bool? color = Task.Run(async () => await ApiCalls.GetGameColor(gameID, playerID, result.playingWhite)).Result;
                         if (color == null)
                         {
-
+                            inMenu = false;
+                            spectating = true;
                         }
                         else
                         {
                             amWhite = (bool)color;
 
-                            Task.Run(async () => await ApiCalls.ResetBoard(playerID)).Wait();
+                            Task.Run(async () => await ApiCalls.ResetBoard(gameID, playerID)).Wait();
                             Task.Run(async () => await GetGameState()).Wait();
 
                             inMenu = false;
@@ -169,22 +177,22 @@ namespace Chess
 
                     if (mouseCell == choices.Queen.ToPoint())
                     {
-                        Task.Run(async () => await ApiCalls.Promote(playerID, "Queen")).Wait();
+                        Task.Run(async () => await ApiCalls.Promote(gameID, playerID, "Queen")).Wait();
                     }
 
                     else if (mouseCell == choices.Rook.ToPoint())
                     {
-                        Task.Run(async () => await ApiCalls.Promote(playerID, "Rook")).Wait();
+                        Task.Run(async () => await ApiCalls.Promote(gameID, playerID, "Rook")).Wait();
                     }
 
                     else if (mouseCell == choices.Bishop.ToPoint())
                     {
-                        Task.Run(async () => await ApiCalls.Promote(playerID, "Bishop")).Wait();
+                        Task.Run(async () => await ApiCalls.Promote(gameID, playerID, "Bishop")).Wait();
                     }
 
                     else if (mouseCell == choices.Knight.ToPoint())
                     {
-                        Task.Run(async () => await ApiCalls.Promote(playerID, "Knight")).Wait();
+                        Task.Run(async () => await ApiCalls.Promote(gameID, playerID, "Knight")).Wait();
                     }
 
                     Task.Run(async () => await GetGameState()).Wait();
@@ -205,13 +213,13 @@ namespace Chess
                     Point[] moves;
                     if (amWhite)
                     {
-                        moves = Task.Run(async () => await ApiCalls.GetMoves(mouseCell)).Result;
+                        moves = Task.Run(async () => await ApiCalls.GetMoves(gameID, mouseCell)).Result;
 
                         HighlightedSquares.AddRange(moves);
                     }
                     else
                     {
-                        moves = Task.Run(async () => await ApiCalls.GetMoves(Flip(mouseCell))).Result;
+                        moves = Task.Run(async () => await ApiCalls.GetMoves(gameID, Flip(mouseCell))).Result;
 
                         HighlightedSquares.AddRange(FlipSquares(moves));
                     }
@@ -225,16 +233,16 @@ namespace Chess
                     {
                         if (amWhite)
                         {
-                            Task.Run(async () => await ApiCalls.Move(playerID, HighlightedSquares[0], mouseCell)).Wait();
+                            Task.Run(async () => await ApiCalls.Move(gameID, playerID, HighlightedSquares[0], mouseCell)).Wait();
                         }
                         else
                         {
-                            Task.Run(async () => await ApiCalls.Move(playerID, Flip(HighlightedSquares[0]), Flip(mouseCell))).Wait();
+                            Task.Run(async () => await ApiCalls.Move(gameID, playerID, Flip(HighlightedSquares[0]), Flip(mouseCell))).Wait();
                         }
 
                         HighlightedSquares.Clear();
 
-                        Task.Run(async () => await ApiCalls.CheckPromotion()).Wait();
+                        Task.Run(async () => await ApiCalls.CheckPromotion(gameID)).Wait();
 
                         Task.Run(async () => await GetGameState()).Wait();
 
@@ -259,7 +267,7 @@ namespace Chess
         {
             System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
 
-            var checkForMoveResults = Task.Run(async () => await ApiCalls.CheckForNoMoves()).Result;
+            var checkForMoveResults = Task.Run(async () => await ApiCalls.CheckForNoMoves(gameID)).Result;
             if (checkForMoveResults)
             {
                 Draw(gameTime);
@@ -290,7 +298,7 @@ namespace Chess
                     break;
 
                 case System.Windows.Forms.DialogResult.Retry:
-                    Task.Run(async () => await ApiCalls.ResetBoard(playerID)).Wait();
+                    Task.Run(async () => await ApiCalls.ResetBoard(gameID, playerID)).Wait();
                     break;
 
                 case System.Windows.Forms.DialogResult.Ignore:
@@ -455,7 +463,7 @@ namespace Chess
 
         public async Task GetGameState()
         {
-            string newFEN = await ApiCalls.MakeFEN();
+            string newFEN = await ApiCalls.MakeFEN(gameID);
             if (newFEN == lastFEN)
             {
                 return;
@@ -486,51 +494,51 @@ namespace Chess
                         switch (rows[y][i])
                             {
                                 case 'p':
-                                    gamestate.PieceGrid[y, x] = new Pawn(false);
+                                    gamestate.PieceGrid[y, x] = new Pawn(chessGame, false);
                                     break;
 
                                 case 'P':
-                                    gamestate.PieceGrid[y, x] = new Pawn(true);
+                                    gamestate.PieceGrid[y, x] = new Pawn(chessGame, true);
                                     break;
 
                                 case 'b':
-                                    gamestate.PieceGrid[y, x] = new Bishop(false);
+                                    gamestate.PieceGrid[y, x] = new Bishop(chessGame, false);
                                     break;
 
                                 case 'B':
-                                    gamestate.PieceGrid[y, x] = new Bishop(true);
+                                    gamestate.PieceGrid[y, x] = new Bishop(chessGame, true);
                                     break;
 
                                 case 'n':
-                                    gamestate.PieceGrid[y, x] = new Knight(false);
+                                    gamestate.PieceGrid[y, x] = new Knight(chessGame, false);
                                     break;
 
                                 case 'N':
-                                    gamestate.PieceGrid[y, x] = new Knight(true);
+                                    gamestate.PieceGrid[y, x] = new Knight(chessGame, true);
                                     break;
 
                                 case 'k':
-                                    gamestate.PieceGrid[y, x] = new King(false);
+                                    gamestate.PieceGrid[y, x] = new King(chessGame, false);
                                     break;
 
                                 case 'K':
-                                    gamestate.PieceGrid[y, x] = new King(true);
+                                    gamestate.PieceGrid[y, x] = new King(chessGame, true);
                                     break;
 
                                 case 'r':
-                                    gamestate.PieceGrid[y, x] = new Rook(false);
+                                    gamestate.PieceGrid[y, x] = new Rook(chessGame, false);
                                     break;
 
                                 case 'R':
-                                    gamestate.PieceGrid[y, x] = new Rook(true);
+                                    gamestate.PieceGrid[y, x] = new Rook(chessGame, true);
                                     break;
 
                                 case 'q':
-                                    gamestate.PieceGrid[y, x] = new Queen(false);
+                                    gamestate.PieceGrid[y, x] = new Queen(chessGame, false);
                                     break;
 
                                 case 'Q':
-                                    gamestate.PieceGrid[y, x] = new Queen(true);
+                                    gamestate.PieceGrid[y, x] = new Queen(chessGame, true);
                                     break;
 
                                 default:
@@ -543,51 +551,51 @@ namespace Chess
                             switch (rows[y][i])
                             {
                                 case 'p':
-                                    gamestate.PieceGrid[7 - y, 7 - x] = new Pawn(false);
+                                    gamestate.PieceGrid[7 - y, 7 - x] = new Pawn(chessGame, false);
                                     break;
 
                                 case 'P':
-                                    gamestate.PieceGrid[7 - y, 7 - x] = new Pawn(true);
+                                    gamestate.PieceGrid[7 - y, 7 - x] = new Pawn(chessGame, true);
                                     break;
 
                                 case 'b':
-                                    gamestate.PieceGrid[7 - y, 7 - x] = new Bishop(false);
+                                    gamestate.PieceGrid[7 - y, 7 - x] = new Bishop(chessGame, false);
                                     break;
 
                                 case 'B':
-                                    gamestate.PieceGrid[7 - y, 7 - x] = new Bishop(true);
+                                    gamestate.PieceGrid[7 - y, 7 - x] = new Bishop(chessGame, true);
                                     break;
 
                                 case 'n':
-                                    gamestate.PieceGrid[7 - y, 7 - x] = new Knight(false);
+                                    gamestate.PieceGrid[7 - y, 7 - x] = new Knight(chessGame, false);
                                     break;
 
                                 case 'N':
-                                    gamestate.PieceGrid[7 - y, 7 - x] = new Knight(true);
+                                    gamestate.PieceGrid[7 - y, 7 - x] = new Knight(chessGame, true);
                                     break;
 
                                 case 'k':
-                                    gamestate.PieceGrid[7 - y, 7 - x] = new King(false);
+                                    gamestate.PieceGrid[7 - y, 7 - x] = new King(chessGame, false);
                                     break;
 
                                 case 'K':
-                                    gamestate.PieceGrid[7 - y, 7 - x] = new King(true);
+                                    gamestate.PieceGrid[7 - y, 7 - x] = new King(chessGame, true);
                                     break;
 
                                 case 'r':
-                                    gamestate.PieceGrid[7 - y, 7 - x] = new Rook(false);
+                                    gamestate.PieceGrid[7 - y, 7 - x] = new Rook(chessGame, false);
                                     break;
 
                                 case 'R':
-                                    gamestate.PieceGrid[7 - y, 7 - x] = new Rook(true);
+                                    gamestate.PieceGrid[7 - y, 7 - x] = new Rook(chessGame, true);
                                     break;
 
                                 case 'q':
-                                    gamestate.PieceGrid[7 - y, 7 - x] = new Queen(false);
+                                    gamestate.PieceGrid[7 - y, 7 - x] = new Queen(chessGame, false);
                                     break;
 
                                 case 'Q':
-                                    gamestate.PieceGrid[7 - y, 7 - x] = new Queen(true);
+                                    gamestate.PieceGrid[7 - y, 7 - x] = new Queen(chessGame, true);
                                     break;
 
                                 default:

@@ -13,69 +13,76 @@ namespace WebApi2.Controllers
     [Route("game")]
     public class ChessController : Controller
     {
+        static Dictionary<Guid, ChessGame> games = new Dictionary<Guid, ChessGame>();
+
         public IActionResult Index()
         {
             return View();
         }
 
 
-        [HttpGet("GetPlayerId")]
-        public Guid GetPlayerId()
+        [HttpGet("GetPlayerId/{gameID}")]
+        public Guid GetPlayerId(Guid gameID)
         {
+            if(!games.ContainsKey(gameID))
+            {
+                games[gameID] = new ChessGame();
+            }
+
             return Guid.NewGuid();
         }
 
-        [HttpGet("GetGameColor/{playerID}/{wantsWhite}")]
-        public bool? GetGameColor(Guid playerID, bool wantsWhite)
+        [HttpGet("GetGameColor/{gameID}/{playerID}/{wantsWhite}")]
+        public bool? GetGameColor(Guid gameID, Guid playerID, bool wantsWhite)
         {
-            return Class1.GetGameColor(playerID, wantsWhite);
+            return games[gameID].GetGameColor(playerID, wantsWhite);
         }
 
 
-        [HttpGet("ResetBoard/{playerID}")]
-        public void ResetBoard(Guid playerID)
+        [HttpGet("ResetBoard/{gameID}/{playerID}")]
+        public void ResetBoard(Guid gameID, Guid playerID)
         {
-            Class1.ResetBoard(playerID);
+            games[gameID].ResetBoard(playerID);
         }
 
 
-        [HttpPost("GetMoves")]
-        public Square[] GetMoves([FromBody]Square piece)
+        [HttpPost("GetMoves/{gameID}")]
+        public Square[] GetMoves(Guid gameID, [FromBody]Square piece)
         {
-            return Class1.GetMoves(piece);
+            return games[gameID].GetMoves(piece);
         }
 
 
-        [HttpGet("Move/{playerID}/{pieceX}/{pieceY}/{destinationX}/{destinationY}")]
-        public void Move(Guid playerID, int pieceX, int pieceY, int destinationX, int destinationY)
+        [HttpGet("Move/{gameID}/{playerID}/{pieceX}/{pieceY}/{destinationX}/{destinationY}")]
+        public void Move(Guid gameID, Guid playerID, int pieceX, int pieceY, int destinationX, int destinationY)
         {
-            Class1.Move(playerID, new Square(pieceX, pieceY), new Square(destinationX, destinationY));
+            games[gameID].Move(playerID, new Square(pieceX, pieceY), new Square(destinationX, destinationY));
         }
 
 
-        [HttpGet("CheckForNoMoves")]
-        public bool CheckForNoMoves()
+        [HttpGet("CheckForNoMoves/{gameID}")]
+        public bool CheckForNoMoves(Guid gameID)
         {
-            return Class1.CheckForNoMoves();
+            return games[gameID].CheckForNoMoves();
         }
 
 
-        [HttpGet("MakeFEN")]
-        public string MakeFEN()
+        [HttpGet("MakeFEN/{gameID}")]
+        public string MakeFEN(Guid gameID)
         {
-            return Class1.MakeFEN();
+            return games[gameID].MakeFEN();
         }
 
-        [HttpGet("CheckPromotion")]
-        public void CheckPromotion()
+        [HttpGet("CheckPromotion/{gameID}")]
+        public void CheckPromotion(Guid gameID)
         {
-            Class1.CheckPromotion();
+            games[gameID].CheckPromotion();
         }
 
-        [HttpGet("Promote/{playerID}/{pieceChoice}")]
-        public void Promote(Guid playerID, string pieceChoice)
+        [HttpGet("Promote/{gameID}/{playerID}/{pieceChoice}")]
+        public void Promote(Guid gameID, Guid playerID, string pieceChoice)
         {
-            Class1.Promote(playerID, pieceChoice);
+            games[gameID].Promote(playerID, pieceChoice);
         }
     }
 }

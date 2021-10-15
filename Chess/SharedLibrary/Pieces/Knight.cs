@@ -9,8 +9,9 @@ namespace SharedLibrary.Pieces
         public override PieceTypes PieceType => PieceTypes.Knight;
         public override bool IsWhite { get; set; }
 
-        public Knight(bool isWhite)
+        public Knight(ChessGame owningGame, bool isWhite)
         {
+            this.owningGame = owningGame;
             IsWhite = isWhite;
         }
         public override List<(Square, MoveTypes)> GetMoves(Piece[,] PieceGrid, Square position)

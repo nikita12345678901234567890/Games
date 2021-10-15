@@ -16,31 +16,37 @@ namespace SharedLibrary
      * 
      */
 
-    public static class Class1
+    //theAverageFlappy
+    //theSuperSpeedup
+    //un-speedItUp
+
+    //"It's going to crash, but with a different error. This is progress." -Stan 10/14/2021
+
+    public class ChessGame
     {
         //Specifically chess related stuff:
 
-        public static Piece[,] PieceGrid = new Piece[8, 8];
+        public Piece[,] PieceGrid = new Piece[8, 8];
 
-        public static bool Whiteturn = true;
+        public bool Whiteturn = true;
 
-        public static Square LastMove;
+        public Square LastMove;
 
-        public static bool WhiteInCheck = false;
+        public bool WhiteInCheck = false;
 
-        public static bool BlackInCheck = false;
+        public bool BlackInCheck = false;
 
-        public static int moveCounter = 0;
+        public int moveCounter = 0;
 
-        public static PiecePromotion choices;
+        public PiecePromotion choices;
 
-        public static bool choosingPromotion = false;
+        public bool choosingPromotion = false;
 
 
-        private static Guid whitePlayerID = Guid.Empty;
-        private static Guid blackPlayerID = Guid.Empty;
+        private Guid whitePlayerID = Guid.Empty;
+        private Guid blackPlayerID = Guid.Empty;
 
-        public static bool? GetGameColor(Guid playerID, bool wantsWhite)
+        public bool? GetGameColor(Guid playerID, bool wantsWhite)
         {
             if (wantsWhite)
             {
@@ -75,7 +81,7 @@ namespace SharedLibrary
 
 
 
-        public static void ResetBoard(Guid playerID) //Only the white player can reset the board to ensure it only happens once
+        public void ResetBoard(Guid playerID) //Only the white player can reset the board to ensure it only happens once
         {
             if (playerID != whitePlayerID) return;
 
@@ -91,42 +97,42 @@ namespace SharedLibrary
             for (int x = 0; x < 8; x++)
             {
                 //Black pawns:
-                PieceGrid[1, x] = new Pawn(false);
+                PieceGrid[1, x] = new Pawn(this, false);
 
                 //White pawns:
-                PieceGrid[6, x] = new Pawn(true);
+                PieceGrid[6, x] = new Pawn(this, true);
             }
             //Rooks:
             //Black:
-            PieceGrid[0, 0] = new Rook(false);
-            PieceGrid[0, 7] = new Rook(false);
+            PieceGrid[0, 0] = new Rook(this, false);
+            PieceGrid[0, 7] = new Rook(this, false);
             //White:
-            PieceGrid[7, 0] = new Rook(true);
-            PieceGrid[7, 7] = new Rook(true);
+            PieceGrid[7, 0] = new Rook(this, true);
+            PieceGrid[7, 7] = new Rook(this, true);
             //Knights:
             //Black:
-            PieceGrid[0, 1] = new Knight(false);
-            PieceGrid[0, 6] = new Knight(false);
+            PieceGrid[0, 1] = new Knight(this, false);
+            PieceGrid[0, 6] = new Knight(this, false);
             //white:
-            PieceGrid[7, 1] = new Knight(true);
-            PieceGrid[7, 6] = new Knight(true);
+            PieceGrid[7, 1] = new Knight(this, true);
+            PieceGrid[7, 6] = new Knight(this, true);
             //Bishops:
             //Black:
-            PieceGrid[0, 2] = new Bishop(false);
-            PieceGrid[0, 5] = new Bishop(false);
+            PieceGrid[0, 2] = new Bishop(this, false);
+            PieceGrid[0, 5] = new Bishop(this, false);
             //White:
-            PieceGrid[7, 2] = new Bishop(true);
-            PieceGrid[7, 5] = new Bishop(true);
+            PieceGrid[7, 2] = new Bishop(this, true);
+            PieceGrid[7, 5] = new Bishop(this, true);
             //Kings:
             //Black:
-            PieceGrid[0, 4] = new King(false);
+            PieceGrid[0, 4] = new King(this, false);
             //White:
-            PieceGrid[7, 4] = new King(true);
+            PieceGrid[7, 4] = new King(this, true);
             //Queens:
             //Black:
-            PieceGrid[0, 3] = new Queen(false);
+            PieceGrid[0, 3] = new Queen(this, false);
             //White:
-            PieceGrid[7, 3] = new Queen(true);
+            PieceGrid[7, 3] = new Queen(this, true);
 
             Whiteturn = true;
 
@@ -139,7 +145,7 @@ namespace SharedLibrary
             moveCounter = 0;
         }
 
-        private static bool Contains(List<(Square, MoveTypes)> list, Square pos)
+        private bool Contains(List<(Square, MoveTypes)> list, Square pos)
         {
             foreach (var square in list)
             {
@@ -151,7 +157,7 @@ namespace SharedLibrary
             return false;
         }
 
-        private static int IndexOf(List<(Square, MoveTypes)> list, Square pos)
+        private int IndexOf(List<(Square, MoveTypes)> list, Square pos)
         {
             for (int i = 0; i < list.Count; i++)
             {
@@ -163,7 +169,7 @@ namespace SharedLibrary
             return -1;
         }
 
-        private static bool IsChecking(Piece piece, Square pieceGridPositiion, Piece[,] PieceGrid)
+        private bool IsChecking(Piece piece, Square pieceGridPositiion, Piece[,] PieceGrid)
         {
             var movesAndMoveTypes = piece.GetMoves(PieceGrid, pieceGridPositiion);
             var moves = movesAndMoveTypes.Select((x) => x.Item1).ToList();
@@ -179,7 +185,7 @@ namespace SharedLibrary
             return false;
         }
 
-        public static bool UnderAttack(Square square, bool attackedByWhite, Piece[,] PieceGrid)
+        public bool UnderAttack(Square square, bool attackedByWhite, Piece[,] PieceGrid)
         {
             for (int x = 0; x < PieceGrid.GetLength(1); x++)
             {
@@ -204,16 +210,17 @@ namespace SharedLibrary
             return false;
         }
 
-        public static Square[] GetMoves(Square piece)
+        public Square[] GetMoves(Square piece)
         {
             if (PieceGrid[piece.Y, piece.X] == null || PieceGrid[piece.Y, piece.X].IsWhite != Whiteturn)
             {
                 return null;
             }
 
-            List<Square> moves = new List<Square>();
-
-            moves.Add(piece);
+            List<Square> moves = new List<Square>
+            {
+                piece
+            };
 
             List<(Square, MoveTypes)> potentialMoves = PieceGrid[piece.Y, piece.X].GetMoves(PieceGrid, piece);
 
@@ -278,11 +285,12 @@ namespace SharedLibrary
             return moves.ToArray();
         }
 
-        public static List<(Square, MoveTypes)> GetMovesAndTypes(Square piece)
+        public List<(Square, MoveTypes)> GetMovesAndTypes(Square piece)
         {
-            List<(Square, MoveTypes)> moves = new List<(Square, MoveTypes)>();
-
-            moves.Add((piece, MoveTypes.None));
+            List<(Square, MoveTypes)> moves = new List<(Square, MoveTypes)>
+            {
+                (piece, MoveTypes.None)
+            };
 
             List<(Square, MoveTypes)> potentialMoves = PieceGrid[piece.Y, piece.X].GetMoves(PieceGrid, piece);
 
@@ -347,7 +355,7 @@ namespace SharedLibrary
             return moves;
         }
 
-        public static void Move(Guid playerID, Square piece, Square destination)
+        public void Move(Guid playerID, Square piece, Square destination)
         {
             if (!ValidPlayer(playerID)) return;
 
@@ -452,7 +460,7 @@ namespace SharedLibrary
             }
         }
 
-        public static bool CheckForNoMoves()
+        public bool CheckForNoMoves()
         {
             for (int x = 0; x < PieceGrid.GetLength(1); x++)
             {
@@ -470,7 +478,7 @@ namespace SharedLibrary
             return true;
         }
 
-        public static string MakeFEN()
+        public string MakeFEN()
         {
             string FEN = "";
             int spaces = 0;
@@ -572,7 +580,7 @@ namespace SharedLibrary
                 spaces = 0;
             }
 
-            FEN = FEN.Substring(0, FEN.Length - 1);
+            FEN = FEN[0..^1];
 
             FEN += " ";
             if (Whiteturn)
@@ -607,7 +615,7 @@ namespace SharedLibrary
             return FEN;
         }
 
-        public static void Promote(Guid playerID, string pieceChoice)
+        public void Promote(Guid playerID, string pieceChoice)
         {
             if (!ValidPlayer(playerID)) return;
 
@@ -620,25 +628,25 @@ namespace SharedLibrary
                 switch (pieceChoice)
                 {
                     case "Queen":
-                        PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Queen(promotionInfo.IsWhite);
+                        PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Queen(this, promotionInfo.IsWhite);
                         choosingPromotion = false;
                         Whiteturn = !Whiteturn;
                         break;
 
                     case "Rook":
-                        PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Rook(promotionInfo.IsWhite);
+                        PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Rook(this, promotionInfo.IsWhite);
                         choosingPromotion = false;
                         Whiteturn = !Whiteturn;
                         break;
 
                     case "Bishop":
-                        PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Bishop(promotionInfo.IsWhite);
+                        PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Bishop(this, promotionInfo.IsWhite);
                         choosingPromotion = false;
                         Whiteturn = !Whiteturn;
                         break;
 
                     case "Knight":
-                        PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Knight(promotionInfo.IsWhite);
+                        PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Knight(this, promotionInfo.IsWhite);
                         choosingPromotion = false;
                         Whiteturn = !Whiteturn;
                         break;
@@ -646,7 +654,7 @@ namespace SharedLibrary
             }
         }
 
-        private static (bool promotion, bool IsWhite, Square pawnLocation) GetPromotionInfo()
+        private (bool promotion, bool IsWhite, Square pawnLocation) GetPromotionInfo()
         {
             bool promotion = false;
             bool isWhite = false;
@@ -674,7 +682,7 @@ namespace SharedLibrary
             return (promotion, isWhite, pawnLocation);
         }
 
-        public static void CheckPromotion()
+        public void CheckPromotion()
         {
             bool promotion = false;
 
@@ -699,7 +707,7 @@ namespace SharedLibrary
 
 
 
-        private static bool ValidPlayer(Guid playerID)
+        private bool ValidPlayer(Guid playerID)
         {
             if ((playerID == whitePlayerID && Whiteturn) || (playerID == blackPlayerID && !Whiteturn))
             {

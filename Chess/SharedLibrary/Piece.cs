@@ -6,6 +6,8 @@ namespace SharedLibrary
 {
     public abstract class Piece
     {
+        protected ChessGame owningGame;
+
         public abstract PieceTypes PieceType { get; }
         public abstract bool IsWhite { get; set; }
 

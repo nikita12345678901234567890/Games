@@ -1,7 +1,8 @@
 {
   "profiles": {
     "Chess": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "396fa760-c43d-46f2-9780-f70390e4ddea"
     }
   }
 }

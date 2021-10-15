@@ -11,8 +11,10 @@ namespace SharedLibrary.Pieces
 
         public bool HasMoved { get; set; }
 
-        public King(bool isWhite)
+        public King(ChessGame owningGame, bool isWhite)
         {
+            this.owningGame = owningGame;
+
             IsWhite = isWhite;
 
             HasMoved = false;
@@ -41,11 +43,11 @@ namespace SharedLibrary.Pieces
 
             //Castling:
             bool inCheck = false;
-            if (IsWhite && Class1.WhiteInCheck)
+            if (IsWhite && owningGame.WhiteInCheck)
             {
                 inCheck = true;
             }
-            if (!IsWhite && Class1.BlackInCheck)
+            if (!IsWhite && owningGame.BlackInCheck)
             {
                 inCheck = true;
             }
@@ -62,7 +64,7 @@ namespace SharedLibrary.Pieces
                     if (!leftRook.HasMoved && PieceGrid[position.Y, position.X - 1] == null && PieceGrid[position.Y, position.X - 2] == null)
                     {
                         //Checking that the squares the king passes through aren't under attack:
-                        if (!Class1.UnderAttack(new Square(position.X - 1, position.Y), !IsWhite, PieceGrid) && !Class1.UnderAttack(new Square(position.X - 2, position.Y), !IsWhite, PieceGrid))
+                        if (!owningGame.UnderAttack(new Square(position.X - 1, position.Y), !IsWhite, PieceGrid) && !owningGame.UnderAttack(new Square(position.X - 2, position.Y), !IsWhite, PieceGrid))
                         {
                             Moves.Add((new Square(position.X - 2, position.Y), MoveTypes.CastleLeft));
                         }
@@ -78,7 +80,8 @@ namespace SharedLibrary.Pieces
                     if (!rightRook.HasMoved && PieceGrid[position.Y, position.X + 1] == null && PieceGrid[position.Y, position.X + 2] == null)
                     {
                         //Checking that the squares the king passes through aren't under attack:
-                        if (!Class1.UnderAttack(new Square(position.X + 1, position.Y), !IsWhite, PieceGrid) && !Class1.UnderAttack(new Square(position.X + 2, position.Y), !IsWhite, PieceGrid))
+
+                        if (!owningGame.UnderAttack(new Square(position.X + 1, position.Y), !IsWhite, PieceGrid) && !owningGame.UnderAttack(new Square(position.X + 2, position.Y), !IsWhite, PieceGrid))
                         {
                             Moves.Add((new Square(position.X + 2, position.Y), MoveTypes.CastleRight));
                         }

@@ -7,8 +7,12 @@ namespace Chess
         [STAThread]
         static void Main(string[] args)
         {
-            using (var game = new Game1())
+            var gameID = Guid.Parse(args[0]);
+
+            using (var game = new Game1(gameID))
+            {
                 game.Run();
+            }
         }
     }
 }
