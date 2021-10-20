@@ -267,6 +267,9 @@ namespace Chess
         {
             System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
 
+
+            System.Windows.Forms.MessageBox.Show();//pop up a messagebox on launch that asks for gameID.
+
             var checkForMoveResults = Task.Run(async () => await ApiCalls.CheckForNoMoves(gameID)).Result;
             if (checkForMoveResults)
             {

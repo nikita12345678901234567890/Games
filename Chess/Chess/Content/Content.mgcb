@@ -116,6 +116,13 @@
 /processorParam:TextureFormat=Compressed
 /build:File.spritefont;Spritefont
 
+#begin font2.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:font2.spritefont
+
 #begin whitebishop.png
 /importer:TextureImporter
 /processor:TextureProcessor

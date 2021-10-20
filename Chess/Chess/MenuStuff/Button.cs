@@ -12,13 +12,17 @@ namespace Chess
     {
         public string text;
         SpriteFont font;
-        public Texture2D clickedTexture { get; set; }
+        public Texture2D normalTexture;
+        public Texture2D clickedTexture;
 
-        public Button(string text, Texture2D texture, Vector2 position, Vector2 scale, Vector2 origin, Color color, SpriteFont font)
-            :base(texture, position, scale, origin, color)
+        public Button(string text, Texture2D normalTexture, Texture2D clickedTexture, Vector2 position, Vector2 scale, Vector2 origin, Color color, SpriteFont font)
+            :base(normalTexture, position, scale, origin, color)
         {
             this.text = text;
             this.font = font;
+
+            this.normalTexture = normalTexture;
+            this.clickedTexture = clickedTexture;
         }
 
         public bool isClicked(MouseState ms)
