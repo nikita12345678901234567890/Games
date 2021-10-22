@@ -56,14 +56,11 @@ namespace Chess
 
         string lastFEN = String.Empty;
 
-        public Game1(Guid gameID)
+        public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-
-            this.gameID = gameID;
-
         }
 
         protected override void Initialize()
