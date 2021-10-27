@@ -24,18 +24,23 @@ namespace WebApi2.Controllers
         [HttpGet("GetPlayerId/{gameID}")]
         public Guid GetPlayerId(Guid gameID)
         {
-            if(!games.ContainsKey(gameID))
+            Guid id = Guid.NewGuid();
+            if (!games.ContainsKey(gameID))
             {
                 games[gameID] = new ChessGame();
             }
 
-            return Guid.NewGuid();
+            return id;
         }
 
         [HttpGet("GetGameColor/{gameID}/{playerID}/{wantsWhite}")]
         public bool? GetGameColor(Guid gameID, Guid playerID, bool wantsWhite)
         {
-            return games[gameID].GetGameColor(playerID, wantsWhite);
+            bool? result = games[gameID].GetGameColor(playerID, wantsWhite);
+
+            games[gameID].ResetBoard(playerID);
+
+            return result;
         }
 
 

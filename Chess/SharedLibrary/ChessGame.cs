@@ -81,9 +81,9 @@ namespace SharedLibrary
 
 
 
-        public void ResetBoard(Guid playerID) //Only the white player can reset the board to ensure it only happens once
+        public void ResetBoard(Guid playerID)
         {
-            if (playerID != whitePlayerID) return;
+            if (playerID != whitePlayerID && playerID != blackPlayerID) return;
 
             for (int x = 0; x < PieceGrid.GetLength(1); x++)
             {

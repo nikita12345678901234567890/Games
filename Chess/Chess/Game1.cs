@@ -46,7 +46,7 @@ namespace Chess
 
         Guid playerID;
 
-        Guid gameID;
+        Guid gameID = Guid.Empty;
 
         bool amWhite;
 
@@ -105,9 +105,6 @@ namespace Chess
             Textures.Add((PieceTypes.King, false), Content.Load<Texture2D>("blackking"));
             Textures.Add((PieceTypes.Queen, true), Content.Load<Texture2D>("whitequeen"));
             Textures.Add((PieceTypes.Queen, false), Content.Load<Texture2D>("blackqueen"));
-
-
-            playerID = Task.Run(async () => await ApiCalls.GetPlayerId(gameID)).Result; //No connection could be made because the target machine actively refused it. (localhost:5001)
         }
 
         protected override void Update(GameTime gameTime)
@@ -118,7 +115,7 @@ namespace Chess
             InputManager.MouseState = Mouse.GetState();
 
             prevTime += gameTime.ElapsedGameTime;
-            if (prevTime.TotalMilliseconds >= delayMillis)
+            if (!inMenu && prevTime.TotalMilliseconds >= delayMillis)
             {
                 Task.Run(async () => await GetGameState()).Wait();
             }
@@ -129,6 +126,19 @@ namespace Chess
                 var result = menu.Update(gameTime);
                 if (result.moveOn)
                 {
+                    if (result.newGame)
+                    {
+                        gameID = Guid.NewGuid();
+
+                        System.Windows.Forms.MessageBox.Show(gameID.ToString(), "Your gameID is:", System.Windows.Forms.MessageBoxButtons.OK);
+                    }
+                    else
+                    {
+                        throw new Exception("Ask for gameID!");
+                    }
+
+                    playerID = Task.Run(async () => await ApiCalls.GetPlayerId(gameID)).Result;
+
                     if (result.spectating)
                     {
                         inMenu = false;
@@ -139,14 +149,25 @@ namespace Chess
                         bool? color = Task.Run(async () => await ApiCalls.GetGameColor(gameID, playerID, result.playingWhite)).Result;
                         if (color == null)
                         {
-                            inMenu = false;
-                            spectating = true;
+                            var BoxResult = System.Windows.Forms.MessageBox.Show("The game is full", "Press ok the spectate and cancel to go back.", System.Windows.Forms.MessageBoxButtons.OKCancel);
+
+                            switch (BoxResult)
+                            {
+                                case System.Windows.Forms.DialogResult.OK:
+                                    inMenu = false;
+                                    spectating = true;
+                                    break;
+
+                                case System.Windows.Forms.DialogResult.Cancel:
+                                    inMenu = true;
+                                    spectating = false;
+                                    break;
+                            }
                         }
                         else
                         {
                             amWhite = (bool)color;
 
-                            Task.Run(async () => await ApiCalls.ResetBoard(gameID, playerID)).Wait();
                             Task.Run(async () => await GetGameState()).Wait();
 
                             inMenu = false;
@@ -157,13 +178,14 @@ namespace Chess
 
             else if (spectating)
             {
-
+                Window.Title = $"GameID = {gameID}. You are spectating.";
             }
 
 
             //Checking if mouse clicked:
             else if (InputManager.MouseState.LeftButton == ButtonState.Pressed && InputManager.LastMouseState.LeftButton == ButtonState.Released && GraphicsDevice.Viewport.Bounds.Contains(InputManager.MouseState.Position) && currentGameState.Whiteturn == amWhite && IsActive)
             {
+                Window.Title = $"GameID = {gameID}";
                 var mouseCell = PositionToCell(InputManager.MouseState.Position);
 
                 //If choosing a piece for promotion:
@@ -263,9 +285,6 @@ namespace Chess
         void CheckIfGameOver(GameTime gameTime)
         {
             System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
-
-
-            System.Windows.Forms.MessageBox.Show();//pop up a messagebox on launch that asks for gameID.
 
             var checkForMoveResults = Task.Run(async () => await ApiCalls.CheckForNoMoves(gameID)).Result;
             if (checkForMoveResults)

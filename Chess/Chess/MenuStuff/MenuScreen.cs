@@ -21,6 +21,9 @@ namespace Chess
         Button WhiteButton;
         Button BlackButton;
         Button SpectateButton;
+        Button NewGameButton;
+
+        bool newGame = false;
 
         public MenuScreen(ContentManager content, GraphicsDeviceManager graphics)
         {
@@ -35,17 +38,34 @@ namespace Chess
             WhiteButton = new Button("Play\nWhite", ButtonTexture, ClickedButtonTexture, new Vector2(200, 100), new Vector2(10, 20), new Vector2(0, 0), Color.White, font);
             BlackButton = new Button("Play\nBlack", ButtonTexture, ClickedButtonTexture, new Vector2(400, 100), new Vector2(10, 20), new Vector2(0, 0), Color.White, font);
             SpectateButton = new Button("Spectate", ButtonTexture, ClickedButtonTexture, new Vector2(300, 300), new Vector2(10, 5), new Vector2(0, 0), Color.White, font);
+
+            NewGameButton = new Button("Start\nnew\ngame", ButtonTexture, ClickedButtonTexture, new Vector2(300, 500), new Vector2(10, 15), new Vector2(0, 0), Color.White, font);
         }
 
-        public (bool moveOn, bool spectating, bool playingWhite) Update(GameTime gameTime) //returns true if menu exited
+        public (bool moveOn, bool spectating, bool playingWhite, bool newGame) Update(GameTime gameTime)
         {
-            if (WhiteButton.isClicked(InputManager.MouseState)) return (true, false, true);
+            if (NewGameButton.isClicked(InputManager.MouseState, InputManager.LastMouseState))
+            {
+                if (NewGameButton.texture == NewGameButton.normalTexture)
+                {
+                    NewGameButton.texture = NewGameButton.clickedTexture;
+                    newGame = true;
+                }
+                else
+                {
+                    NewGameButton.texture = NewGameButton.normalTexture;
+                    newGame = false;
+                }
+            }
 
-            if (BlackButton.isClicked(InputManager.MouseState)) return (true, false, false);
 
-            if (SpectateButton.isClicked(InputManager.MouseState)) return (true, true, false);
+            if (WhiteButton.isClicked(InputManager.MouseState)) return (true, false, true, newGame);
 
-            return (false, false, false);
+            if (BlackButton.isClicked(InputManager.MouseState)) return (true, false, false, newGame);
+
+            if (SpectateButton.isClicked(InputManager.MouseState)) return (true, true, false, newGame);
+
+            return (false, false, false, newGame);
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -53,6 +73,8 @@ namespace Chess
             WhiteButton.Draw(spriteBatch);
             BlackButton.Draw(spriteBatch);
             SpectateButton.Draw(spriteBatch);
+
+            NewGameButton.Draw(spriteBatch);
         }
     }
 }
