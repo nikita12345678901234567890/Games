@@ -13,73 +13,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Reflection;
 using System.Threading;
-
-
-
-using VeryHacky.BecauseNikita;
-
-namespace VeryHacky.BecauseNikita
-{
-    public class GameIDNotifierForm : System.Windows.Forms.Form
-    {
-        public static GameIDNotifierForm Instance { get; } = new GameIDNotifierForm();
-        static GameIDNotifierForm() { }
-
-        private System.Windows.Forms.TextBox gameIDTextBox;
-        public void SetGameID(Guid gameID) 
-            => gameIDTextBox.Text = gameID.ToString();
-
-
-        public GameIDNotifierForm()
-        {
-            Size = new System.Drawing.Size(300, 120);
-            BackColor = System.Drawing.Color.CornflowerBlue;
-            Text = "Game ID:";
-            ControlBox = false;
-            FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
-
-            gameIDTextBox = new System.Windows.Forms.TextBox()
-            {
-                Size = new System.Drawing.Size(270, 40),
-                ReadOnly = true,
-                Location = new System.Drawing.Point(5, 5)                
-            };
-            Controls.Add(gameIDTextBox);
-
-            var copyButton = new System.Windows.Forms.Button()
-            {
-                AutoSize = true,
-                Text = "Copy",
-                Location = new System.Drawing.Point(5, 50)
-            };
-            copyButton.Click += (s, e) =>
-            {
-                System.Windows.Forms.Clipboard.SetText(gameIDTextBox.Text);
-                this.Close();
-            };
-            Controls.Add(copyButton);
-        }
-    }
-
-    public class GameIDEntryForm : System.Windows.Forms.Form
-    {
-        public GameIDEntryForm()
-        {
-            Size = new System.Drawing.Size(300, 70);
-            BackColor = System.Drawing.Color.CornflowerBlue;
-            Text = "Game ID:";
-
-            var gameIDTextBox = new System.Windows.Forms.TextBox()
-            {
-                Size = new System.Drawing.Size(270, 40),
-                Location = new System.Drawing.Point(5, 5)
-            };
-
-            Controls.Add(gameIDTextBox);
-        }
-    }
-}
-
+using Chess.HackyStuff;
 
 namespace Chess
 {
@@ -128,6 +62,7 @@ namespace Chess
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+            IsFixedTimeStep = false;
         }
 
         protected override void Initialize()
@@ -207,7 +142,7 @@ namespace Chess
                             GameIDNotifierForm.Instance.SetGameID(gameID);
                             if (!GameIDNotifierForm.Instance.Visible)
                             {
-                                GameIDNotifierForm.Instance.ShowDialog();
+                                GameIDNotifierForm.Instance.Show();
                             }
                         }
                     }
@@ -217,7 +152,7 @@ namespace Chess
                         new GameIDEntryForm().ShowDialog();
                     }
 
-                    playerID = Task.Run(async () => await ApiCalls.GetPlayerId(gameID)).Result; //this is really wierd.
+                    playerID = Task.Run(async () => await ApiCalls.GetPlayerId(gameID)).Result;
 
                     if (result.spectating)
                     {
