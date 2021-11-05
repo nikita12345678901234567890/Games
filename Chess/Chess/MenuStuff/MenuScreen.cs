@@ -42,28 +42,31 @@ namespace Chess
             NewGameButton = new Button("Start\nnew\ngame", ButtonTexture, ClickedButtonTexture, new Vector2(300, 500), new Vector2(10, 15), new Vector2(0, 0), Color.White, font);
         }
 
-        public (bool moveOn, bool spectating, bool playingWhite, bool newGame) Update(GameTime gameTime)
+        public (bool moveOn, bool spectating, bool playingWhite, bool newGame) Update(GameTime gameTime, bool IsActive)
         {
-            if (NewGameButton.isClicked(InputManager.MouseState, InputManager.LastMouseState))
+            if (IsActive)
             {
-                if (NewGameButton.texture == NewGameButton.normalTexture)
+                if (NewGameButton.isClicked(InputManager.MouseState, InputManager.LastMouseState))
                 {
-                    NewGameButton.texture = NewGameButton.clickedTexture;
-                    newGame = true;
+                    if (NewGameButton.texture == NewGameButton.normalTexture)
+                    {
+                        NewGameButton.texture = NewGameButton.clickedTexture;
+                        newGame = true;
+                    }
+                    else
+                    {
+                        NewGameButton.texture = NewGameButton.normalTexture;
+                        newGame = false;
+                    }
                 }
-                else
-                {
-                    NewGameButton.texture = NewGameButton.normalTexture;
-                    newGame = false;
-                }
+
+
+                if (WhiteButton.isClicked(InputManager.MouseState)) return (true, false, true, newGame);
+
+                if (BlackButton.isClicked(InputManager.MouseState)) return (true, false, false, newGame);
+
+                if (SpectateButton.isClicked(InputManager.MouseState)) return (true, true, false, newGame);
             }
-
-
-            if (WhiteButton.isClicked(InputManager.MouseState)) return (true, false, true, newGame);
-
-            if (BlackButton.isClicked(InputManager.MouseState)) return (true, false, false, newGame);
-
-            if (SpectateButton.isClicked(InputManager.MouseState)) return (true, true, false, newGame);
 
             return (false, false, false, newGame);
         }

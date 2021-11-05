@@ -31,5 +31,10 @@ namespace Chess.HackyStuff
             Clipboard.SetText(gameIDTextBox.Text);
             Close();
         }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

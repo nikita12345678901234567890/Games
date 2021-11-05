@@ -122,10 +122,15 @@ namespace Chess
                 Task.Run(async () => await GetGameState()).Wait();
             }
 
+            if(GameIDEntryForm.Instance.State == GameEntryFormShownStates.Ready)
+            {
+                gameID = GameIDEntryForm.Instance.GameID;
+                GameIDEntryForm.Instance.Close();
+            }
 
             if (inMenu)
             {
-                var result = menu.Update(gameTime);
+                var result = menu.Update(gameTime, IsActive);
                 if (result.moveOn)
                 {
                     if (result.newGame)
@@ -149,7 +154,7 @@ namespace Chess
                     else
                     {
                         inMenu = false;
-                        new GameIDEntryForm().ShowDialog();
+                        GameIDEntryForm.Instance.Show();
                     }
 
                     playerID = Task.Run(async () => await ApiCalls.GetPlayerId(gameID)).Result;
