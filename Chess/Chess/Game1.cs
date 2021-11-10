@@ -126,6 +126,8 @@ namespace Chess
             {
                 gameID = GameIDEntryForm.Instance.GameID;
                 GameIDEntryForm.Instance.Close();
+
+
             }
 
             if (inMenu)
@@ -153,8 +155,7 @@ namespace Chess
                     }
                     else
                     {
-                        inMenu = false;
-                        GameIDEntryForm.Instance.Show();
+                        GameIDEntryForm.Instance.ShowDialog();
                     }
 
                     playerID = Task.Run(async () => await ApiCalls.GetPlayerId(gameID)).Result;
@@ -195,6 +196,7 @@ namespace Chess
                     }
                 }
             }
+
 
             else if (spectating)
             {
