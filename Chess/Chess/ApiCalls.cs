@@ -14,7 +14,7 @@ namespace Chess
     public static class ApiCalls
     {
         static HttpClient client;
-        static readonly string baseURL = "https://localhost:5001";
+        static readonly string baseURL = System.Configuration.ConfigurationManager.AppSettings["ServerBaseURL"];
 
 
         static ApiCalls()
