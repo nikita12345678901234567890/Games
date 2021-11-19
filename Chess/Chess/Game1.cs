@@ -143,7 +143,6 @@ namespace Chess
                         }
                         else
                         {
-                            //inMenu = false;
                             gameID = Guid.NewGuid();
 
                             GameIDNotifierForm.Instance.SetGameID(gameID);
@@ -164,6 +163,8 @@ namespace Chess
                     {
                         inMenu = false;
                         spectating = true;
+
+                        Task.Run(async () => await GetGameState()).Wait();
                     }
                     else
                     {
