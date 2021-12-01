@@ -11,9 +11,8 @@ namespace SharedLibrary.Pieces
 
         public bool DidMoveTwice { get; set; }
 
-        public Pawn(ChessGame owningGame, bool isWhite)
+        public Pawn(bool isWhite)
         {
-            this.owningGame = owningGame;
             IsWhite = isWhite;
             DidMoveTwice = false;
         }

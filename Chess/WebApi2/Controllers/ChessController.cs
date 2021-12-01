@@ -27,7 +27,7 @@ namespace WebApi2.Controllers
             Guid id = Guid.NewGuid();
             if (!games.ContainsKey(gameID))
             {
-                games[gameID] = new ChessGame();
+                games[gameID] = new();
             }
 
             return id;

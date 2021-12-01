@@ -11,10 +11,8 @@ namespace SharedLibrary.Pieces
 
         public bool HasMoved { get; set; }
 
-        public King(ChessGame owningGame, bool isWhite)
+        public King(bool isWhite)
         {
-            this.owningGame = owningGame;
-
             IsWhite = isWhite;
 
             HasMoved = false;

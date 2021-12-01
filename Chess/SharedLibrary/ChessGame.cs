@@ -97,42 +97,42 @@ namespace SharedLibrary
             for (int x = 0; x < 8; x++)
             {
                 //Black pawns:
-                PieceGrid[1, x] = new Pawn(this, false);
+                PieceGrid[1, x] = new Pawn(false);
 
                 //White pawns:
-                PieceGrid[6, x] = new Pawn(this, true);
+                PieceGrid[6, x] = new Pawn(true);
             }
             //Rooks:
             //Black:
-            PieceGrid[0, 0] = new Rook(this, false);
-            PieceGrid[0, 7] = new Rook(this, false);
+            PieceGrid[0, 0] = new Rook(false);
+            PieceGrid[0, 7] = new Rook(false);
             //White:
-            PieceGrid[7, 0] = new Rook(this, true);
-            PieceGrid[7, 7] = new Rook(this, true);
+            PieceGrid[7, 0] = new Rook(true);
+            PieceGrid[7, 7] = new Rook(true);
             //Knights:
             //Black:
-            PieceGrid[0, 1] = new Knight(this, false);
-            PieceGrid[0, 6] = new Knight(this, false);
+            PieceGrid[0, 1] = new Knight(false);
+            PieceGrid[0, 6] = new Knight(false);
             //white:
-            PieceGrid[7, 1] = new Knight(this, true);
-            PieceGrid[7, 6] = new Knight(this, true);
+            PieceGrid[7, 1] = new Knight(true);
+            PieceGrid[7, 6] = new Knight(true);
             //Bishops:
             //Black:
-            PieceGrid[0, 2] = new Bishop(this, false);
-            PieceGrid[0, 5] = new Bishop(this, false);
+            PieceGrid[0, 2] = new Bishop(false);
+            PieceGrid[0, 5] = new Bishop(false);
             //White:
-            PieceGrid[7, 2] = new Bishop(this, true);
-            PieceGrid[7, 5] = new Bishop(this, true);
+            PieceGrid[7, 2] = new Bishop(true);
+            PieceGrid[7, 5] = new Bishop(true);
             //Kings:
             //Black:
-            PieceGrid[0, 4] = new King(this, false);
+            PieceGrid[0, 4] = new King(false);
             //White:
-            PieceGrid[7, 4] = new King(this, true);
+            PieceGrid[7, 4] = new King(true);
             //Queens:
             //Black:
-            PieceGrid[0, 3] = new Queen(this, false);
+            PieceGrid[0, 3] = new Queen(false);
             //White:
-            PieceGrid[7, 3] = new Queen(this, true);
+            PieceGrid[7, 3] = new Queen(true);
 
             Whiteturn = true;
 
@@ -628,25 +628,25 @@ namespace SharedLibrary
                 switch (pieceChoice)
                 {
                     case "Queen":
-                        PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Queen(this, promotionInfo.IsWhite);
+                        PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Queen(promotionInfo.IsWhite);
                         choosingPromotion = false;
                         Whiteturn = !Whiteturn;
                         break;
 
                     case "Rook":
-                        PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Rook(this, promotionInfo.IsWhite);
+                        PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Rook(promotionInfo.IsWhite);
                         choosingPromotion = false;
                         Whiteturn = !Whiteturn;
                         break;
 
                     case "Bishop":
-                        PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Bishop(this, promotionInfo.IsWhite);
+                        PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Bishop(promotionInfo.IsWhite);
                         choosingPromotion = false;
                         Whiteturn = !Whiteturn;
                         break;
 
                     case "Knight":
-                        PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Knight(this, promotionInfo.IsWhite);
+                        PieceGrid[promotionInfo.pawnLocation.Y, promotionInfo.pawnLocation.X] = new Knight(promotionInfo.IsWhite);
                         choosingPromotion = false;
                         Whiteturn = !Whiteturn;
                         break;

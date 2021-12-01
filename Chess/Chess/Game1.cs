@@ -86,8 +86,6 @@ namespace Chess
             var exceptions = Assembly.GetAssembly(typeof(int)).GetTypes().
                              Where(x => x.IsSubclassOf(typeof(Exception))).ToArray();
 
-            chessGame = new ChessGame();
-
             base.Initialize();
         }
 
@@ -499,51 +497,51 @@ namespace Chess
                         switch (rows[y][i])
                         {
                             case 'p':
-                                gamestate.PieceGrid[y, x] = new Pawn(chessGame, false);
+                                gamestate.PieceGrid[y, x] = new Pawn(false);
                                 break;
 
                             case 'P':
-                                gamestate.PieceGrid[y, x] = new Pawn(chessGame, true);
+                                gamestate.PieceGrid[y, x] = new Pawn(true);
                                 break;
 
                             case 'b':
-                                gamestate.PieceGrid[y, x] = new Bishop(chessGame, false);
+                                gamestate.PieceGrid[y, x] = new Bishop(false);
                                 break;
 
                             case 'B':
-                                gamestate.PieceGrid[y, x] = new Bishop(chessGame, true);
+                                gamestate.PieceGrid[y, x] = new Bishop(true);
                                 break;
 
                             case 'n':
-                                gamestate.PieceGrid[y, x] = new Knight(chessGame, false);
+                                gamestate.PieceGrid[y, x] = new Knight(false);
                                 break;
 
                             case 'N':
-                                gamestate.PieceGrid[y, x] = new Knight(chessGame, true);
+                                gamestate.PieceGrid[y, x] = new Knight(true);
                                 break;
 
                             case 'k':
-                                gamestate.PieceGrid[y, x] = new King(chessGame, false);
+                                gamestate.PieceGrid[y, x] = new King(false);
                                 break;
 
                             case 'K':
-                                gamestate.PieceGrid[y, x] = new King(chessGame, true);
+                                gamestate.PieceGrid[y, x] = new King(true);
                                 break;
 
                             case 'r':
-                                gamestate.PieceGrid[y, x] = new Rook(chessGame, false);
+                                gamestate.PieceGrid[y, x] = new Rook(false);
                                 break;
 
                             case 'R':
-                                gamestate.PieceGrid[y, x] = new Rook(chessGame, true);
+                                gamestate.PieceGrid[y, x] = new Rook(true);
                                 break;
 
                             case 'q':
-                                gamestate.PieceGrid[y, x] = new Queen(chessGame, false);
+                                gamestate.PieceGrid[y, x] = new Queen(false);
                                 break;
 
                             case 'Q':
-                                gamestate.PieceGrid[y, x] = new Queen(chessGame, true);
+                                gamestate.PieceGrid[y, x] = new Queen(true);
                                 break;
 
                             default:
@@ -556,51 +554,51 @@ namespace Chess
                         switch (rows[y][i])
                         {
                             case 'p':
-                                gamestate.PieceGrid[7 - y, 7 - x] = new Pawn(chessGame, false);
+                                gamestate.PieceGrid[7 - y, 7 - x] = new Pawn(false);
                                 break;
 
                             case 'P':
-                                gamestate.PieceGrid[7 - y, 7 - x] = new Pawn(chessGame, true);
+                                gamestate.PieceGrid[7 - y, 7 - x] = new Pawn(true);
                                 break;
 
                             case 'b':
-                                gamestate.PieceGrid[7 - y, 7 - x] = new Bishop(chessGame, false);
+                                gamestate.PieceGrid[7 - y, 7 - x] = new Bishop(false);
                                 break;
 
                             case 'B':
-                                gamestate.PieceGrid[7 - y, 7 - x] = new Bishop(chessGame, true);
+                                gamestate.PieceGrid[7 - y, 7 - x] = new Bishop(true);
                                 break;
 
                             case 'n':
-                                gamestate.PieceGrid[7 - y, 7 - x] = new Knight(chessGame, false);
+                                gamestate.PieceGrid[7 - y, 7 - x] = new Knight(false);
                                 break;
 
                             case 'N':
-                                gamestate.PieceGrid[7 - y, 7 - x] = new Knight(chessGame, true);
+                                gamestate.PieceGrid[7 - y, 7 - x] = new Knight(true);
                                 break;
 
                             case 'k':
-                                gamestate.PieceGrid[7 - y, 7 - x] = new King(chessGame, false);
+                                gamestate.PieceGrid[7 - y, 7 - x] = new King(false);
                                 break;
 
                             case 'K':
-                                gamestate.PieceGrid[7 - y, 7 - x] = new King(chessGame, true);
+                                gamestate.PieceGrid[7 - y, 7 - x] = new King(true);
                                 break;
 
                             case 'r':
-                                gamestate.PieceGrid[7 - y, 7 - x] = new Rook(chessGame, false);
+                                gamestate.PieceGrid[7 - y, 7 - x] = new Rook(false);
                                 break;
 
                             case 'R':
-                                gamestate.PieceGrid[7 - y, 7 - x] = new Rook(chessGame, true);
+                                gamestate.PieceGrid[7 - y, 7 - x] = new Rook(true);
                                 break;
 
                             case 'q':
-                                gamestate.PieceGrid[7 - y, 7 - x] = new Queen(chessGame, false);
+                                gamestate.PieceGrid[7 - y, 7 - x] = new Queen(false);
                                 break;
 
                             case 'Q':
-                                gamestate.PieceGrid[7 - y, 7 - x] = new Queen(chessGame, true);
+                                gamestate.PieceGrid[7 - y, 7 - x] = new Queen(true);
                                 break;
 
                             default:
