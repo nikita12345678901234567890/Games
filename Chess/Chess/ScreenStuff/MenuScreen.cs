@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Chess
 {
-    public class MenuScreen
+    public class MenuScreen : Screen
     {
         ContentManager content;
         GraphicsDeviceManager graphics;
@@ -42,8 +42,9 @@ namespace Chess
             NewGameButton = new Button("Start\nnew\ngame", ButtonTexture, ClickedButtonTexture, new Vector2(300, 500), new Vector2(10, 15), new Vector2(0, 0), Color.White, font);
         }
 
-        public (bool moveOn, bool spectating, bool playingWhite, bool newGame) Update(GameTime gameTime, bool IsActive)
+        public override UpdateResult Update(GameTime gameTime, bool IsActive)
         {
+            UpdateResult result;
             if (IsActive)
             {
                 if (NewGameButton.isClicked(InputManager.MouseState, InputManager.LastMouseState))
@@ -61,17 +62,47 @@ namespace Chess
                 }
 
 
-                if (WhiteButton.isClicked(InputManager.MouseState)) return (true, false, true, newGame);
+                if (WhiteButton.isClicked(InputManager.MouseState))
+                {
+                    result.moveOn = true;
+                    result.false = true;
+                    result.spectating = false;
+                    result.playingWhite = true;
+                    result.newGame = newGame;
 
-                if (BlackButton.isClicked(InputManager.MouseState)) return (true, false, false, newGame);
+                    return result;
+                }
 
-                if (SpectateButton.isClicked(InputManager.MouseState)) return (true, true, false, newGame);
+                if (BlackButton.isClicked(InputManager.MouseState))
+                {
+                    result.moveOn = true;
+                    result.spectating = false;
+                    result.playingWhite = false;
+                    result.newGame = newGame;
+
+                    return result;
+                }
+
+                if (SpectateButton.isClicked(InputManager.MouseState))
+                {
+                    result.moveOn = true;
+                    result.spectating = true;
+                    result.playingWhite = false;
+                    result.newGame = newGame;
+
+                    return result;
+                }
             }
 
-            return (false, false, false, newGame);
+            result.moveOn = false;
+            result.spectating = false;
+            result.playingWhite = false;
+            result.newGame = newGame;
+
+            return result;
         }
 
-        public void Draw(SpriteBatch spriteBatch)
+        public override void Draw(SpriteBatch spriteBatch)
         {
             WhiteButton.Draw(spriteBatch);
             BlackButton.Draw(spriteBatch);

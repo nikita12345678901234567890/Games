@@ -19,8 +19,6 @@ namespace Chess
 {
     public class Game1 : Game
     {
-        private ChessGame chessGame;
-
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
@@ -65,13 +63,20 @@ namespace Chess
             IsFixedTimeStep = false;
         }
 
+        /*
+        Make game screens
+        Have one sidebar with smaller pieces
+        Make the game scream
+        Make settings screen
+        */
+
         protected override void Initialize()
         {
             graphics.PreferredBackBufferWidth = 800;
             graphics.PreferredBackBufferHeight = 800;
             graphics.ApplyChanges();
 
-            squaresize = graphics.PreferredBackBufferWidth / 8;
+            squaresize = graphics.PreferredBackBufferHeight / 8;
 
             HighlightedSquares = new List<Point>();
 
@@ -205,7 +210,7 @@ namespace Chess
             }
 
 
-            //Checking if mouse clicked:
+            /*Checking if mouse clicked:
             else if (InputManager.MouseState.LeftButton == ButtonState.Pressed && InputManager.LastMouseState.LeftButton == ButtonState.Released && GraphicsDevice.Viewport.Bounds.Contains(InputManager.MouseState.Position) && currentGameState.Whiteturn == amWhite && IsActive)
             {
                 Window.Title = $"GameID = {gameID}";
@@ -298,56 +303,14 @@ namespace Chess
                         CheckIfGameOver(gameTime);
                     }
                 }
-            }
+            }*/
 
 
             InputManager.LastMouseState = InputManager.MouseState;
             base.Update(gameTime);
         }
 
-        void CheckIfGameOver(GameTime gameTime)
-        {
-            System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
-
-            var checkForMoveResults = Task.Run(async () => await ApiCalls.CheckForNoMoves(gameID)).Result;
-            if (checkForMoveResults)
-            {
-                Draw(gameTime);
-                if (currentGameState.WhiteInCheck)
-                {
-                    result = System.Windows.Forms.MessageBox.Show("White in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
-                }
-                else if (currentGameState.BlackInCheck)
-                {
-                    result = System.Windows.Forms.MessageBox.Show("Black in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
-                }
-                else
-                {
-                    result = System.Windows.Forms.MessageBox.Show("Stalemate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
-                }
-            }
-
-            else if (currentGameState.moveCounter >= 50)
-            {
-                Draw(gameTime);
-                result = System.Windows.Forms.MessageBox.Show("There have been 50 moves and nothing has happened", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
-            }
-
-            switch (result)
-            {
-                case System.Windows.Forms.DialogResult.Abort:
-                    this.Exit();
-                    break;
-
-                case System.Windows.Forms.DialogResult.Retry:
-                    Task.Run(async () => await ApiCalls.ResetBoard(gameID, playerID)).Wait();
-                    break;
-
-                case System.Windows.Forms.DialogResult.Ignore:
-                    spectating = true;
-                    break;
-            }
-        }
+        
 
         public Vector2 CellCenter(Point GridPosition)
         {
