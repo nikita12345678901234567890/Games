@@ -1,5 +1,12 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Chess.HackyStuff;
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+
+using SharedLibrary;
+using SharedLibrary.Pieces;
 
 using System;
 using System.Collections.Generic;
@@ -11,11 +18,154 @@ namespace Chess
 {
     public class NormalGameScreen : Screen
     {
+        ContentManager content;
+        GraphicsDeviceManager graphics;
+
+        public static Dictionary<(PieceTypes, bool), Texture2D> Textures;
+
+        public static Texture2D Pixel;
+
+
+        public int squaresize;
+
+        public List<Point> HighlightedSquares;
+
+        bool spectating = false;
+
+        PiecePromotion choices;
+
+        GameState currentGameState;
+
+        Guid playerID;
+
+        Guid gameID = Guid.Empty;
+
+        bool amWhite;
+
+        const int delayMillis = 250;
+
+        TimeSpan prevTime;
+
+        string lastFEN = String.Empty;
+
+
+        public NormalGameScreen(ContentManager content, GraphicsDeviceManager graphics)
+        {
+            this.content = content;
+            this.graphics = graphics;
+
+            squaresize = graphics.PreferredBackBufferHeight / 8;
+
+            HighlightedSquares = new List<Point>();
+
+            //Loading piece textures:
+            Textures = new Dictionary<(PieceTypes, bool), Texture2D>();
+            Textures.Add((PieceTypes.Pawn, true), content.Load<Texture2D>("whitepawn"));
+            Textures.Add((PieceTypes.Pawn, false), content.Load<Texture2D>("blackpawn"));
+            Textures.Add((PieceTypes.Rook, true), content.Load<Texture2D>("whiterook"));
+            Textures.Add((PieceTypes.Rook, false), content.Load<Texture2D>("blackrook"));
+            Textures.Add((PieceTypes.Knight, true), content.Load<Texture2D>("whiteknight"));
+            Textures.Add((PieceTypes.Knight, false), content.Load<Texture2D>("blackknight"));
+            Textures.Add((PieceTypes.Bishop, true), content.Load<Texture2D>("whitebishop"));
+            Textures.Add((PieceTypes.Bishop, false), content.Load<Texture2D>("blackbishop"));
+            Textures.Add((PieceTypes.King, true), content.Load<Texture2D>("whiteking"));
+            Textures.Add((PieceTypes.King, false), content.Load<Texture2D>("blackking"));
+            Textures.Add((PieceTypes.Queen, true), content.Load<Texture2D>("whitequeen"));
+            Textures.Add((PieceTypes.Queen, false), content.Load<Texture2D>("blackqueen"));
+            
+            Pixel = new Texture2D(graphics.GraphicsDevice, 1, 1);
+            Pixel.SetData(new[] { Color.White });
+        }
+
+        UpdateResult CheckIfGameOver(GameTime gameTime)
+        {
+            UpdateResult finalResult = new UpdateResult();
+            finalResult.moveOn = false;
+            finalResult.spectating = false;
+            finalResult.playingWhite = false;
+            finalResult.newGame = false;
+
+            System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
+
+            var checkForMoveResults = Task.Run(async () => await ApiCalls.CheckForNoMoves(gameID)).Result;
+            if (checkForMoveResults)
+            {
+                if (currentGameState.WhiteInCheck)
+                {
+                    result = System.Windows.Forms.MessageBox.Show("White in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
+                }
+                else if (currentGameState.BlackInCheck)
+                {
+                    result = System.Windows.Forms.MessageBox.Show("Black in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
+                }
+                else
+                {
+                    result = System.Windows.Forms.MessageBox.Show("Stalemate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
+                }
+            }
+
+            else if (currentGameState.moveCounter >= 50)
+            {
+                result = System.Windows.Forms.MessageBox.Show("There have been 50 moves and nothing has happened", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
+            }
+
+            switch (result)
+            {
+                case System.Windows.Forms.DialogResult.Abort:
+                    finalResult.moveOn = true;
+                    break;
+
+                case System.Windows.Forms.DialogResult.Retry:
+                    finalResult.newGame = true;
+                    break;
+
+                case System.Windows.Forms.DialogResult.Ignore:
+                    finalResult.spectating = true;
+                    break;
+            }
+
+            return finalResult;
+        }
+
         public override UpdateResult Update(GameTime gameTime, bool IsActive)
         {
-            if (InputManager.MouseState.LeftButton == ButtonState.Pressed && InputManager.LastMouseState.LeftButton == ButtonState.Released && GraphicsDevice.Viewport.Bounds.Contains(InputManager.MouseState.Position) && currentGameState.Whiteturn == amWhite && IsActive)
+            UpdateResult result = new UpdateResult();
+            result.moveOn = false;
+            result.spectating = false;
+            result.playingWhite = false;
+            result.newGame = false;
+
+            UpdateResult GameOverResult;
+            GameOverResult.moveOn = false;
+            GameOverResult.spectating = false;
+            GameOverResult.playingWhite = false;
+            GameOverResult.newGame = false;
+
+
+            prevTime += gameTime.ElapsedGameTime;
+            if (prevTime.TotalMilliseconds >= delayMillis)
             {
-                Window.Title = $"GameID = {gameID}";
+                Task.Run(async () => await GetGameState()).Wait();
+            }
+
+            if (GameIDEntryForm.Instance.State == GameEntryFormShownStates.Ready)
+            {
+                gameID = GameIDEntryForm.Instance.GameID;
+                GameIDEntryForm.Instance.Close();
+
+
+            }
+
+
+            if (spectating)
+            {
+                
+            }
+
+
+            //Checking if mouse clicked:
+            else if (InputManager.MouseState.LeftButton == ButtonState.Pressed && InputManager.LastMouseState.LeftButton == ButtonState.Released && graphics.GraphicsDevice.Viewport.Bounds.Contains(InputManager.MouseState.Position) && currentGameState.Whiteturn == amWhite && IsActive)
+            {
                 var mouseCell = PositionToCell(InputManager.MouseState.Position);
 
                 //If choosing a piece for promotion:
@@ -45,7 +195,7 @@ namespace Chess
                     }
 
                     Task.Run(async () => await GetGameState()).Wait();
-                    CheckIfGameOver(gameTime);
+                    GameOverResult = CheckIfGameOver(gameTime);
                 }
 
                 //Deselecting piece:
@@ -102,59 +252,345 @@ namespace Chess
                         }
 
 
-                        CheckIfGameOver(gameTime);
+                        GameOverResult = CheckIfGameOver(gameTime);
                     }
                 }
+
+                if (GameOverResult.moveOn)
+                {
+                    throw new Exception("Close program");
+                }
+                else if (GameOverResult.spectating)
+                {
+                    spectating = true;
+                }
+                else if (GameOverResult.newGame)
+                {
+                    throw new Exception("Join another game");
+                }
             }
+
+            return result;
         }
 
-        void CheckIfGameOver(GameTime gameTime)
+        public Vector2 CellCenter(Point GridPosition)
         {
-            System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
+            return new Vector2((GridPosition.X * squaresize) + squaresize / 2, (GridPosition.Y * squaresize) + squaresize / 2);
+        }
 
-            var checkForMoveResults = Task.Run(async () => await ApiCalls.CheckForNoMoves(gameID)).Result;
-            if (checkForMoveResults)
+        public Point PositionToCell(Point position)
+        {
+            return new Point((position.X / squaresize), (position.Y / squaresize));
+        }
+
+        public Point Flip(Point square)
+        {
+            return new Point(7 - square.X, 7 - square.Y);
+        }
+        public Point[] FlipSquares(Point[] squares)
+        {
+            Point[] flipped = new Point[squares.Length];
+
+            for (int i = 0; i < squares.Length; i++)
             {
-                Draw(gameTime);
-                if (currentGameState.WhiteInCheck)
-                {
-                    result = System.Windows.Forms.MessageBox.Show("White in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
-                }
-                else if (currentGameState.BlackInCheck)
-                {
-                    result = System.Windows.Forms.MessageBox.Show("Black in checkmate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
-                }
-                else
-                {
-                    result = System.Windows.Forms.MessageBox.Show("Stalemate", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
-                }
+                flipped[i] = new Point(7 - squares[i].X, 7 - squares[i].Y);
             }
 
-            else if (currentGameState.moveCounter >= 50)
-            {
-                Draw(gameTime);
-                result = System.Windows.Forms.MessageBox.Show("There have been 50 moves and nothing has happened", "Game over", System.Windows.Forms.MessageBoxButtons.AbortRetryIgnore);
-            }
-
-            switch (result)
-            {
-                case System.Windows.Forms.DialogResult.Abort:
-                    this.Exit();
-                    break;
-
-                case System.Windows.Forms.DialogResult.Retry:
-                    Task.Run(async () => await ApiCalls.ResetBoard(gameID, playerID)).Wait();
-                    break;
-
-                case System.Windows.Forms.DialogResult.Ignore:
-                    spectating = true;
-                    break;
-            }
+            return flipped;
         }
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            throw new NotImplementedException();
+            graphics.GraphicsDevice.Clear(Color.CornflowerBlue);
+
+            //Drawing grid:
+            Color cellColor = Color.White;
+            Color color = cellColor;
+            for (int x = 0; x < 8; x++)
+            {
+                for (int y = 0; y < 8; y++)
+                {
+                    color = cellColor;
+
+                    spriteBatch.Draw(Pixel, new Vector2(x * squaresize, y * squaresize), null, color, 0, new Vector2(0, 0), Vector2.One * squaresize, SpriteEffects.None, 0);
+                    cellColor = cellColor == Color.White ? Color.Gray : Color.White;
+
+                    //Changing the color of the highlighted squares:
+                    if (HighlightedSquares.Contains(new Point(x, y)))
+                    {
+                        color = Color.Yellow * 0.3f;
+                    }
+
+                    //Highlighting the checked king red:
+                    if (currentGameState.WhiteInCheck)
+                    {
+                        Piece piece = currentGameState.PieceGrid[y, x];
+                        if (piece != null && piece.IsWhite && piece.PieceType == PieceTypes.King)
+                        {
+                            color = Color.Red * 0.3f;
+                        }
+                    }
+                    else if (currentGameState.BlackInCheck)
+                    {
+                        Piece piece = currentGameState.PieceGrid[y, x];
+                        if (piece != null && !piece.IsWhite && piece.PieceType == PieceTypes.King)
+                        {
+                            color = Color.Red * 0.3f;
+                        }
+                    }
+
+                    spriteBatch.Draw(Pixel, new Vector2(x * squaresize, y * squaresize), null, color, 0, new Vector2(0, 0), Vector2.One * squaresize, SpriteEffects.None, 0);
+                }
+
+                cellColor = cellColor == Color.White ? Color.Gray : Color.White;
+            }
+
+            //Drawing pieces:
+            float scale;
+            for (int y = 0; y < currentGameState.PieceGrid.GetLength(0); y++)
+            {
+                for (int x = 0; x < currentGameState.PieceGrid.GetLength(1); x++)
+                {
+                    if (currentGameState.PieceGrid[y, x] != null)
+                    {
+                        if (currentGameState.PieceGrid[y, x].PieceType == PieceTypes.Pawn)
+                        {
+                            scale = 1;
+                        }
+                        else
+                        {
+                            scale = 0.5f;
+                        }
+                        var texture = Textures[(currentGameState.PieceGrid[y, x].PieceType, currentGameState.PieceGrid[y, x].IsWhite)];
+                        spriteBatch.Draw(texture, CellCenter(new Point(x, y)), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), scale, SpriteEffects.None, 0);
+                    }
+                }
+            }
+
+
+
+
+
+            if (currentGameState.ChoosingPromotion && currentGameState.Whiteturn == amWhite)
+            {
+                //Gray out whole screen:
+                spriteBatch.Draw(Pixel, graphics.GraphicsDevice.Viewport.Bounds, Color.White * 0.5f);
+
+
+                //Draw piece choices:
+                var texture = Textures[(PieceTypes.Queen, amWhite)];
+                spriteBatch.Draw(texture, CellCenter(choices.Queen.ToPoint()), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+
+                texture = Textures[(PieceTypes.Rook, amWhite)];
+                spriteBatch.Draw(texture, CellCenter(choices.Rook.ToPoint()), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+
+                texture = Textures[(PieceTypes.Bishop, amWhite)];
+                spriteBatch.Draw(texture, CellCenter(choices.Bishop.ToPoint()), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+
+                texture = Textures[(PieceTypes.Knight, amWhite)];
+                spriteBatch.Draw(texture, CellCenter(choices.Knight.ToPoint()), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+            }
+        }
+
+        public (bool promotion, bool IsWhite, Point pawnLocation) CheckPromotion()
+        {
+            bool promotion = false;
+            bool isWhite = false;
+            Point pawnLocation = new Point(0, 0);
+
+            for (int x = 0; x < currentGameState.PieceGrid.GetLength(1); x++)
+            {
+                //Checking for a pawn in the top row:
+                if (currentGameState.PieceGrid[0, x] != null && currentGameState.PieceGrid[0, x].PieceType == PieceTypes.Pawn)
+                {
+                    promotion = true;
+                    isWhite = amWhite;
+                    pawnLocation = new Point(x, 0);
+                }
+            }
+
+            return (promotion, isWhite, pawnLocation);
+        }
+
+
+        public async Task GetGameState()
+        {
+            string newFEN = await ApiCalls.MakeFEN(gameID);
+            if (newFEN == lastFEN)
+            {
+                return;
+            }
+            currentGameState = DecodeFEN(newFEN);
+            lastFEN = newFEN;
+        }
+
+        public GameState DecodeFEN(string FEN)
+        {
+            GameState gamestate = new GameState();
+
+            gamestate.PieceGrid = new Piece[8, 8];
+
+            var rows = FEN.Split('/');
+
+            var ending = rows[7].Split(' ');
+
+            rows[7] = ending[0];
+
+            for (int y = 0; y < rows.Length; y++)
+            {
+                int x = 0;
+                for (int i = 0; i < rows[y].Length; i++)
+                {
+                    if (amWhite)
+                    {
+                        switch (rows[y][i])
+                        {
+                            case 'p':
+                                gamestate.PieceGrid[y, x] = new Pawn(false);
+                                break;
+
+                            case 'P':
+                                gamestate.PieceGrid[y, x] = new Pawn(true);
+                                break;
+
+                            case 'b':
+                                gamestate.PieceGrid[y, x] = new Bishop(false);
+                                break;
+
+                            case 'B':
+                                gamestate.PieceGrid[y, x] = new Bishop(true);
+                                break;
+
+                            case 'n':
+                                gamestate.PieceGrid[y, x] = new Knight(false);
+                                break;
+
+                            case 'N':
+                                gamestate.PieceGrid[y, x] = new Knight(true);
+                                break;
+
+                            case 'k':
+                                gamestate.PieceGrid[y, x] = new King(false);
+                                break;
+
+                            case 'K':
+                                gamestate.PieceGrid[y, x] = new King(true);
+                                break;
+
+                            case 'r':
+                                gamestate.PieceGrid[y, x] = new Rook(false);
+                                break;
+
+                            case 'R':
+                                gamestate.PieceGrid[y, x] = new Rook(true);
+                                break;
+
+                            case 'q':
+                                gamestate.PieceGrid[y, x] = new Queen(false);
+                                break;
+
+                            case 'Q':
+                                gamestate.PieceGrid[y, x] = new Queen(true);
+                                break;
+
+                            default:
+                                x += (int)char.GetNumericValue(rows[y][i]) - 1;
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        switch (rows[y][i])
+                        {
+                            case 'p':
+                                gamestate.PieceGrid[7 - y, 7 - x] = new Pawn(false);
+                                break;
+
+                            case 'P':
+                                gamestate.PieceGrid[7 - y, 7 - x] = new Pawn(true);
+                                break;
+
+                            case 'b':
+                                gamestate.PieceGrid[7 - y, 7 - x] = new Bishop(false);
+                                break;
+
+                            case 'B':
+                                gamestate.PieceGrid[7 - y, 7 - x] = new Bishop(true);
+                                break;
+
+                            case 'n':
+                                gamestate.PieceGrid[7 - y, 7 - x] = new Knight(false);
+                                break;
+
+                            case 'N':
+                                gamestate.PieceGrid[7 - y, 7 - x] = new Knight(true);
+                                break;
+
+                            case 'k':
+                                gamestate.PieceGrid[7 - y, 7 - x] = new King(false);
+                                break;
+
+                            case 'K':
+                                gamestate.PieceGrid[7 - y, 7 - x] = new King(true);
+                                break;
+
+                            case 'r':
+                                gamestate.PieceGrid[7 - y, 7 - x] = new Rook(false);
+                                break;
+
+                            case 'R':
+                                gamestate.PieceGrid[7 - y, 7 - x] = new Rook(true);
+                                break;
+
+                            case 'q':
+                                gamestate.PieceGrid[7 - y, 7 - x] = new Queen(false);
+                                break;
+
+                            case 'Q':
+                                gamestate.PieceGrid[7 - y, 7 - x] = new Queen(true);
+                                break;
+
+                            default:
+                                x += (int)char.GetNumericValue(rows[y][i]) - 1;
+                                break;
+                        }
+                    }
+
+                    x++;
+                }
+            }
+
+
+
+
+            if (ending[1] == "w")
+            {
+                gamestate.Whiteturn = true;
+            }
+            else
+            {
+                gamestate.Whiteturn = false;
+            }
+
+            if (ending[2] == "w")
+            {
+                gamestate.WhiteInCheck = true;
+            }
+            else if (ending[2] == "b")
+            {
+                gamestate.BlackInCheck = true;
+            }
+
+            if (ending[3] == "y")
+            {
+                gamestate.ChoosingPromotion = true;
+            }
+            else
+            {
+                gamestate.ChoosingPromotion = false;
+            }
+
+            return gamestate;
         }
     }
 }

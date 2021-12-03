@@ -17,7 +17,7 @@ namespace SharedLibrary.Pieces
 
             HasMoved = false;
         }
-        public override List<(Square, MoveTypes)> GetMoves(Piece[,] PieceGrid, Square position)
+        public override List<(Square, MoveTypes)> GetMoves(ChessGame owningGame, Square position)
         {
 
             List<(Square, MoveTypes)> Moves = new List<(Square, MoveTypes)>();
@@ -44,7 +44,7 @@ namespace SharedLibrary.Pieces
                         break;
 
                     case Directions.Down:
-                        if (counter.Y < PieceGrid.GetLength(0) - 1)
+                        if (counter.Y < owningGame.PieceGrid.GetLength(0) - 1)
                         {
                             counter.Y++;
                         }
@@ -70,14 +70,14 @@ namespace SharedLibrary.Pieces
                         break;
 
                     case Directions.Right:
-                        if (counter.X < PieceGrid.GetLength(1) - 1)
+                        if (counter.X < owningGame.PieceGrid.GetLength(1) - 1)
                         {
                             counter.X++;
                         }
                         break;
                 }
 
-                var piece = PieceGrid[counter.Y, counter.X];
+                var piece = owningGame.PieceGrid[counter.Y, counter.X];
                 if (piece != null && piece.IsWhite == IsWhite)
                 {
                     if (direction != Directions.Right)

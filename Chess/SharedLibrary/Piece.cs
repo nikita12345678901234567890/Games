@@ -9,6 +9,6 @@ namespace SharedLibrary
         public abstract PieceTypes PieceType { get; }
         public abstract bool IsWhite { get; set; }
 
-        public abstract List<(Square, MoveTypes)> GetMoves(Piece[,] PieceGrid, Square position);
+        public abstract List<(Square, MoveTypes)> GetMoves(ChessGame owningGame, Square position);
     }
 }

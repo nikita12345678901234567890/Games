@@ -18,7 +18,7 @@ namespace SharedLibrary.Pieces
             HasMoved = false;
         }
 
-        public override List<(Square, MoveTypes)> GetMoves(Piece[,] PieceGrid, Square position)
+        public override List<(Square, MoveTypes)> GetMoves(ChessGame owningGame, Square position)
         {
             List<(Square, MoveTypes)> Moves = new List<(Square, MoveTypes)>();
 
@@ -27,9 +27,9 @@ namespace SharedLibrary.Pieces
             {
                 for (int y = position.Y - 1; y <= position.Y + 1; y++)
                 {
-                    if (x >= 0 && x < PieceGrid.GetLength(1) && y >= 0 && y < PieceGrid.GetLength(0))
+                    if (x >= 0 && x < owningGame.PieceGrid.GetLength(1) && y >= 0 && y < owningGame.PieceGrid.GetLength(0))
                     {
-                        Piece piece = PieceGrid[y, x];
+                        Piece piece = owningGame.PieceGrid[y, x];
 
                         if (piece == null || (piece != null && piece.IsWhite == !IsWhite))
                         {
@@ -53,16 +53,16 @@ namespace SharedLibrary.Pieces
             if (!HasMoved && !inCheck)
             {
                 //Checking if there's a rook of the same color in the left corner:
-                var leftCorner = PieceGrid[position.Y, 0];
+                var leftCorner = owningGame.PieceGrid[position.Y, 0];
                 if (leftCorner != null && leftCorner.IsWhite == IsWhite && leftCorner.PieceType == PieceTypes.Rook)
                 {
                     //Checking if that rook hasn't moved and that the spaces between the king and the rook are empty:
                     Rook leftRook = (Rook)leftCorner;
 
-                    if (!leftRook.HasMoved && PieceGrid[position.Y, position.X - 1] == null && PieceGrid[position.Y, position.X - 2] == null)
+                    if (!leftRook.HasMoved && owningGame.PieceGrid[position.Y, position.X - 1] == null && owningGame.PieceGrid[position.Y, position.X - 2] == null)
                     {
                         //Checking that the squares the king passes through aren't under attack:
-                        if (!owningGame.UnderAttack(new Square(position.X - 1, position.Y), !IsWhite, PieceGrid) && !owningGame.UnderAttack(new Square(position.X - 2, position.Y), !IsWhite, PieceGrid))
+                        if (!owningGame.UnderAttack(new Square(position.X - 1, position.Y), !IsWhite, owningGame.PieceGrid) && !owningGame.UnderAttack(new Square(position.X - 2, position.Y), !IsWhite, owningGame.PieceGrid))
                         {
                             Moves.Add((new Square(position.X - 2, position.Y), MoveTypes.CastleLeft));
                         }
@@ -70,16 +70,16 @@ namespace SharedLibrary.Pieces
                 }
 
                 //Checking if there's a rook of the same color in the right corner:
-                var rightCorner = PieceGrid[position.Y, 0];
+                var rightCorner = owningGame.PieceGrid[position.Y, 0];
                 if (rightCorner != null && rightCorner.IsWhite == IsWhite && rightCorner.PieceType == PieceTypes.Rook)
                 {
                     //Checking if that rook hasn't moved and that the spaces between the king and the rook are empty:
                     Rook rightRook = (Rook)rightCorner;
-                    if (!rightRook.HasMoved && PieceGrid[position.Y, position.X + 1] == null && PieceGrid[position.Y, position.X + 2] == null)
+                    if (!rightRook.HasMoved && owningGame.PieceGrid[position.Y, position.X + 1] == null && owningGame.PieceGrid[position.Y, position.X + 2] == null)
                     {
                         //Checking that the squares the king passes through aren't under attack:
 
-                        if (!owningGame.UnderAttack(new Square(position.X + 1, position.Y), !IsWhite, PieceGrid) && !owningGame.UnderAttack(new Square(position.X + 2, position.Y), !IsWhite, PieceGrid))
+                        if (!owningGame.UnderAttack(new Square(position.X + 1, position.Y), !IsWhite, owningGame.PieceGrid) && !owningGame.UnderAttack(new Square(position.X + 2, position.Y), !IsWhite, owningGame.PieceGrid))
                         {
                             Moves.Add((new Square(position.X + 2, position.Y), MoveTypes.CastleRight));
                         }

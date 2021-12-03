@@ -65,7 +65,6 @@ namespace Chess
                 if (WhiteButton.isClicked(InputManager.MouseState))
                 {
                     result.moveOn = true;
-                    result.false = true;
                     result.spectating = false;
                     result.playingWhite = true;
                     result.newGame = newGame;

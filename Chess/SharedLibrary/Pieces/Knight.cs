@@ -13,55 +13,55 @@ namespace SharedLibrary.Pieces
         {
             IsWhite = isWhite;
         }
-        public override List<(Square, MoveTypes)> GetMoves(Piece[,] PieceGrid, Square position)
+        public override List<(Square, MoveTypes)> GetMoves(ChessGame owningGame, Square position)
         {
             List<(Square, MoveTypes)> Moves = new List<(Square, MoveTypes)>();
 
-            if (position.X + 1 < PieceGrid.GetLength(1) && position.Y + 2 < PieceGrid.GetLength(0))
+            if (position.X + 1 < owningGame.PieceGrid.GetLength(1) && position.Y + 2 < owningGame.PieceGrid.GetLength(0))
             {
-                var piece = PieceGrid[position.Y + 2, position.X + 1];
+                var piece = owningGame.PieceGrid[position.Y + 2, position.X + 1];
                 if (piece == null || (piece != null && piece.IsWhite == !IsWhite))
                 {
                     Moves.Add((new Square(position.X + 1, position.Y + 2), MoveTypes.Normal));
                 }
             }
-            if (position.X + 2 < PieceGrid.GetLength(1) && position.Y + 1 < PieceGrid.GetLength(0))
+            if (position.X + 2 < owningGame.PieceGrid.GetLength(1) && position.Y + 1 < owningGame.PieceGrid.GetLength(0))
             {
-                var piece = PieceGrid[position.Y + 1, position.X + 2];
+                var piece = owningGame.PieceGrid[position.Y + 1, position.X + 2];
                 if (piece == null || (piece != null && piece.IsWhite == !IsWhite))
                 {
                     Moves.Add((new Square(position.X + 2, position.Y + 1), MoveTypes.Normal));
                 }
             }
 
-            if (position.X - 1 >= 0 && position.Y + 2 < PieceGrid.GetLength(0))
+            if (position.X - 1 >= 0 && position.Y + 2 < owningGame.PieceGrid.GetLength(0))
             {
-                var piece = PieceGrid[position.Y + 2, position.X - 1];
+                var piece = owningGame.PieceGrid[position.Y + 2, position.X - 1];
                 if (piece == null || (piece != null && piece.IsWhite == !IsWhite))
                 {
                     Moves.Add((new Square(position.X - 1, position.Y + 2), MoveTypes.Normal));
                 }
             }
-            if (position.X - 2 >= 0 && position.Y + 1 < PieceGrid.GetLength(0))
+            if (position.X - 2 >= 0 && position.Y + 1 < owningGame.PieceGrid.GetLength(0))
             {
-                var piece = PieceGrid[position.Y + 1, position.X - 2];
+                var piece = owningGame.PieceGrid[position.Y + 1, position.X - 2];
                 if (piece == null || (piece != null && piece.IsWhite == !IsWhite))
                 {
                     Moves.Add((new Square(position.X - 2, position.Y + 1), MoveTypes.Normal));
                 }
             }
 
-            if (position.X + 1 < PieceGrid.GetLength(1) && position.Y - 2 >= 0)
+            if (position.X + 1 < owningGame.PieceGrid.GetLength(1) && position.Y - 2 >= 0)
             {
-                var piece = PieceGrid[position.Y - 2, position.X + 1];
+                var piece = owningGame.PieceGrid[position.Y - 2, position.X + 1];
                 if (piece == null || (piece != null && piece.IsWhite == !IsWhite))
                 {
                     Moves.Add((new Square(position.X + 1, position.Y - 2), MoveTypes.Normal));
                 }
             }
-            if (position.X + 2 < PieceGrid.GetLength(1) && position.Y - 1 >= 0)
+            if (position.X + 2 < owningGame.PieceGrid.GetLength(1) && position.Y - 1 >= 0)
             {
-                var piece = PieceGrid[position.Y - 1, position.X + 2];
+                var piece = owningGame.PieceGrid[position.Y - 1, position.X + 2];
                 if (piece == null || (piece != null && piece.IsWhite == !IsWhite))
                 {
                     Moves.Add((new Square(position.X + 2, position.Y - 1), MoveTypes.Normal));
@@ -70,7 +70,7 @@ namespace SharedLibrary.Pieces
 
             if (position.X - 1 >= 0 && position.Y - 2 >= 0)
             {
-                var piece = PieceGrid[position.Y - 2, position.X - 1];
+                var piece = owningGame.PieceGrid[position.Y - 2, position.X - 1];
                 if (piece == null || (piece != null && piece.IsWhite == !IsWhite))
                 {
                     Moves.Add((new Square(position.X - 1, position.Y - 2), MoveTypes.Normal));
@@ -78,7 +78,7 @@ namespace SharedLibrary.Pieces
             }
             if (position.X - 2 >= 0 && position.Y - 1 >= 0)
             {
-                var piece = PieceGrid[position.Y - 1, position.X - 2];
+                var piece = owningGame.PieceGrid[position.Y - 1, position.X - 2];
                 if (piece == null || (piece != null && piece.IsWhite == !IsWhite))
                 {
                     Moves.Add((new Square(position.X - 2, position.Y - 1), MoveTypes.Normal));

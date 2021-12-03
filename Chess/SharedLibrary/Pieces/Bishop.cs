@@ -13,7 +13,7 @@ namespace SharedLibrary.Pieces
         {
             IsWhite = isWhite;
         }
-        public override List<(Square, MoveTypes)> GetMoves(Piece[,] PieceGrid, Square position)
+        public override List<(Square, MoveTypes)> GetMoves(ChessGame owningGame, Square position)
         {
             List<(Square, MoveTypes)> Moves = new List<(Square, MoveTypes)>();
 
@@ -26,7 +26,7 @@ namespace SharedLibrary.Pieces
                 switch (direction)
                 {
                     case Directions.UpRight:
-                        if (counter.Y > 0 && counter.X < PieceGrid.GetLength(1) - 1)
+                        if (counter.Y > 0 && counter.X < owningGame.PieceGrid.GetLength(1) - 1)
                         {
                             counter.Y--;
                             counter.X++;
@@ -54,7 +54,7 @@ namespace SharedLibrary.Pieces
                         break;
 
                     case Directions.DownRight:
-                        if (counter.Y < PieceGrid.GetLength(0) - 1 && counter.X < PieceGrid.GetLength(1) - 1)
+                        if (counter.Y < owningGame.PieceGrid.GetLength(0) - 1 && counter.X < owningGame.PieceGrid.GetLength(1) - 1)
                         {
                             counter.Y++;
                             counter.X++;
@@ -68,7 +68,7 @@ namespace SharedLibrary.Pieces
                         break;
 
                     case Directions.DownLeft:
-                        if (counter.Y < PieceGrid.GetLength(0) - 1 && counter.X > 0)
+                        if (counter.Y < owningGame.PieceGrid.GetLength(0) - 1 && counter.X > 0)
                         {
                             counter.Y++;
                             counter.X--;
@@ -80,7 +80,7 @@ namespace SharedLibrary.Pieces
                         break;
                 }
 
-                var piece = PieceGrid[counter.Y, counter.X];
+                var piece = owningGame.PieceGrid[counter.Y, counter.X];
                 if (piece != null && piece.IsWhite == IsWhite)
                 {
                     if (direction != Directions.DownLeft)
