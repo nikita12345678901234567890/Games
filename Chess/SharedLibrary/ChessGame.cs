@@ -22,6 +22,8 @@ namespace SharedLibrary
 
     //"It's going to crash, but with a different error. This is progress." -Stan 10/14/2021
 
+    //"School really interferes with learning." -Stan 12/7/2021
+
     public class ChessGame
     {
         //Specifically chess related stuff:

@@ -164,7 +164,10 @@ namespace Chess
 
 
             //Checking if mouse clicked:
-            else if (InputManager.MouseState.LeftButton == ButtonState.Pressed && InputManager.LastMouseState.LeftButton == ButtonState.Released && graphics.GraphicsDevice.Viewport.Bounds.Contains(InputManager.MouseState.Position) && currentGameState.Whiteturn == amWhite && IsActive)
+            else if (InputManager.MouseState.LeftButton == ButtonState.Pressed 
+                  && InputManager.LastMouseState.LeftButton == ButtonState.Released 
+                  && graphics.GraphicsDevice.Viewport.Bounds.Contains(InputManager.MouseState.Position) 
+                  && currentGameState.Whiteturn == amWhite && IsActive)
             {
                 var mouseCell = PositionToCell(InputManager.MouseState.Position);
 

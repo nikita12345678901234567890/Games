@@ -22,10 +22,6 @@ namespace Chess
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
-
-
-
-
         public MenuScreen menu;
 
         public MouseState Lastms;
