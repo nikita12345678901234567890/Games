@@ -20,6 +20,9 @@ namespace Chess.ScreenStuff
         {
             screens = new Stack<Screen>();
 
+            this.content = content;
+            this.graphics = graphics;
+
             screens.Push(new MenuScreen(content, graphics));
         }
 
@@ -27,16 +30,17 @@ namespace Chess.ScreenStuff
         {
             var result = screens.Peek().Update(gameTime, IsActive);
 
-            if (result.moveOn)
+            if (result.startPlaying)
             {
-                if (screens.Peek() is MenuScreen menuScreen)
-                {
-                    screens.Push(new NormalGameScreen(content, graphics));
-                }
-                else
-                { 
-                    screens.Pop();
-                }
+                screens.Push(new NormalGameScreen(content, graphics, result));
+            }
+            else if (result.exitScreen)
+            {
+                screens.Pop();
+            }
+            else if (result.openSettings)
+            {
+                throw new Exception("This should open settings");
             }
         }
 

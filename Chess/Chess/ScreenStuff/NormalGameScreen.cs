@@ -49,7 +49,7 @@ namespace Chess
         string lastFEN = String.Empty;
 
 
-        public NormalGameScreen(ContentManager content, GraphicsDeviceManager graphics)
+        public NormalGameScreen(ContentManager content, GraphicsDeviceManager graphics, UpdateResult options)
         {
             this.content = content;
             this.graphics = graphics;
@@ -75,15 +75,69 @@ namespace Chess
             
             Pixel = new Texture2D(graphics.GraphicsDevice, 1, 1);
             Pixel.SetData(new[] { Color.White });
+
+
+            if (options.startNewGame)
+            {
+                if (options.startSpectating)
+                {
+                    System.Windows.Forms.MessageBox.Show("You can't do that.", "", System.Windows.Forms.MessageBoxButtons.OK);
+                }
+                else
+                {
+                    gameID = Guid.NewGuid();
+
+                    GameIDNotifierForm.Instance.SetGameID(gameID);
+                    if (!GameIDNotifierForm.Instance.Visible)
+                    {
+                        GameIDNotifierForm.Instance.Show();
+                    }
+                }
+            }
+            else
+            {
+                GameIDEntryForm.Instance.ShowDialog();
+            }
+
+            playerID = Task.Run(async () => await ApiCalls.GetPlayerId(gameID)).Result;
+
+            if (options.startSpectating)
+            {
+                spectating = true;
+
+                Task.Run(async () => await GetGameState()).Wait();
+            }
+            else
+            {
+                bool? color = Task.Run(async () => await ApiCalls.GetGameColor(gameID, playerID, options.startPlayingWhite)).Result;
+                if (color == null)
+                {
+                    var BoxResult = System.Windows.Forms.MessageBox.Show("The game is full", "Press ok the spectate and cancel to go back.", System.Windows.Forms.MessageBoxButtons.OKCancel);
+
+                    switch (BoxResult)
+                    {
+                        case System.Windows.Forms.DialogResult.OK:
+                            spectating = true;
+                            break;
+
+                        case System.Windows.Forms.DialogResult.Cancel:
+                            spectating = false;
+                            throw new Exception("This should go back to menu");
+                            break;
+                    }
+                }
+                else
+                {
+                    amWhite = (bool)color;
+
+                    Task.Run(async () => await GetGameState()).Wait();
+                }
+            }
         }
 
         UpdateResult CheckIfGameOver(GameTime gameTime)
         {
             UpdateResult finalResult = new UpdateResult();
-            finalResult.moveOn = false;
-            finalResult.spectating = false;
-            finalResult.playingWhite = false;
-            finalResult.newGame = false;
 
             System.Windows.Forms.DialogResult result = System.Windows.Forms.DialogResult.None;
 
@@ -112,15 +166,15 @@ namespace Chess
             switch (result)
             {
                 case System.Windows.Forms.DialogResult.Abort:
-                    finalResult.moveOn = true;
+                    finalResult.exitScreen = true;
                     break;
 
                 case System.Windows.Forms.DialogResult.Retry:
-                    finalResult.newGame = true;
+                    finalResult.startNewGame = true;
                     break;
 
                 case System.Windows.Forms.DialogResult.Ignore:
-                    finalResult.spectating = true;
+                    spectating = true;
                     break;
             }
 
@@ -130,16 +184,8 @@ namespace Chess
         public override UpdateResult Update(GameTime gameTime, bool IsActive)
         {
             UpdateResult result = new UpdateResult();
-            result.moveOn = false;
-            result.spectating = false;
-            result.playingWhite = false;
-            result.newGame = false;
 
             UpdateResult GameOverResult;
-            GameOverResult.moveOn = false;
-            GameOverResult.spectating = false;
-            GameOverResult.playingWhite = false;
-            GameOverResult.newGame = false;
 
 
             prevTime += gameTime.ElapsedGameTime;
@@ -257,19 +303,6 @@ namespace Chess
 
                         GameOverResult = CheckIfGameOver(gameTime);
                     }
-                }
-
-                if (GameOverResult.moveOn)
-                {
-                    throw new Exception("Close program");
-                }
-                else if (GameOverResult.spectating)
-                {
-                    spectating = true;
-                }
-                else if (GameOverResult.newGame)
-                {
-                    throw new Exception("Join another game");
                 }
             }
 

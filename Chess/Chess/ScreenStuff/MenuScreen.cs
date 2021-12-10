@@ -44,7 +44,7 @@ namespace Chess
 
         public override UpdateResult Update(GameTime gameTime, bool IsActive)
         {
-            UpdateResult result;
+            UpdateResult result = default;
             if (IsActive)
             {
                 if (NewGameButton.isClicked(InputManager.MouseState, InputManager.LastMouseState))
@@ -61,42 +61,41 @@ namespace Chess
                     }
                 }
 
-
                 if (WhiteButton.isClicked(InputManager.MouseState))
                 {
-                    result.moveOn = true;
-                    result.spectating = false;
-                    result.playingWhite = true;
-                    result.newGame = newGame;
+                    result.startPlaying = true;
+                    result.startSpectating = false;
+                    result.startPlayingWhite = true;
+                    result.startNewGame = newGame;
 
                     return result;
                 }
 
                 if (BlackButton.isClicked(InputManager.MouseState))
                 {
-                    result.moveOn = true;
-                    result.spectating = false;
-                    result.playingWhite = false;
-                    result.newGame = newGame;
+                    result.startPlaying = true;
+                    result.startSpectating = false;
+                    result.startPlayingWhite = false;
+                    result.startNewGame = newGame;
 
                     return result;
                 }
 
                 if (SpectateButton.isClicked(InputManager.MouseState))
                 {
-                    result.moveOn = true;
-                    result.spectating = true;
-                    result.playingWhite = false;
-                    result.newGame = newGame;
+                    result.startPlaying = true;
+                    result.startSpectating = true;
+                    result.startPlayingWhite = false;
+                    result.startNewGame = newGame;
 
                     return result;
                 }
             }
 
-            result.moveOn = false;
-            result.spectating = false;
-            result.playingWhite = false;
-            result.newGame = newGame;
+            result.startPlaying = false;
+            result.startSpectating = false;
+            result.startPlayingWhite = false;
+            result.startNewGame = newGame;
 
             return result;
         }

@@ -9,14 +9,6 @@ using System.Threading.Tasks;
 
 namespace Chess
 {
-    public struct UpdateResult
-    {
-        public bool moveOn;
-        public bool spectating;
-        public bool playingWhite;
-        public bool newGame;
-    }
-
     public abstract class Screen
     {
         public abstract UpdateResult Update(GameTime gameTime, bool IsActive);

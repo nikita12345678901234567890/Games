@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Reflection;
 using System.Threading;
 using Chess.HackyStuff;
+using Chess.ScreenStuff;
 
 namespace Chess
 {
@@ -26,9 +27,7 @@ namespace Chess
 
         public MouseState Lastms;
 
-
-
-        bool inMenu = true;
+        public ScreenManager screens;
 
         public Game1()
         {
@@ -52,7 +51,7 @@ namespace Chess
             graphics.ApplyChanges();
 
 
-            menu = new MenuScreen(Content, graphics);
+            screens = new ScreenManager(Content, graphics);
 
             //This generates a list of all exceptions:
             var exceptions = Assembly.GetAssembly(typeof(int)).GetTypes().
@@ -77,73 +76,7 @@ namespace Chess
 
             InputManager.MouseState = Mouse.GetState();
 
-            if (inMenu)
-            {
-                var result = menu.Update(gameTime, IsActive);
-                if (result.moveOn)
-                {
-                    if (result.newGame)
-                    {
-                        if (result.spectating)
-                        {
-                            System.Windows.Forms.MessageBox.Show("You can't do that.", "", System.Windows.Forms.MessageBoxButtons.OK);
-                        }
-                        else
-                        {
-                            gameID = Guid.NewGuid();
-
-                            GameIDNotifierForm.Instance.SetGameID(gameID);
-                            if (!GameIDNotifierForm.Instance.Visible)
-                            {
-                                GameIDNotifierForm.Instance.Show();
-                            }
-                        }
-                    }
-                    else
-                    {
-                        GameIDEntryForm.Instance.ShowDialog();
-                    }
-
-                    playerID = Task.Run(async () => await ApiCalls.GetPlayerId(gameID)).Result;
-
-                    if (result.spectating)
-                    {
-                        inMenu = false;
-                        spectating = true;
-
-                        Task.Run(async () => await GetGameState()).Wait();
-                    }
-                    else
-                    {
-                        bool? color = Task.Run(async () => await ApiCalls.GetGameColor(gameID, playerID, result.playingWhite)).Result;
-                        if (color == null)
-                        {
-                            var BoxResult = System.Windows.Forms.MessageBox.Show("The game is full", "Press ok the spectate and cancel to go back.", System.Windows.Forms.MessageBoxButtons.OKCancel);
-
-                            switch (BoxResult)
-                            {
-                                case System.Windows.Forms.DialogResult.OK:
-                                    inMenu = false;
-                                    spectating = true;
-                                    break;
-
-                                case System.Windows.Forms.DialogResult.Cancel:
-                                    inMenu = true;
-                                    spectating = false;
-                                    break;
-                            }
-                        }
-                        else
-                        {
-                            amWhite = (bool)color;
-
-                            Task.Run(async () => await GetGameState()).Wait();
-
-                            inMenu = false;
-                        }
-                    }
-                }
-            }
+            screens.Update(gameTime, IsActive);
 
 
             InputManager.LastMouseState = InputManager.MouseState;
@@ -156,7 +89,11 @@ namespace Chess
 
         protected override void Draw(GameTime gameTime)
         {
+            GraphicsDevice.Clear(Color.DarkGoldenrod);
+
             spriteBatch.Begin();
+
+            screens.Draw(spriteBatch);
 
             spriteBatch.End();
 
