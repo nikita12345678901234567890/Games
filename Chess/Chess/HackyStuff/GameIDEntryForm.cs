@@ -40,6 +40,7 @@ namespace Chess.HackyStuff
             if (isReady)
             {
                 State = GameEntryFormShownStates.Ready;
+                Close();
             }
         }
 

@@ -97,6 +97,8 @@ namespace Chess
             else
             {
                 GameIDEntryForm.Instance.ShowDialog();
+                gameID = GameIDEntryForm.Instance.GameID;
+                GameIDEntryForm.Instance.Close();
             }
 
             playerID = Task.Run(async () => await ApiCalls.GetPlayerId(gameID)).Result;
@@ -192,14 +194,6 @@ namespace Chess
             if (prevTime.TotalMilliseconds >= delayMillis)
             {
                 Task.Run(async () => await GetGameState()).Wait();
-            }
-
-            if (GameIDEntryForm.Instance.State == GameEntryFormShownStates.Ready)
-            {
-                gameID = GameIDEntryForm.Instance.GameID;
-                GameIDEntryForm.Instance.Close();
-
-
             }
 
 
