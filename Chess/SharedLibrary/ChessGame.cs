@@ -147,7 +147,7 @@ namespace SharedLibrary
             moveCounter = 0;
         }
 
-        private bool Contains(List<(Square, MoveTypes)> list, Square pos)
+        protected bool Contains(List<(Square, MoveTypes)> list, Square pos)
         {
             foreach (var square in list)
             {
@@ -159,7 +159,7 @@ namespace SharedLibrary
             return false;
         }
 
-        private int IndexOf(List<(Square, MoveTypes)> list, Square pos)
+        protected int IndexOf(List<(Square, MoveTypes)> list, Square pos)
         {
             for (int i = 0; i < list.Count; i++)
             {
@@ -171,7 +171,7 @@ namespace SharedLibrary
             return -1;
         }
 
-        private bool IsChecking(Piece piece, Square pieceGridPositiion, Piece[,] PieceGrid)
+        protected bool IsChecking(Piece piece, Square pieceGridPositiion, Piece[,] PieceGrid)
         {
             var movesAndMoveTypes = piece.GetMoves(this, pieceGridPositiion);
             var moves = movesAndMoveTypes.Select((x) => x.Item1).ToList();
@@ -357,7 +357,7 @@ namespace SharedLibrary
             return moves;
         }
 
-        public void Move(Guid playerID, Square piece, Square destination)
+        public virtual void Move(Guid playerID, Square piece, Square destination)
         {
             if (!ValidPlayer(playerID)) return;
 
@@ -480,7 +480,7 @@ namespace SharedLibrary
             return true;
         }
 
-        public string MakeFEN()
+        public virtual string MakeFEN()
         {
             string FEN = "";
             int spaces = 0;
@@ -709,7 +709,7 @@ namespace SharedLibrary
 
 
 
-        private bool ValidPlayer(Guid playerID)
+        protected bool ValidPlayer(Guid playerID)
         {
             if ((playerID == whitePlayerID && Whiteturn) || (playerID == blackPlayerID && !Whiteturn))
             {

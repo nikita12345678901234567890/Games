@@ -22,8 +22,10 @@ namespace Chess
         Button BlackButton;
         Button SpectateButton;
         Button NewGameButton;
+        Button CrazyhouseButton;
 
         bool newGame = false;
+        bool crazyhouse = false;
 
         public MenuScreen(ContentManager content, GraphicsDeviceManager graphics)
         {
@@ -35,11 +37,12 @@ namespace Chess
             ButtonTexture = content.Load<Texture2D>("Button");
             ClickedButtonTexture = content.Load<Texture2D>("ButtonClicked");
 
-            WhiteButton = new Button("Play\nWhite", ButtonTexture, ClickedButtonTexture, new Vector2(200, 100), new Vector2(10, 20), new Vector2(0, 0), Color.Yellow, font);
+            WhiteButton = new Button("Play\nWhite", ButtonTexture, ClickedButtonTexture, new Vector2(200, 100), new Vector2(10, 20), new Vector2(0, 0), Color.White, font);
             BlackButton = new Button("Play\nBlack", ButtonTexture, ClickedButtonTexture, new Vector2(400, 100), new Vector2(10, 20), new Vector2(0, 0), Color.White, font);
             SpectateButton = new Button("Spectate", ButtonTexture, ClickedButtonTexture, new Vector2(300, 300), new Vector2(10, 5), new Vector2(0, 0), Color.White, font);
 
-            NewGameButton = new Button("Start\nnew\ngame", ButtonTexture, ClickedButtonTexture, new Vector2(300, 500), new Vector2(10, 15), new Vector2(0, 0), Color.White, font);
+            NewGameButton = new Button("Start\nnew\ngame", ButtonTexture, ClickedButtonTexture, new Vector2(200, 400), new Vector2(10, 15), new Vector2(0, 0), Color.White, font);
+            CrazyhouseButton = new Button("Crazyhouse", ButtonTexture, ClickedButtonTexture, new Vector2(400, 400), new Vector2(15, 7), new Vector2(0, 0), Color.White, font);
         }
 
         public override UpdateResult Update(GameTime gameTime, bool IsActive)
@@ -61,12 +64,27 @@ namespace Chess
                     }
                 }
 
+                if (CrazyhouseButton.isClicked(InputManager.MouseState, InputManager.LastMouseState))
+                {
+                    if (CrazyhouseButton.texture == CrazyhouseButton.normalTexture)
+                    {
+                        CrazyhouseButton.texture = CrazyhouseButton.clickedTexture;
+                        crazyhouse = true;
+                    }
+                    else
+                    {
+                        CrazyhouseButton.texture = CrazyhouseButton.normalTexture;
+                        crazyhouse = false;
+                    }
+                }
+
                 if (WhiteButton.isClicked(InputManager.MouseState))
                 {
                     result.startPlaying = true;
                     result.startSpectating = false;
                     result.startPlayingWhite = true;
                     result.startNewGame = newGame;
+                    result.startPlayingCrazyhouse = crazyhouse;
 
                     return result;
                 }
@@ -77,6 +95,7 @@ namespace Chess
                     result.startSpectating = false;
                     result.startPlayingWhite = false;
                     result.startNewGame = newGame;
+                    result.startPlayingCrazyhouse = crazyhouse;
 
                     return result;
                 }
@@ -87,15 +106,11 @@ namespace Chess
                     result.startSpectating = true;
                     result.startPlayingWhite = false;
                     result.startNewGame = newGame;
+                    result.startPlayingCrazyhouse = crazyhouse;
 
                     return result;
                 }
             }
-
-            result.startPlaying = false;
-            result.startSpectating = false;
-            result.startPlayingWhite = false;
-            result.startNewGame = newGame;
 
             return result;
         }
@@ -105,6 +120,7 @@ namespace Chess
             WhiteButton.Draw(spriteBatch);
             BlackButton.Draw(spriteBatch);
             SpectateButton.Draw(spriteBatch);
+            CrazyhouseButton.Draw(spriteBatch);
 
             NewGameButton.Draw(spriteBatch);
         }

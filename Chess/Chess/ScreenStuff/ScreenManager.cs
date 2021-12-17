@@ -32,7 +32,14 @@ namespace Chess.ScreenStuff
 
             if (result.startPlaying)
             {
-                screens.Push(new NormalGameScreen(content, graphics, result));
+                if (result.startPlayingCrazyhouse)
+                {
+                    screens.Push(new CrazyhouseGameScreen(content, graphics, result));
+                }
+                else
+                {
+                    screens.Push(new NormalGameScreen(content, graphics, result));
+                }
             }
             else if (result.exitScreen)
             {

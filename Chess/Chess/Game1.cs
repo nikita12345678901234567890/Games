@@ -38,7 +38,6 @@ namespace Chess
         }
 
         /*
-        Make game screens
         Have one sidebar with smaller pieces
         Make the game scream
         Make settings screen

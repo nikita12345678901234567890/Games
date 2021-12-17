@@ -6,6 +6,7 @@
         public bool startSpectating;
         public bool startPlayingWhite;
         public bool startNewGame;
+        public bool startPlayingCrazyhouse;
         public bool exitScreen;
         public bool openSettings;
     }
