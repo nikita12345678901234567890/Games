@@ -400,7 +400,7 @@ namespace Chess
 
 
 
-
+            //Drawing promotion choices:
             if (currentGameState.ChoosingPromotion && currentGameState.Whiteturn == amWhite)
             {
                 //Gray out whole screen:

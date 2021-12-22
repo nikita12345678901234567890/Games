@@ -14,7 +14,7 @@ namespace Chess
         GraphicsDeviceManager graphics;
 
         SpriteFont font;
-        SpriteFont font2;
+        
 
         Texture2D ButtonTexture;
         Texture2D ClickedButtonTexture;
@@ -33,7 +33,6 @@ namespace Chess
             this.graphics = graphics;
 
             font = content.Load<SpriteFont>("SpriteFont");
-            font2 = content.Load<SpriteFont>("font2");
             ButtonTexture = content.Load<Texture2D>("Button");
             ClickedButtonTexture = content.Load<Texture2D>("ButtonClicked");
 

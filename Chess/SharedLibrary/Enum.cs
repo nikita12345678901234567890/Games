@@ -7,11 +7,11 @@ namespace SharedLibrary
     public enum PieceTypes
     {
         Pawn,
-        Rook,
-        Bishop,
         Knight,
-        King,
-        Queen
+        Bishop,
+        Rook,
+        Queen,
+        King
     };
 
     public enum MoveTypes

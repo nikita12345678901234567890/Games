@@ -21,6 +21,8 @@ namespace Chess
         ContentManager content;
         GraphicsDeviceManager graphics;
 
+        SpriteFont font2;
+
         public static Dictionary<(PieceTypes, bool), Texture2D> Textures;
 
         public static Texture2D Pixel;
@@ -46,6 +48,9 @@ namespace Chess
         TimeSpan prevTime;
 
         string lastFEN = String.Empty;
+
+        public int[] WhiteAvailablePieces = { 0, 0, 0, 0, 0 };
+        public int[] BlackAvailablePieces = { 0, 0, 0, 0, 0 };
 
 
         public CrazyhouseGameScreen(ContentManager content, GraphicsDeviceManager graphics, UpdateResult options)
@@ -77,6 +82,9 @@ namespace Chess
 
             Pixel = new Texture2D(graphics.GraphicsDevice, 1, 1);
             Pixel.SetData(new[] { Color.White });
+
+
+            font2 = content.Load<SpriteFont>("font2");
 
 
             if (options.startNewGame)
@@ -333,7 +341,7 @@ namespace Chess
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            graphics.GraphicsDevice.Clear(Color.Chocolate);
+            graphics.GraphicsDevice.Clear(Color.Purple);
 
             //Drawing grid:
             Color cellColor = Color.White;
@@ -400,9 +408,7 @@ namespace Chess
             }
 
 
-
-
-
+            //Drawing promotion choices:
             if (currentGameState.ChoosingPromotion && currentGameState.Whiteturn == amWhite)
             {
                 //Gray out whole screen:
@@ -421,6 +427,49 @@ namespace Chess
 
                 texture = Textures[(PieceTypes.Knight, amWhite)];
                 spriteBatch.Draw(texture, CellCenter(choices.Knight.ToPoint()), null, Color.White, 0, new Vector2(texture.Width / 2, texture.Height / 2), 0.5f, SpriteEffects.None, 0);
+            }
+
+            //Drawing available pieces:
+            int offset = 7;
+            Texture2D pieceTexture;
+            for (int i = 0; i < 5; i++)
+            {
+                pieceTexture = Textures[(PieceTypes.Queen - i, !amWhite)];
+
+                if (i == 4)
+                {
+                    spriteBatch.Draw(pieceTexture, CellCenter(new Point(8, i)) - new Vector2(0, (20 * (i)) + offset), null, Color.White, 0, new Vector2(pieceTexture.Width / 2, pieceTexture.Height / 2), 0.8f, SpriteEffects.None, 0);
+                }
+                else
+                {
+                    spriteBatch.Draw(pieceTexture, CellCenter(new Point(8, i)) - new Vector2(0, (20 * (i)) + offset), null, Color.White, 0, new Vector2(pieceTexture.Width / 2, pieceTexture.Height / 2), 0.4f, SpriteEffects.None, 0);
+                }
+            }
+
+            for (int i = 4; i >= 0; i--)
+            {
+                pieceTexture = Textures[(PieceTypes.Pawn + i, amWhite)];
+
+                if (i == 0)
+                {
+                    spriteBatch.Draw(pieceTexture, CellCenter(new Point(8, i + 4)) - new Vector2(0, (20 * (i)) + offset), null, Color.White, 0, new Vector2(pieceTexture.Width / 2, pieceTexture.Height / 2), 0.8f, SpriteEffects.None, 0);
+                }
+                else
+                {
+                    spriteBatch.Draw(pieceTexture, CellCenter(new Point(8, i + 4)) - new Vector2(0, (20 * (i)) + offset), null, Color.White, 0, new Vector2(pieceTexture.Width / 2, pieceTexture.Height / 2), 0.4f, SpriteEffects.None, 0);
+                }
+            }
+
+            //Drawing the numbers of pieces available:
+            for (int i = 0; i < 5; i++)
+            {
+                spriteBatch.Draw(Pixel, new Vector2(880, 60 + (72 * i)), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
+                spriteBatch.DrawString(font2, WhiteAvailablePieces[i].ToString(), new Vector2(883, 56 + (72 * i)), Color.Black);
+            }
+
+            for (int i = 4; i >= 0; i--)
+            {
+                
             }
         }
 
