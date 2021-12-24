@@ -30,9 +30,9 @@ namespace Chess
         }
 
 
-        public static async Task<Guid> GetPlayerId(Guid gameID)
+        public static async Task<Guid> GetPlayerId(Guid gameID, bool crazyhouse)
         {
-            var result = await client.GetAsync($"{baseURL}/game/GetPlayerID/{gameID}");
+            var result = await client.GetAsync($"{baseURL}/game/GetPlayerID/{gameID}/{crazyhouse}");
             var temp = await result.Content.ReadAsStringAsync();
             temp = temp.Substring(1, temp.Length - 2);
             return Guid.Parse(temp);
@@ -97,6 +97,23 @@ namespace Chess
         public static async Task Promote(Guid gameID, Guid playerID, string pieceChoice)
         {
             var result = await client.GetAsync($"{baseURL}/game/Promote/{gameID}/{playerID}/{pieceChoice}");
+        }
+
+        public static async Task<Point[]> PlacePiece(Guid gameID, Guid playerID, Piece piece, Square destination)
+        {
+            //.NET 5 solution
+            var options = new JsonSerializerOptions { IncludeFields = true, PropertyNamingPolicy = null };
+            string json = JsonSerializer.Serialize(piece, options);
+
+            //new string(Array.ConvertAll<byte, char>(s._content, n => (char)n))
+
+            StringContent s = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+            var result = await client.PostAsync($"{baseURL}/game/GetMoves/{gameID}/{playerID}/{pieceChoice}", s);
+            var temp = await result.Content.ReadAsStringAsync();
+
+            var squares = JsonSerializer.Deserialize<Square[]>(temp, options);
+            return squares.Select(s => s.ToPoint()).ToArray();
         }
     }
 }

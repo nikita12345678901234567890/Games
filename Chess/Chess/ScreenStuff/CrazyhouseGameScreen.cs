@@ -49,6 +49,10 @@ namespace Chess
 
         string lastFEN = String.Empty;
 
+        bool dragging = false;
+        Piece draggingPiece;
+
+        //number of [pawns, knights, bishops, rooks, queens] available;
         public int[] WhiteAvailablePieces = { 1, 2, 3, 4, 5 };
         public int[] BlackAvailablePieces = { 6, 7, 8, 9, 0 };
 
@@ -111,7 +115,7 @@ namespace Chess
                 GameIDEntryForm.Instance.Close();
             }
 
-            playerID = Task.Run(async () => await ApiCalls.GetPlayerId(gameID)).Result;
+            playerID = Task.Run(async () => await ApiCalls.GetPlayerId(gameID, options.startPlayingCrazyhouse)).Result;
 
             if (options.startSpectating)
             {
@@ -214,98 +218,138 @@ namespace Chess
 
 
             //Checking if mouse clicked:
-            else if (InputManager.MouseState.LeftButton == ButtonState.Pressed
-                  && InputManager.LastMouseState.LeftButton == ButtonState.Released
+            else if (((InputManager.MouseState.LeftButton == ButtonState.Pressed && InputManager.LastMouseState.LeftButton == ButtonState.Released) || dragging)
                   && graphics.GraphicsDevice.Viewport.Bounds.Contains(InputManager.MouseState.Position)
                   && currentGameState.Whiteturn == amWhite && IsActive)
             {
-                var mouseCell = PositionToCell(InputManager.MouseState.Position);
-
-                //If choosing a piece for promotion:
-                if (currentGameState.ChoosingPromotion)
+                if (InputManager.MouseState.Position.X < 800 && !dragging)
                 {
-                    var promotionInfo = CheckPromotion();
-                    choices = new PiecePromotion(amWhite, promotionInfo.pawnLocation.X);
+                    var mouseCell = PositionToCell(InputManager.MouseState.Position);
 
-                    if (mouseCell == choices.Queen.ToPoint())
+                    //If choosing a piece for promotion:
+                    if (currentGameState.ChoosingPromotion)
                     {
-                        Task.Run(async () => await ApiCalls.Promote(gameID, playerID, "Queen")).Wait();
+                        var promotionInfo = CheckPromotion();
+                        choices = new PiecePromotion(amWhite, promotionInfo.pawnLocation.X);
+
+                        if (mouseCell == choices.Queen.ToPoint())
+                        {
+                            Task.Run(async () => await ApiCalls.Promote(gameID, playerID, "Queen")).Wait();
+                        }
+
+                        else if (mouseCell == choices.Rook.ToPoint())
+                        {
+                            Task.Run(async () => await ApiCalls.Promote(gameID, playerID, "Rook")).Wait();
+                        }
+
+                        else if (mouseCell == choices.Bishop.ToPoint())
+                        {
+                            Task.Run(async () => await ApiCalls.Promote(gameID, playerID, "Bishop")).Wait();
+                        }
+
+                        else if (mouseCell == choices.Knight.ToPoint())
+                        {
+                            Task.Run(async () => await ApiCalls.Promote(gameID, playerID, "Knight")).Wait();
+                        }
+
+                        Task.Run(async () => await GetGameState()).Wait();
+                        GameOverResult = CheckIfGameOver(gameTime);
                     }
 
-                    else if (mouseCell == choices.Rook.ToPoint())
+                    //Deselecting piece:
+                    else if (currentGameState.PieceGrid[mouseCell.Y, mouseCell.X] != null && HighlightedSquares.Count > 0 && mouseCell == HighlightedSquares[0])
                     {
-                        Task.Run(async () => await ApiCalls.Promote(gameID, playerID, "Rook")).Wait();
+                        HighlightedSquares.Clear();
                     }
 
-                    else if (mouseCell == choices.Bishop.ToPoint())
+                    //Selecting piece:
+                    else if (currentGameState.PieceGrid[mouseCell.Y, mouseCell.X] != null && currentGameState.PieceGrid[mouseCell.Y, mouseCell.X].IsWhite == amWhite)
                     {
-                        Task.Run(async () => await ApiCalls.Promote(gameID, playerID, "Bishop")).Wait();
-                    }
+                        HighlightedSquares.Clear();
 
-                    else if (mouseCell == choices.Knight.ToPoint())
-                    {
-                        Task.Run(async () => await ApiCalls.Promote(gameID, playerID, "Knight")).Wait();
-                    }
-
-                    Task.Run(async () => await GetGameState()).Wait();
-                    GameOverResult = CheckIfGameOver(gameTime);
-                }
-
-                //Deselecting piece:
-                else if (currentGameState.PieceGrid[mouseCell.Y, mouseCell.X] != null && HighlightedSquares.Count > 0 && mouseCell == HighlightedSquares[0])
-                {
-                    HighlightedSquares.Clear();
-                }
-
-                //Selecting piece:
-                else if (currentGameState.PieceGrid[mouseCell.Y, mouseCell.X] != null && currentGameState.PieceGrid[mouseCell.Y, mouseCell.X].IsWhite == amWhite)
-                {
-                    HighlightedSquares.Clear();
-
-                    Point[] moves;
-                    if (amWhite)
-                    {
-                        moves = Task.Run(async () => await ApiCalls.GetMoves(gameID, mouseCell)).Result;
-
-                        HighlightedSquares.AddRange(moves);
-                    }
-                    else
-                    {
-                        moves = Task.Run(async () => await ApiCalls.GetMoves(gameID, Flip(mouseCell))).Result;
-
-                        HighlightedSquares.AddRange(FlipSquares(moves));
-                    }
-
-
-                }
-                //Selecting move:
-                else
-                {
-                    if (HighlightedSquares.Contains(mouseCell) && mouseCell != HighlightedSquares[0])
-                    {
+                        Point[] moves;
                         if (amWhite)
                         {
-                            Task.Run(async () => await ApiCalls.Move(gameID, playerID, HighlightedSquares[0], mouseCell)).Wait();
+                            moves = Task.Run(async () => await ApiCalls.GetMoves(gameID, mouseCell)).Result;
+
+                            HighlightedSquares.AddRange(moves);
                         }
                         else
                         {
-                            Task.Run(async () => await ApiCalls.Move(gameID, playerID, Flip(HighlightedSquares[0]), Flip(mouseCell))).Wait();
+                            moves = Task.Run(async () => await ApiCalls.GetMoves(gameID, Flip(mouseCell))).Result;
+
+                            HighlightedSquares.AddRange(FlipSquares(moves));
                         }
 
-                        HighlightedSquares.Clear();
 
-                        Task.Run(async () => await ApiCalls.CheckPromotion(gameID)).Wait();
-
-                        Task.Run(async () => await GetGameState()).Wait();
-
-                        var promotionInfo = CheckPromotion();
-                        if (promotionInfo.promotion)
+                    }
+                    //Selecting move:
+                    else
+                    {
+                        if (HighlightedSquares.Contains(mouseCell) && mouseCell != HighlightedSquares[0])
                         {
-                            choices = new PiecePromotion(amWhite, promotionInfo.pawnLocation.X);
+                            if (amWhite)
+                            {
+                                Task.Run(async () => await ApiCalls.Move(gameID, playerID, HighlightedSquares[0], mouseCell)).Wait();
+                            }
+                            else
+                            {
+                                Task.Run(async () => await ApiCalls.Move(gameID, playerID, Flip(HighlightedSquares[0]), Flip(mouseCell))).Wait();
+                            }
+
+                            HighlightedSquares.Clear();
+
+                            Task.Run(async () => await ApiCalls.CheckPromotion(gameID)).Wait();
+
+                            Task.Run(async () => await GetGameState()).Wait();
+
+                            var promotionInfo = CheckPromotion();
+                            if (promotionInfo.promotion)
+                            {
+                                choices = new PiecePromotion(amWhite, promotionInfo.pawnLocation.X);
+                            }
+
+
+                            GameOverResult = CheckIfGameOver(gameTime);
                         }
-
-
-                        GameOverResult = CheckIfGameOver(gameTime);
+                    }
+                }
+                else
+                {
+                    if (dragging)
+                    {
+                        if (InputManager.MouseState.LeftButton == ButtonState.Released && InputManager.MouseState.Position.X < 800)
+                        {
+                            dragging = false;
+                            dragging = !Task.Run(async () => await ApiCalls.PlacePiece(gameID, draggingPiece)).Result;
+                        }
+                    }
+                    else
+                    {
+                        if (InputManager.MouseState.Position.Y > 373)
+                        {
+                            if (InputManager.MouseState.Position.Y <= 453)
+                            {
+                                draggingPiece = new Pawn(amWhite);
+                            }
+                            else if (InputManager.MouseState.Position.Y <= 534)
+                            {
+                                draggingPiece = new Knight(amWhite);
+                            }
+                            else if (InputManager.MouseState.Position.Y <= 615)
+                            {
+                                draggingPiece = new Bishop(amWhite);
+                            }
+                            else if (InputManager.MouseState.Position.Y <= 692)
+                            {
+                                draggingPiece = new Rook(amWhite);
+                            }
+                            else if (InputManager.MouseState.Position.Y <= 775)
+                            {
+                                draggingPiece = new Queen(amWhite);
+                            }
+                            dragging = true;
+                        }
                     }
                 }
             }
@@ -466,13 +510,49 @@ namespace Chess
             spriteBatch.Draw(Pixel, new Vector2(880, 216), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
             spriteBatch.Draw(Pixel, new Vector2(880, 295), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
             spriteBatch.Draw(Pixel, new Vector2(880, 373), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
-            spriteBatch.Draw(Pixel, new Vector2(880, 453), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
-            spriteBatch.Draw(Pixel, new Vector2(880, 132), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
-            spriteBatch.Draw(Pixel, new Vector2(880, 132), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
-            spriteBatch.Draw(Pixel, new Vector2(880, 132), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
-            spriteBatch.Draw(Pixel, new Vector2(880, 132), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
 
-            spriteBatch.DrawString(font2, WhiteAvailablePieces[0].ToString(), new Vector2(883, 128), Color.Black);
+            spriteBatch.Draw(Pixel, new Vector2(880, 453), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
+            spriteBatch.Draw(Pixel, new Vector2(880, 534), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
+            spriteBatch.Draw(Pixel, new Vector2(880, 615), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
+            spriteBatch.Draw(Pixel, new Vector2(880, 692), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
+            spriteBatch.Draw(Pixel, new Vector2(880, 775), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
+
+            int[] topArray;
+            int[] bottomArray;
+            if (amWhite)
+            {
+                topArray = BlackAvailablePieces;
+                bottomArray = WhiteAvailablePieces;
+            }
+            else
+            {
+                topArray = WhiteAvailablePieces;
+                bottomArray = BlackAvailablePieces;
+            }
+
+            spriteBatch.DrawString(font2, topArray[4].ToString(), new Vector2(883, 57), Color.Black);
+            spriteBatch.DrawString(font2, topArray[3].ToString(), new Vector2(883, 129), Color.Black);
+            spriteBatch.DrawString(font2, topArray[2].ToString(), new Vector2(883, 213), Color.Black);
+            spriteBatch.DrawString(font2, topArray[1].ToString(), new Vector2(883, 292), Color.Black);
+            spriteBatch.DrawString(font2, topArray[0].ToString(), new Vector2(883, 370), Color.Black);
+            spriteBatch.DrawString(font2, bottomArray[0].ToString(), new Vector2(883, 450), Color.Black);
+            spriteBatch.DrawString(font2, bottomArray[1].ToString(), new Vector2(883, 531), Color.Black);
+            spriteBatch.DrawString(font2, bottomArray[2].ToString(), new Vector2(883, 612), Color.Black);
+            spriteBatch.DrawString(font2, bottomArray[3].ToString(), new Vector2(883, 689), Color.Black);
+            spriteBatch.DrawString(font2, bottomArray[4].ToString(), new Vector2(883, 772), Color.Black);
+
+            //Drawing dragging piece:
+            if (dragging)
+            {
+                if (draggingPiece.PieceType == PieceTypes.Pawn)
+                {
+                    spriteBatch.Draw(Textures[(draggingPiece.PieceType, amWhite)], InputManager.MouseState.Position.ToVector2(), null, Color.White, 0, new Vector2(Textures[(draggingPiece.PieceType, amWhite)].Width / 2, Textures[(draggingPiece.PieceType, amWhite)].Height / 2), 0.8f, SpriteEffects.None, 0);
+                }
+                else
+                {
+                    spriteBatch.Draw(Textures[(draggingPiece.PieceType, amWhite)], InputManager.MouseState.Position.ToVector2(), null, Color.White, 0, new Vector2(Textures[(draggingPiece.PieceType, amWhite)].Width / 2, Textures[(draggingPiece.PieceType, amWhite)].Height / 2), 0.4f, SpriteEffects.None, 0);
+                }
+            }
         }
 
         public (bool promotion, bool IsWhite, Point pawnLocation) CheckPromotion()
@@ -671,6 +751,15 @@ namespace Chess
             else
             {
                 gamestate.ChoosingPromotion = false;
+            }
+
+            for (int i = 0; i < 5; i++)
+            {
+                WhiteAvailablePieces[i] = int.Parse(ending[4 + i]);
+            }
+            for (int i = 0; i < 5; i++)
+            {
+                BlackAvailablePieces[i] = int.Parse(ending[9 + i]);
             }
 
             return gamestate;

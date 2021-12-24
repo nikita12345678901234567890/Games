@@ -101,7 +101,7 @@ namespace Chess
                 GameIDEntryForm.Instance.Close();
             }
 
-            playerID = Task.Run(async () => await ApiCalls.GetPlayerId(gameID)).Result;
+            playerID = Task.Run(async () => await ApiCalls.GetPlayerId(gameID, options.startPlayingCrazyhouse)).Result;
 
             if (options.startSpectating)
             {

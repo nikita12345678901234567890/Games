@@ -45,8 +45,8 @@ namespace SharedLibrary
         public bool choosingPromotion = false;
 
 
-        private Guid whitePlayerID = Guid.Empty;
-        private Guid blackPlayerID = Guid.Empty;
+        protected Guid whitePlayerID = Guid.Empty;
+        protected Guid blackPlayerID = Guid.Empty;
 
         public bool? GetGameColor(Guid playerID, bool wantsWhite)
         {

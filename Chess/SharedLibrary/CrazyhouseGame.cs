@@ -10,115 +10,77 @@ namespace SharedLibrary
     public class CrazyhouseGame : ChessGame
     {
         //number of [pawns, knights, bishops, rooks, queens] available;
-        public int[] WhiteAvailablePieces = {0, 0, 0, 0, 0 };
+        public int[] WhiteAvailablePieces = {1, 2, 3, 4, 5 };
         public int[] BlackAvailablePieces = { 0, 0, 0, 0, 0 };
 
-        public override void Move(Guid playerID, Square piece, Square destination)
+        public void ResetBoard(Guid playerID)
         {
-            if (!ValidPlayer(playerID)) return;
+            if (playerID != whitePlayerID && playerID != blackPlayerID) return;
 
-            var moves = GetMovesAndTypes(piece);
-            if (Contains(moves, destination))
+            for (int x = 0; x < PieceGrid.GetLength(1); x++)
             {
-                //Checks for reseting the moveCounter
-                if (PieceGrid[piece.Y, piece.X].PieceType == PieceTypes.Pawn || PieceGrid[destination.Y, destination.X] != null)
+                for (int y = 0; y < PieceGrid.GetLength(0); y++)
                 {
-                    moveCounter = 0;
+                    PieceGrid[y, x] = null;
                 }
-
-
-                //Setting DidMoveTwice:
-                if (moves.Count >= 3 && destination == moves[2].Item1 && PieceGrid[piece.Y, piece.X] != null && PieceGrid[piece.Y, piece.X].PieceType == PieceTypes.Pawn)
-                {
-                    Pawn pawn = (Pawn)PieceGrid[piece.Y, piece.X];
-                    pawn.DidMoveTwice = true;
-                }
-
-                PieceGrid[destination.Y, destination.X] = PieceGrid[piece.Y, piece.X];
-                PieceGrid[piece.Y, piece.X] = null;
-
-                bool IsPromotion = false;
-
-                switch (moves[IndexOf(moves, destination)].Item2)
-                {
-                    case MoveTypes.EnPassant:
-
-                        if (PieceGrid[destination.Y, destination.X].IsWhite)
-                        {
-                            PieceGrid[destination.Y + 1, destination.X] = null;
-                        }
-                        else
-                        {
-                            PieceGrid[destination.Y - 1, destination.X] = null;
-                        }
-
-                        break;
-
-                    case MoveTypes.CastleLeft:
-
-                        PieceGrid[destination.Y, destination.X + 1] = PieceGrid[destination.Y, 0];
-                        PieceGrid[destination.Y, 0] = null;
-
-                        break;
-
-                    case MoveTypes.CastleRight:
-
-                        PieceGrid[destination.Y, destination.X - 1] = PieceGrid[destination.Y, PieceGrid.GetLength(1) - 1];
-                        PieceGrid[destination.Y, PieceGrid.GetLength(1) - 1] = null;
-
-                        break;
-
-                    case MoveTypes.Promotion:
-
-                        IsPromotion = true;
-
-                        break;
-                }
-
-                LastMove = destination;
-
-                //Setting HasMoved:
-                var lastMovedPiece = PieceGrid[LastMove.Y, LastMove.X];
-                if (lastMovedPiece.PieceType == PieceTypes.King)
-                {
-                    King kingMoved = (King)lastMovedPiece;
-                    kingMoved.HasMoved = true;
-                }
-                if (lastMovedPiece.PieceType == PieceTypes.Rook)
-                {
-                    Rook rookMoved = (Rook)lastMovedPiece;
-                    rookMoved.HasMoved = true;
-                }
-
-                if (!IsPromotion)
-                {
-                    Whiteturn = !Whiteturn;
-
-                    //Checking if last move put someone in check:
-                    if (IsChecking(PieceGrid[LastMove.Y, LastMove.X], LastMove, PieceGrid))
-                    {
-                        if (PieceGrid[LastMove.Y, LastMove.X].IsWhite)
-                        {
-                            BlackInCheck = true;
-                        }
-                        else
-                        {
-                            WhiteInCheck = true;
-                        }
-                    }
-                    else
-                    {
-                        WhiteInCheck = false;
-                        BlackInCheck = false;
-                    }
-                }
-
-
-                moveCounter++;
             }
-        }
 
-        public virtual string MakeFEN()
+            //Setting up grid:
+            for (int x = 0; x < 8; x++)
+            {
+                //Black pawns:
+                PieceGrid[1, x] = new Pawn(false);
+
+                //White pawns:
+                PieceGrid[6, x] = new Pawn(true);
+            }
+            //Rooks:
+            //Black:
+            PieceGrid[0, 0] = new Rook(false);
+            PieceGrid[0, 7] = new Rook(false);
+            //White:
+            PieceGrid[7, 0] = new Rook(true);
+            PieceGrid[7, 7] = new Rook(true);
+            //Knights:
+            //Black:
+            PieceGrid[0, 1] = new Knight(false);
+            PieceGrid[0, 6] = new Knight(false);
+            //white:
+            PieceGrid[7, 1] = new Knight(true);
+            PieceGrid[7, 6] = new Knight(true);
+            //Bishops:
+            //Black:
+            PieceGrid[0, 2] = new Bishop(false);
+            PieceGrid[0, 5] = new Bishop(false);
+            //White:
+            PieceGrid[7, 2] = new Bishop(true);
+            PieceGrid[7, 5] = new Bishop(true);
+            //Kings:
+            //Black:
+            PieceGrid[0, 4] = new King(false);
+            //White:
+            PieceGrid[7, 4] = new King(true);
+            //Queens:
+            //Black:
+            PieceGrid[0, 3] = new Queen(false);
+            //White:
+            PieceGrid[7, 3] = new Queen(true);
+
+            Whiteturn = true;
+
+            LastMove = default;
+
+            WhiteInCheck = false;
+
+            BlackInCheck = false;
+
+            moveCounter = 0;
+
+            WhiteAvailablePieces = new int[] { 0, 0, 0, 0, 0 };
+            BlackAvailablePieces = new int[] { 0, 0, 0, 0, 0 };
+    }
+
+        public override string MakeFEN()
         {
             string FEN = "";
             int spaces = 0;
@@ -252,7 +214,35 @@ namespace SharedLibrary
                 FEN += "n";
             }
 
+            for (int i = 0; i < 5; i++)
+            {
+                FEN += " ";
+                FEN += WhiteAvailablePieces[i].ToString();
+            }
+            for (int i = 0; i < 5; i++)
+            {
+                FEN += " ";
+                FEN += BlackAvailablePieces[i].ToString();
+            }
+
             return FEN;
+        }
+
+        public bool PlacePiece(Guid playerID, Piece piece, Square destination)
+        {
+            if (!ValidPlayer(playerID)) return false;
+
+            //Checking if this will result in a pawn promotion:
+            if (piece.PieceType == PieceTypes.Pawn && (destination.Y == 7 || destination.Y == 0)) return false;
+
+            //Checking if there is anything on that square:
+            if (PieceGrid[destination.Y, destination.X] != null) return false;
+
+            //Checking if that would result in check:
+            if (IsChecking(piece, destination, PieceGrid)) return false;
+
+            PieceGrid[destination.Y, destination.X] = piece;
+            return true;
         }
     }
 }

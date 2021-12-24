@@ -21,13 +21,20 @@ namespace WebApi2.Controllers
         }
 
 
-        [HttpGet("GetPlayerId/{gameID}")]
-        public Guid GetPlayerId(Guid gameID)
+        [HttpGet("GetPlayerId/{gameID}/{crazyhouse}")]
+        public Guid GetPlayerId(Guid gameID, bool crazyhouse)
         {
             Guid id = Guid.NewGuid();
             if (!games.ContainsKey(gameID))
             {
-                games[gameID] = new();
+                if (crazyhouse)
+                {
+                    games[gameID] = new CrazyhouseGame();
+                }
+                else
+                {
+                    games[gameID] = new();
+                }
             }
 
             return id;
@@ -88,6 +95,12 @@ namespace WebApi2.Controllers
         public void Promote(Guid gameID, Guid playerID, string pieceChoice)
         {
             games[gameID].Promote(playerID, pieceChoice);
+        }
+
+        [HttpPost("GetMoves/{gameID}")]
+        public Square[] PlacePiece(Guid gameID, [FromBody] Square piece)
+        {
+            return games[gameID].PlacePiece(piece);
         }
     }
 }
