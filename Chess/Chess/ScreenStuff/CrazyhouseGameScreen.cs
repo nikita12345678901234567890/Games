@@ -49,8 +49,8 @@ namespace Chess
 
         string lastFEN = String.Empty;
 
-        public int[] WhiteAvailablePieces = { 0, 0, 0, 0, 0 };
-        public int[] BlackAvailablePieces = { 0, 0, 0, 0, 0 };
+        public int[] WhiteAvailablePieces = { 1, 2, 3, 4, 5 };
+        public int[] BlackAvailablePieces = { 6, 7, 8, 9, 0 };
 
 
         public CrazyhouseGameScreen(ContentManager content, GraphicsDeviceManager graphics, UpdateResult options)
@@ -461,16 +461,18 @@ namespace Chess
             }
 
             //Drawing the numbers of pieces available:
-            for (int i = 0; i < 5; i++)
-            {
-                spriteBatch.Draw(Pixel, new Vector2(880, 60 + (72 * i)), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
-                spriteBatch.DrawString(font2, WhiteAvailablePieces[i].ToString(), new Vector2(883, 56 + (72 * i)), Color.Black);
-            }
+            spriteBatch.Draw(Pixel, new Vector2(880, 60), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
+            spriteBatch.Draw(Pixel, new Vector2(880, 132), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
+            spriteBatch.Draw(Pixel, new Vector2(880, 216), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
+            spriteBatch.Draw(Pixel, new Vector2(880, 295), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
+            spriteBatch.Draw(Pixel, new Vector2(880, 373), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
+            spriteBatch.Draw(Pixel, new Vector2(880, 453), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
+            spriteBatch.Draw(Pixel, new Vector2(880, 132), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
+            spriteBatch.Draw(Pixel, new Vector2(880, 132), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
+            spriteBatch.Draw(Pixel, new Vector2(880, 132), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
+            spriteBatch.Draw(Pixel, new Vector2(880, 132), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
 
-            for (int i = 4; i >= 0; i--)
-            {
-                
-            }
+            spriteBatch.DrawString(font2, WhiteAvailablePieces[0].ToString(), new Vector2(883, 128), Color.Black);
         }
 
         public (bool promotion, bool IsWhite, Point pawnLocation) CheckPromotion()
