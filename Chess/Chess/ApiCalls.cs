@@ -101,7 +101,6 @@ namespace Chess
 
         public static async Task<Point[]> PlacePiece(Guid gameID, Guid playerID, Piece piece, Square destination)
         {
-            //.NET 5 solution
             var options = new JsonSerializerOptions { IncludeFields = true, PropertyNamingPolicy = null };
             string json = JsonSerializer.Serialize(piece, options);
 

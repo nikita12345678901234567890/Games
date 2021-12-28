@@ -20,9 +20,13 @@ namespace SharedLibrary
     //theSuperSpeedup
     //un-speedItUp
 
+    //this.die
+
     //"It's going to crash, but with a different error. This is progress." -Stan 10/14/2021
 
     //"School really interferes with learning." -Stan 12/7/2021
+
+    //"It's only when we click on it, that it dies." - Stan 12/27/21
 
     public class ChessGame
     {
