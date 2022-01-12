@@ -52,9 +52,7 @@ namespace Chess
         bool dragging = false;
         Piece draggingPiece;
 
-        //number of [pawns, knights, bishops, rooks, queens] available;
-        public int[] WhiteAvailablePieces = { 1, 2, 3, 4, 5 };
-        public int[] BlackAvailablePieces = { 6, 7, 8, 9, 0 };
+        public Dictionary<bool, Dictionary<PieceTypes, Stack<Piece>>> AvailablePieces = new Dictionary<bool, Dictionary<PieceTypes, Stack<Piece>>>();
 
 
         public CrazyhouseGameScreen(ContentManager content, GraphicsDeviceManager graphics, UpdateResult options)
@@ -90,7 +88,25 @@ namespace Chess
 
             font2 = content.Load<SpriteFont>("font2");
 
+            //Initializing the Dictionary of Dictionary of Stack of Piece:
+            AvailablePieces.Add(true, new Dictionary<PieceTypes, Stack<Piece>>());
+            AvailablePieces.Add(false, new Dictionary<PieceTypes, Stack<Piece>>());
 
+
+            AvailablePieces[true].Add(PieceTypes.Pawn, new Stack<Piece>());
+            AvailablePieces[true].Add(PieceTypes.Knight, new Stack<Piece>());
+            AvailablePieces[true].Add(PieceTypes.Bishop, new Stack<Piece>());
+            AvailablePieces[true].Add(PieceTypes.Rook, new Stack<Piece>());
+            AvailablePieces[true].Add(PieceTypes.Queen, new Stack<Piece>());
+
+            AvailablePieces[false].Add(PieceTypes.Pawn, new Stack<Piece>());
+            AvailablePieces[false].Add(PieceTypes.Knight, new Stack<Piece>());
+            AvailablePieces[false].Add(PieceTypes.Bishop, new Stack<Piece>());
+            AvailablePieces[false].Add(PieceTypes.Rook, new Stack<Piece>());
+            AvailablePieces[false].Add(PieceTypes.Queen, new Stack<Piece>());
+
+
+            //Actually starting the game:
             if (options.startNewGame)
             {
                 if (options.startSpectating)
@@ -149,6 +165,8 @@ namespace Chess
                     Task.Run(async () => await GetGameState()).Wait();
                 }
             }
+
+
         }
 
         UpdateResult CheckIfGameOver(GameTime gameTime)
@@ -283,6 +301,7 @@ namespace Chess
 
 
                     }
+
                     //Selecting move:
                     else
                     {
@@ -320,35 +339,38 @@ namespace Chess
                     {
                         if (InputManager.MouseState.LeftButton == ButtonState.Released && InputManager.MouseState.Position.X < 800)
                         {
-                            dragging = false;
-                            dragging = !Task.Run(async () => await ApiCalls.PlacePiece(gameID, draggingPiece)).Result;
+                            dragging = !Task.Run(async () => await ApiCalls.PlacePiece(gameID, playerID, draggingPiece.PieceType, PositionToCell(InputManager.MouseState.Position))).Result;
                         }
                     }
                     else
                     {
-                        if (InputManager.MouseState.Position.Y > 373)
+                        if (InputManager.MouseState.Position.Y > 393)
                         {
-                            if (InputManager.MouseState.Position.Y <= 453)
+                            if (InputManager.MouseState.Position.Y <= 473 && AvailablePieces[amWhite][PieceTypes.Pawn].Count > 0)
                             {
                                 draggingPiece = new Pawn(amWhite);
+                                dragging = true;
                             }
-                            else if (InputManager.MouseState.Position.Y <= 534)
+                            else if (InputManager.MouseState.Position.Y <= 554 && AvailablePieces[amWhite][PieceTypes.Knight].Count > 0)
                             {
                                 draggingPiece = new Knight(amWhite);
+                                dragging = true;
                             }
-                            else if (InputManager.MouseState.Position.Y <= 615)
+                            else if (InputManager.MouseState.Position.Y <= 635 && AvailablePieces[amWhite][PieceTypes.Bishop].Count > 0)
                             {
                                 draggingPiece = new Bishop(amWhite);
+                                dragging = true;
                             }
-                            else if (InputManager.MouseState.Position.Y <= 692)
+                            else if (InputManager.MouseState.Position.Y <= 712 && AvailablePieces[amWhite][PieceTypes.Rook].Count > 0)
                             {
                                 draggingPiece = new Rook(amWhite);
+                                dragging = true;
                             }
-                            else if (InputManager.MouseState.Position.Y <= 775)
+                            else if (InputManager.MouseState.Position.Y <= 800 && AvailablePieces[amWhite][PieceTypes.Queen].Count > 0)
                             {
                                 draggingPiece = new Queen(amWhite);
+                                dragging = true;
                             }
-                            dragging = true;
                         }
                     }
                 }
@@ -517,17 +539,35 @@ namespace Chess
             spriteBatch.Draw(Pixel, new Vector2(880, 692), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
             spriteBatch.Draw(Pixel, new Vector2(880, 775), null, Color.Chocolate, 0, new Vector2(0, 0), Vector2.One * 20, SpriteEffects.None, 0);
 
-            int[] topArray;
-            int[] bottomArray;
+            int[] topArray = new int[5];
+            int[] bottomArray = new int[5];
             if (amWhite)
             {
-                topArray = BlackAvailablePieces;
-                bottomArray = WhiteAvailablePieces;
+                topArray[0] = AvailablePieces[false][PieceTypes.Pawn].Count();
+                topArray[1] = AvailablePieces[false][PieceTypes.Knight].Count();
+                topArray[2] = AvailablePieces[false][PieceTypes.Bishop].Count();
+                topArray[3] = AvailablePieces[false][PieceTypes.Rook].Count();
+                topArray[4] = AvailablePieces[false][PieceTypes.Queen].Count();
+
+                bottomArray[0] = AvailablePieces[true][PieceTypes.Pawn].Count();
+                bottomArray[1] = AvailablePieces[true][PieceTypes.Knight].Count();
+                bottomArray[2] = AvailablePieces[true][PieceTypes.Bishop].Count();
+                bottomArray[3] = AvailablePieces[true][PieceTypes.Rook].Count();
+                bottomArray[4] = AvailablePieces[true][PieceTypes.Queen].Count();
             }
             else
             {
-                topArray = WhiteAvailablePieces;
-                bottomArray = BlackAvailablePieces;
+                topArray[0] = AvailablePieces[true][PieceTypes.Pawn].Count();
+                topArray[1] = AvailablePieces[true][PieceTypes.Knight].Count();
+                topArray[2] = AvailablePieces[true][PieceTypes.Bishop].Count();
+                topArray[3] = AvailablePieces[true][PieceTypes.Rook].Count();
+                topArray[4] = AvailablePieces[true][PieceTypes.Queen].Count();
+
+                bottomArray[0] = AvailablePieces[false][PieceTypes.Pawn].Count();
+                bottomArray[1] = AvailablePieces[false][PieceTypes.Knight].Count();
+                bottomArray[2] = AvailablePieces[false][PieceTypes.Bishop].Count();
+                bottomArray[3] = AvailablePieces[false][PieceTypes.Rook].Count();
+                bottomArray[4] = AvailablePieces[false][PieceTypes.Queen].Count();
             }
 
             spriteBatch.DrawString(font2, topArray[4].ToString(), new Vector2(883, 57), Color.Black);
@@ -753,16 +793,55 @@ namespace Chess
                 gamestate.ChoosingPromotion = false;
             }
 
-            for (int i = 0; i < 5; i++)
-            {
-                WhiteAvailablePieces[i] = int.Parse(ending[4 + i]);
-            }
-            for (int i = 0; i < 5; i++)
-            {
-                BlackAvailablePieces[i] = int.Parse(ending[9 + i]);
-            }
+            var availablePieces = ending[4].Split(',');
+
+            UpdateAvailablePieces(true, PieceTypes.Pawn, int.Parse(availablePieces[0]));
+            UpdateAvailablePieces(true, PieceTypes.Knight, int.Parse(availablePieces[1]));
+            UpdateAvailablePieces(true, PieceTypes.Bishop, int.Parse(availablePieces[2]));
+            UpdateAvailablePieces(true, PieceTypes.Rook, int.Parse(availablePieces[3]));
+            UpdateAvailablePieces(true, PieceTypes.Queen, int.Parse(availablePieces[4]));
+
+            UpdateAvailablePieces(false, PieceTypes.Pawn, int.Parse(availablePieces[5]));
+            UpdateAvailablePieces(false, PieceTypes.Knight, int.Parse(availablePieces[6]));
+            UpdateAvailablePieces(false, PieceTypes.Bishop, int.Parse(availablePieces[7]));
+            UpdateAvailablePieces(false, PieceTypes.Rook, int.Parse(availablePieces[8]));
+            UpdateAvailablePieces(false, PieceTypes.Queen, int.Parse(availablePieces[9]));
 
             return gamestate;
+        }
+
+        private void UpdateAvailablePieces(bool color, PieceTypes piece, int number)
+        {
+            while (AvailablePieces[color][piece].Count < number)
+            {
+                switch (piece)
+                {
+                    case PieceTypes.Pawn:
+                        AvailablePieces[color][piece].Push(new Pawn(color));
+                        break;
+
+                    case PieceTypes.Knight:
+                        AvailablePieces[color][piece].Push(new Knight(color));
+                        break;
+
+                    case PieceTypes.Bishop:
+                        AvailablePieces[color][piece].Push(new Bishop(color));
+                        break;
+
+                    case PieceTypes.Rook:
+                        AvailablePieces[color][piece].Push(new Rook(color));
+                        break;
+
+                    case PieceTypes.Queen:
+                        AvailablePieces[color][piece].Push(new Queen(color));
+                        break;
+                }
+            }
+
+            while (AvailablePieces[color][piece].Count > number)
+            {
+                AvailablePieces[color][piece].Pop();
+            }
         }
     }
 }

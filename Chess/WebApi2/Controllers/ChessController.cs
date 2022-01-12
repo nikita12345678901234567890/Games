@@ -15,14 +15,8 @@ namespace WebApi2.Controllers
     {
         static Dictionary<Guid, ChessGame> games = new Dictionary<Guid, ChessGame>();
 
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-
         [HttpGet("GetPlayerId/{gameID}/{crazyhouse}")]
-        public Guid GetPlayerId(Guid gameID, bool crazyhouse)
+        public ActionResult<Guid> GetPlayerId(Guid gameID, bool crazyhouse)
         {
             Guid id = Guid.NewGuid();
             if (!games.ContainsKey(gameID))
@@ -97,10 +91,18 @@ namespace WebApi2.Controllers
             games[gameID].Promote(playerID, pieceChoice);
         }
 
-        [HttpPost("GetMoves/{gameID}")]
-        public Square[] PlacePiece(Guid gameID, [FromBody] Square piece)
+        [HttpPost("PlacePiece/{gameID}/{playerID}/{piece}")]
+        public ActionResult<bool> PlacePiece(Guid gameID, Guid playerID, PieceTypes piece, [FromBody] Square destination)
         {
-            return games[gameID].PlacePiece(piece);
+            ChessGame game = games[gameID];
+            if (game is CrazyhouseGame chgame)
+            {
+                return chgame.PlacePiece(playerID, piece, destination);
+            }
+            else
+            {
+                return BadRequest(false);
+            }
         }
     }
 }

@@ -87,7 +87,7 @@ namespace SharedLibrary
 
 
 
-        public void ResetBoard(Guid playerID)
+        public virtual void ResetBoard(Guid playerID)
         {
             if (playerID != whitePlayerID && playerID != blackPlayerID) return;
 

@@ -9,11 +9,9 @@ namespace SharedLibrary
 {
     public class CrazyhouseGame : ChessGame
     {
-        //number of [pawns, knights, bishops, rooks, queens] available;
-        public int[] WhiteAvailablePieces = {1, 2, 3, 4, 5 };
-        public int[] BlackAvailablePieces = { 0, 0, 0, 0, 0 };
+        public Dictionary<bool, Dictionary<PieceTypes, Stack<Piece>>> AvailablePieces = new Dictionary<bool, Dictionary<PieceTypes, Stack<Piece>>>();
 
-        public void ResetBoard(Guid playerID)
+        public override void ResetBoard(Guid playerID)
         {
             if (playerID != whitePlayerID && playerID != blackPlayerID) return;
 
@@ -34,6 +32,7 @@ namespace SharedLibrary
                 //White pawns:
                 PieceGrid[6, x] = new Pawn(true);
             }
+
             //Rooks:
             //Black:
             PieceGrid[0, 0] = new Rook(false);
@@ -76,9 +75,156 @@ namespace SharedLibrary
 
             moveCounter = 0;
 
-            WhiteAvailablePieces = new int[] { 0, 0, 0, 0, 0 };
-            BlackAvailablePieces = new int[] { 0, 0, 0, 0, 0 };
-    }
+            
+            //Initializing the Dictionary of Dictionary of Stack of Piece:
+            if (AvailablePieces.Keys.Count == 0)
+            {
+                AvailablePieces.Add(true, new Dictionary<PieceTypes, Stack<Piece>>());
+                AvailablePieces.Add(false, new Dictionary<PieceTypes, Stack<Piece>>());
+
+
+                AvailablePieces[true].Add(PieceTypes.Pawn, new Stack<Piece>());
+                AvailablePieces[true].Add(PieceTypes.Knight, new Stack<Piece>());
+                AvailablePieces[true].Add(PieceTypes.Bishop, new Stack<Piece>());
+                AvailablePieces[true].Add(PieceTypes.Rook, new Stack<Piece>());
+                AvailablePieces[true].Add(PieceTypes.Queen, new Stack<Piece>());
+
+                AvailablePieces[false].Add(PieceTypes.Pawn, new Stack<Piece>());
+                AvailablePieces[false].Add(PieceTypes.Knight, new Stack<Piece>());
+                AvailablePieces[false].Add(PieceTypes.Bishop, new Stack<Piece>());
+                AvailablePieces[false].Add(PieceTypes.Rook, new Stack<Piece>());
+                AvailablePieces[false].Add(PieceTypes.Queen, new Stack<Piece>());
+            }
+        }
+
+        public override void Move(Guid playerID, Square piece, Square destination)
+        {
+            if (!ValidPlayer(playerID)) return;
+
+            var moves = GetMovesAndTypes(piece);
+            if (Contains(moves, destination))
+            {
+                Piece capturedPiece = null;
+
+                //Checks for reseting the moveCounter
+                if (PieceGrid[piece.Y, piece.X].PieceType == PieceTypes.Pawn || PieceGrid[destination.Y, destination.X] != null)
+                {
+                    moveCounter = 0;
+                }
+
+
+                //Setting DidMoveTwice:
+                if (moves.Count >= 3 && destination == moves[2].Item1 && PieceGrid[piece.Y, piece.X] != null && PieceGrid[piece.Y, piece.X].PieceType == PieceTypes.Pawn)
+                {
+                    Pawn pawn = (Pawn)PieceGrid[piece.Y, piece.X];
+                    pawn.DidMoveTwice = true;
+                }
+
+                //Saving the piece that was there:
+                if (PieceGrid[destination.Y, destination.X] != null)
+                {
+                    capturedPiece = PieceGrid[destination.Y, destination.X];
+                }
+
+                //Actually doing the move:
+                PieceGrid[destination.Y, destination.X] = PieceGrid[piece.Y, piece.X];
+                PieceGrid[piece.Y, piece.X] = null;
+
+
+                bool IsPromotion = false;
+
+                switch (moves[IndexOf(moves, destination)].Item2)
+                {
+                    case MoveTypes.EnPassant:
+
+                        if (PieceGrid[destination.Y, destination.X].IsWhite)
+                        {
+                            if (PieceGrid[destination.Y + 1, destination.X] != null)
+                            {
+                                capturedPiece = PieceGrid[destination.Y + 1, destination.X];
+                                PieceGrid[destination.Y + 1, destination.X] = null;
+                            }
+                        }
+                        else
+                        {
+                            if (PieceGrid[destination.Y - 1, destination.X] != null)
+                            {
+                                capturedPiece = PieceGrid[destination.Y - 1, destination.X];
+                                PieceGrid[destination.Y - 1, destination.X] = null;
+                            }
+                        }
+
+                        break;
+
+                    case MoveTypes.CastleLeft:
+
+                        PieceGrid[destination.Y, destination.X + 1] = PieceGrid[destination.Y, 0];
+                        PieceGrid[destination.Y, 0] = null;
+
+                        break;
+
+                    case MoveTypes.CastleRight:
+
+                        PieceGrid[destination.Y, destination.X - 1] = PieceGrid[destination.Y, PieceGrid.GetLength(1) - 1];
+                        PieceGrid[destination.Y, PieceGrid.GetLength(1) - 1] = null;
+
+                        break;
+
+                    case MoveTypes.Promotion:
+
+                        IsPromotion = true;
+
+                        break;
+                }
+
+                if (capturedPiece != null)
+                {
+                    capturedPiece.IsWhite = !capturedPiece.IsWhite;
+                    AvailablePieces[Whiteturn][capturedPiece.PieceType].Push(capturedPiece);
+                }
+
+                LastMove = destination;
+
+                //Setting HasMoved:
+                var lastMovedPiece = PieceGrid[LastMove.Y, LastMove.X];
+                if (lastMovedPiece.PieceType == PieceTypes.King)
+                {
+                    King kingMoved = (King)lastMovedPiece;
+                    kingMoved.HasMoved = true;
+                }
+                if (lastMovedPiece.PieceType == PieceTypes.Rook)
+                {
+                    Rook rookMoved = (Rook)lastMovedPiece;
+                    rookMoved.HasMoved = true;
+                }
+
+                if (!IsPromotion)
+                {
+                    Whiteturn = !Whiteturn;
+
+                    //Checking if last move put someone in check:
+                    if (IsChecking(PieceGrid[LastMove.Y, LastMove.X], LastMove, PieceGrid))
+                    {
+                        if (PieceGrid[LastMove.Y, LastMove.X].IsWhite)
+                        {
+                            BlackInCheck = true;
+                        }
+                        else
+                        {
+                            WhiteInCheck = true;
+                        }
+                    }
+                    else
+                    {
+                        WhiteInCheck = false;
+                        BlackInCheck = false;
+                    }
+                }
+
+
+                moveCounter++;
+            }
+        }
 
         public override string MakeFEN()
         {
@@ -214,34 +360,49 @@ namespace SharedLibrary
                 FEN += "n";
             }
 
-            for (int i = 0; i < 5; i++)
-            {
-                FEN += " ";
-                FEN += WhiteAvailablePieces[i].ToString();
-            }
-            for (int i = 0; i < 5; i++)
-            {
-                FEN += " ";
-                FEN += BlackAvailablePieces[i].ToString();
-            }
+            FEN += " ";
+            FEN += AvailablePieces[true][PieceTypes.Pawn].Count();
+            FEN += ",";
+            FEN += AvailablePieces[true][PieceTypes.Knight].Count();
+            FEN += ",";
+            FEN += AvailablePieces[true][PieceTypes.Bishop].Count();
+            FEN += ",";
+            FEN += AvailablePieces[true][PieceTypes.Rook].Count();
+            FEN += ",";
+            FEN += AvailablePieces[true][PieceTypes.Queen].Count();
+            FEN += ",";
+
+            FEN += AvailablePieces[false][PieceTypes.Pawn].Count();
+            FEN += ",";
+            FEN += AvailablePieces[false][PieceTypes.Knight].Count();
+            FEN += ",";
+            FEN += AvailablePieces[false][PieceTypes.Bishop].Count();
+            FEN += ",";
+            FEN += AvailablePieces[false][PieceTypes.Rook].Count();
+            FEN += ",";
+            FEN += AvailablePieces[false][PieceTypes.Queen].Count();
+            FEN += ",";
 
             return FEN;
         }
 
-        public bool PlacePiece(Guid playerID, Piece piece, Square destination)
+        public bool PlacePiece(Guid playerID, PieceTypes piece, Square destination)
         {
             if (!ValidPlayer(playerID)) return false;
 
+            if (AvailablePieces[Whiteturn][piece].Count == 0) return false;
+
             //Checking if this will result in a pawn promotion:
-            if (piece.PieceType == PieceTypes.Pawn && (destination.Y == 7 || destination.Y == 0)) return false;
+            if (piece == PieceTypes.Pawn && (destination.Y == 7 || destination.Y == 0)) return false;
 
             //Checking if there is anything on that square:
             if (PieceGrid[destination.Y, destination.X] != null) return false;
 
             //Checking if that would result in check:
-            if (IsChecking(piece, destination, PieceGrid)) return false;
+            if (IsChecking(AvailablePieces[Whiteturn][piece].Peek(), destination, PieceGrid)) return false;
 
-            PieceGrid[destination.Y, destination.X] = piece;
+            PieceGrid[destination.Y, destination.X] = AvailablePieces[Whiteturn][piece].Pop();
+            Whiteturn = !Whiteturn;
             return true;
         }
     }
