@@ -398,10 +398,35 @@ namespace SharedLibrary
             //Checking if there is anything on that square:
             if (PieceGrid[destination.Y, destination.X] != null) return false;
 
-            //Checking if that would result in check:
-            if (IsChecking(AvailablePieces[Whiteturn][piece].Peek(), destination, PieceGrid)) return false;
-
             PieceGrid[destination.Y, destination.X] = AvailablePieces[Whiteturn][piece].Pop();
+
+            //Looping through the whole board to find the king of the side that just moved:
+            for (int x = 0; x < PieceGrid.GetLength(1); x++)
+            {
+                for (int y = 0; y < PieceGrid.GetLength(0); y++)
+                {
+                    Piece Piece = PieceGrid[y, x];
+                    if (Piece != null && Piece.IsWhite == Whiteturn && Piece.PieceType == PieceTypes.King)
+                    {
+                        if (UnderAttack(new Square(x, y), !Whiteturn, PieceGrid))
+                        {
+                            AvailablePieces[Whiteturn][piece].Push(PieceGrid[destination.Y, destination.X]);
+                            PieceGrid[destination.Y, destination.X] = null;
+                            return false;
+                        }
+                        if (Whiteturn)
+                        {
+                            WhiteInCheck = false;
+                        }
+                        else
+                        {
+                            BlackInCheck = false;
+                        }
+                    }
+                }
+            }
+
+            LastMove = new Square(destination.X, destination.Y);
             Whiteturn = !Whiteturn;
             return true;
         }

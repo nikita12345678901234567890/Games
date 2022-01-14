@@ -337,9 +337,25 @@ namespace Chess
                 {
                     if (dragging)
                     {
-                        if (InputManager.MouseState.LeftButton == ButtonState.Released && InputManager.MouseState.Position.X < 800)
+                        if (InputManager.MouseState.LeftButton == ButtonState.Released)
                         {
-                            dragging = !Task.Run(async () => await ApiCalls.PlacePiece(gameID, playerID, draggingPiece.PieceType, PositionToCell(InputManager.MouseState.Position))).Result;
+                            dragging = false;
+                            if (InputManager.MouseState.Position.X < 800)
+                            {
+                                bool placed = false;
+                                if (amWhite)
+                                {
+                                    placed = Task.Run(async () => await ApiCalls.PlacePiece(gameID, playerID, draggingPiece.PieceType, PositionToCell(InputManager.MouseState.Position))).Result;
+                                }
+                                else
+                                {
+                                    placed = Task.Run(async () => await ApiCalls.PlacePiece(gameID, playerID, draggingPiece.PieceType, Flip(PositionToCell(InputManager.MouseState.Position)))).Result;
+                                }
+                                if (!placed)
+                                {
+                                    System.Windows.Forms.MessageBox.Show("Michael is wrong.", "", System.Windows.Forms.MessageBoxButtons.OK);
+                                }
+                            }
                         }
                     }
                     else
