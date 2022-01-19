@@ -423,6 +423,21 @@ namespace SharedLibrary
                             BlackInCheck = false;
                         }
                     }
+
+                    if (Piece != null && Piece.IsWhite == !Whiteturn && Piece.PieceType == PieceTypes.King)
+                    {
+                        if (UnderAttack(new Square(x, y), Whiteturn, PieceGrid))
+                        {
+                            if (Whiteturn)
+                            {
+                                BlackInCheck = true;
+                            }
+                            else
+                            {
+                                WhiteInCheck = true;
+                            }
+                        }
+                    }
                 }
             }
 
