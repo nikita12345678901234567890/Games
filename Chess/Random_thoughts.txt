@@ -1,3 +1,0 @@
-Ideas for future:
-  When dragging a piece onto the board have the valid squares highlight
-  Add timer
